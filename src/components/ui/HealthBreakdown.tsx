@@ -15,7 +15,7 @@ function textColor(score: number) {
 }
 
 export function HealthBreakdown(props: HealthBreakdownData) {
-  const { jiraScore, githubScore, onTimePct, blockedTasks, prMergeRate, avgVelocity, stalePRs } = props
+  const { jiraScore, githubScore, onTimePct, blockedTasks, prMergeRate, avgVelocity, stalePRs, completedPoints, totalPoints } = props
 
   return (
     <motion.div
@@ -49,7 +49,7 @@ export function HealthBreakdown(props: HealthBreakdownData) {
               <span>Blocked / At-risk tasks</span><span>{blockedTasks}</span>
             </div>
             <div className="flex justify-between text-xs text-text-secondary">
-              <span>Sprint completion</span><span>{onTimePct}%</span>
+              <span>Sprint completion</span><span>{completedPoints} / {totalPoints} pts</span>
             </div>
           </div>
         </div>

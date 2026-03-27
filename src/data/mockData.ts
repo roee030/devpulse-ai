@@ -482,6 +482,8 @@ export interface HealthBreakdownData {
   prMergeRate: number
   avgVelocity: number
   stalePRs: number
+  completedPoints: number
+  totalPoints: number
 }
 
 export function getAvgVelocityForTeam(teamId: string): number {
@@ -518,5 +520,7 @@ export function getHealthBreakdown(
     prMergeRate,
     avgVelocity,
     stalePRs: entity.stalePRs,
+    completedPoints: entity.completedPoints,
+    totalPoints: entity.totalPoints,
   }
 }
