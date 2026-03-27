@@ -24,7 +24,7 @@ export function TopBar() {
   const [open, setOpen] = useState(false)
 
   return (
-    <header className="h-14 bg-card border-b border-border flex items-center justify-between px-6 fixed top-0 left-60 right-0 z-30">
+    <header className="hidden md:flex h-14 bg-card border-b border-border items-center justify-between px-6 fixed top-0 left-60 right-0 z-30">
       <div className="flex items-center gap-2 text-sm">
         <span className="text-text-secondary">NovaTech</span>
         <span className="text-border">/</span>

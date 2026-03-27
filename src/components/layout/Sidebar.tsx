@@ -13,7 +13,7 @@ const navItems = [
 
 export function Sidebar() {
   return (
-    <aside className="w-60 h-screen bg-card border-r border-border flex flex-col fixed left-0 top-0 z-40">
+    <aside className="hidden md:flex w-60 h-screen bg-card border-r border-border flex-col fixed left-0 top-0 z-40">
       <div className="px-6 py-5 border-b border-border">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
