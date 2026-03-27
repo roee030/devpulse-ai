@@ -472,3 +472,49 @@ export const getDeveloperById = (developerId: string) => developers.find(d => d.
 export const companyHealthScore = Math.round(divisions.reduce((sum, d) => sum + d.healthScore, 0) / divisions.length)
 export const companyStalePRs = divisions.reduce((sum, d) => sum + d.stalePRs, 0)
 export const companyAtRiskTasks = divisions.reduce((sum, d) => sum + d.atRiskTasks, 0)
+
+// ─── Health Breakdown ─────────────────────────────────────────────────────────
+export interface HealthBreakdownData {
+  jiraScore: number
+  githubScore: number
+  onTimePct: number
+  blockedTasks: number
+  prMergeRate: number
+  avgVelocity: number
+  stalePRs: number
+}
+
+export function getAvgVelocityForTeam(teamId: string): number {
+  const devs = getDevelopersByTeam(teamId)
+  if (!devs.length) return 0
+  return Math.round((devs.reduce((s, d) => s + d.velocity, 0) / devs.length) * 10) / 10
+}
+
+export function getAvgVelocityForDivision(divisionId: string): number {
+  const devs = getDevelopersByDivision(divisionId)
+  if (!devs.length) return 0
+  return Math.round((devs.reduce((s, d) => s + d.velocity, 0) / devs.length) * 10) / 10
+}
+
+export function getHealthBreakdown(
+  entity: { stalePRs: number; atRiskTasks: number; completedPoints: number; totalPoints: number },
+  avgVelocity: number
+): HealthBreakdownData {
+  const onTimePct = Math.round((entity.completedPoints / entity.totalPoints) * 100)
+  const jiraScore = onTimePct
+  // Approximate totalPRs: assume activePRs = stalePRs * 3 (at least 5)
+  const activePRs = Math.max(5, entity.stalePRs * 3)
+  const totalPRs = entity.stalePRs + activePRs
+  const prMergeRate = Math.round((activePRs / totalPRs) * 100)
+  const velocityScore = Math.round(Math.min(avgVelocity / 8, 1) * 100)
+  const githubScore = Math.round((prMergeRate + velocityScore) / 2)
+  return {
+    jiraScore,
+    githubScore,
+    onTimePct,
+    blockedTasks: entity.atRiskTasks,
+    prMergeRate,
+    avgVelocity,
+    stalePRs: entity.stalePRs,
+  }
+}
