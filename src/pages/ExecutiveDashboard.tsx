@@ -149,13 +149,13 @@ export function ExecutiveDashboard() {
 
   // Navigation helpers
   function drillIntoDiv(divId: string) {
-    setDrillDir('forward'); setDrill({ level: 'division', divisionId: divId, teamId: null }); setExpandedDevId(null); setCardBreakdownId(null)
+    setDrillDir('forward'); setDrill({ level: 'division', divisionId: divId, teamId: null }); setExpandedDevId(null); setCardBreakdownId(null); setShowMainBreakdown(false)
   }
   function drillIntoTeam(divId: string, teamId: string) {
-    setDrillDir('forward'); setDrill({ level: 'team', divisionId: divId, teamId }); setExpandedDevId(null); setCardBreakdownId(null)
+    setDrillDir('forward'); setDrill({ level: 'team', divisionId: divId, teamId }); setExpandedDevId(null); setCardBreakdownId(null); setShowMainBreakdown(false)
   }
   function drillBackTo(level: DrillLevel, divisionId: string | null = null) {
-    setDrillDir('back'); setDrill({ level, divisionId, teamId: null }); setExpandedDevId(null); setCardBreakdownId(null)
+    setDrillDir('back'); setDrill({ level, divisionId, teamId: null }); setExpandedDevId(null); setCardBreakdownId(null); setShowMainBreakdown(false)
   }
   function toggleCardBreakdown(e: React.MouseEvent, id: string) {
     e.stopPropagation(); setCardBreakdownId(prev => prev === id ? null : id)
