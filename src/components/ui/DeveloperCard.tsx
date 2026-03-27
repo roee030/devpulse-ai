@@ -92,6 +92,7 @@ export function DeveloperCard({ dev, delay = 0, expanded = false, onToggle }: De
               onClick={onToggle}
               className="ml-1 text-text-secondary hover:text-text-primary transition-colors p-1 -mr-1"
               aria-label={expanded ? 'Collapse details' : 'Expand details'}
+              aria-expanded={expanded}
             >
               <motion.div animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
                 <ChevronDown size={16} />
