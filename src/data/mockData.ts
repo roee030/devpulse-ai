@@ -500,7 +500,9 @@ export function getHealthBreakdown(
   entity: { stalePRs: number; atRiskTasks: number; completedPoints: number; totalPoints: number },
   avgVelocity: number
 ): HealthBreakdownData {
-  const onTimePct = Math.round((entity.completedPoints / entity.totalPoints) * 100)
+  const onTimePct = entity.totalPoints === 0
+    ? 0
+    : Math.round((entity.completedPoints / entity.totalPoints) * 100)
   const jiraScore = onTimePct
   // Approximate totalPRs: assume activePRs = stalePRs * 3 (at least 5)
   const activePRs = Math.max(5, entity.stalePRs * 3)
