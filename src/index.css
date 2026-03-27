@@ -1,0 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; }
+body { background: #0a0a0f; color: #f1f5f9; font-family: 'Inter', sans-serif; margin: 0; }
+
+@layer utilities {
+  .card-glow:hover {
+    box-shadow: 0 0 0 1px #6366f133, 0 4px 24px #6366f122;
+  }
+  .pulse-red {
+    animation: pulse-red 2s infinite;
+  }
+  @keyframes pulse-red {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+}
