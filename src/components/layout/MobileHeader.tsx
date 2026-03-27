@@ -1,20 +1,25 @@
 // src/components/layout/MobileHeader.tsx
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Bell, ChevronDown, Check } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUser } from '../../context/UserContext'
 import { User } from '../../data/mockData'
 
-const roleLabel: Record<string, string> = {
-  cto: 'CTO',
-  divisionHead: 'Div. Head',
-  teamLead: 'Team Lead',
-  developer: 'Developer',
-}
-
 export function MobileHeader() {
   const { activeUser, setActiveUser, users } = useUser()
   const [open, setOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handleOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleOutside)
+    return () => document.removeEventListener('mousedown', handleOutside)
+  }, [open])
 
   return (
     <header className="md:hidden h-14 bg-card border-b border-border flex items-center justify-between px-4 fixed top-0 left-0 right-0 z-30">
@@ -31,7 +36,7 @@ export function MobileHeader() {
           <span className="absolute -top-1 -right-1 w-2 h-2 bg-danger rounded-full pulse-red" />
         </button>
 
-        <div className="relative">
+        <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setOpen(v => !v)}
             className="flex items-center gap-2 bg-bg border border-border rounded-lg px-2.5 py-1.5"
