@@ -524,3 +524,15 @@ export function getHealthBreakdown(
     totalPoints: entity.totalPoints,
   }
 }
+
+export const velocityHistory = [
+  { sprint: 'S1', points: 42 },
+  { sprint: 'S2', points: 38 },
+  { sprint: 'S3', points: 51 },
+]
+
+export const roiHistory = [
+  { month: 'Jan', saved: 12000, invested: 4000 },
+  { month: 'Feb', saved: 15000, invested: 4000 },
+  { month: 'Mar', saved: 18000, invested: 4000 },
+]
