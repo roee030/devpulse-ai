@@ -5,7 +5,7 @@ import { TrendingUp, TrendingDown, Minus, X, MessageSquare } from 'lucide-react'
 import { useUser } from '../context/UserContext'
 import { Developer, getTeamById } from '../data/mockData'
 import { AiInsightCard } from '../components/ui/AiInsightCard'
-import { computeBurnoutInsight } from '../lib/insights'
+import { computeBurnoutInsight, computeDeveloperInsight } from '../lib/insights'
 import { RiskBadge } from '../components/ui/RiskBadge'
 import { ActivityHeatmap } from '../components/ui/ActivityHeatmap'
 
@@ -156,6 +156,9 @@ export function BurnoutRisk() {
                     <X size={18} />
                   </button>
                 </div>
+
+                {/* AI Insight */}
+                <AiInsightCard text={computeDeveloperInsight(selected)} />
 
                 <div className="mb-6">
                   <p className="text-text-secondary text-xs font-medium mb-3 uppercase tracking-wider">Activity — Last 4 Weeks</p>
