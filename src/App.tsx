@@ -1,6 +1,7 @@
 // src/App.tsx
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
+import { AuthProvider } from './context/AuthContext'
 import { UserProvider } from './context/UserContext'
 import { AppShell } from './components/layout/AppShell'
 import { ExecutiveDashboard } from './pages/ExecutiveDashboard'
@@ -8,6 +9,8 @@ import { SprintPrediction } from './pages/SprintPrediction'
 import { DeveloperBriefing } from './pages/DeveloperBriefing'
 import { BurnoutRisk } from './pages/BurnoutRisk'
 import { ROICalculator } from './pages/ROICalculator'
+import { IntegrationsPage } from './pages/Settings/IntegrationsPage'
+import { CompanyPage } from './pages/Settings/CompanyPage'
 
 const pageVariants = {
   initial: { opacity: 0, y: 16 },
@@ -33,6 +36,8 @@ function AnimatedRoutes() {
           <Route path="/briefing"  element={<DeveloperBriefing />} />
           <Route path="/burnout"   element={<BurnoutRisk />} />
           <Route path="/roi"       element={<ROICalculator />} />
+          <Route path="/settings/integrations" element={<IntegrationsPage />} />
+          <Route path="/settings/company"      element={<CompanyPage />} />
         </Routes>
       </motion.div>
     </AnimatePresence>
@@ -42,11 +47,13 @@ function AnimatedRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      <UserProvider>
-        <AppShell>
-          <AnimatedRoutes />
-        </AppShell>
-      </UserProvider>
+      <AuthProvider>
+        <UserProvider>
+          <AppShell>
+            <AnimatedRoutes />
+          </AppShell>
+        </UserProvider>
+      </AuthProvider>
     </BrowserRouter>
   )
 }
