@@ -3,6 +3,8 @@ import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, ChevronDown, X, AlertTriangle, Zap } from 'lucide-react'
 import { useUser } from '../context/UserContext'
+import { AiInsightCard } from '../components/ui/AiInsightCard'
+import { computeBriefingInsight } from '../lib/insights'
 import { DeveloperCard } from '../components/ui/DeveloperCard'
 import { HealthRing } from '../components/ui/HealthRing'
 import { Developer, RiskLevel, getTeamById, users } from '../data/mockData'
@@ -60,6 +62,11 @@ export function DeveloperBriefing() {
   const totalVisible    = Object.values(filteredDevsByTeam).reduce((s, d) => s + d.length, 0)
   const hasActiveFilter = filters.teamIds.length > 0 || filters.riskLevels.length > 0 || filters.sort !== 'none'
 
+  const briefingInsightText = useMemo(
+    () => computeBriefingInsight(visibleDevelopers, visibleTeamsList),
+    [visibleDevelopers, visibleTeamsList],
+  )
+
   function toggleRisk(level: RiskLevel) {
     setFilters(f => ({
       ...f,
@@ -97,6 +104,9 @@ export function DeveloperBriefing() {
           </motion.div>
           <h1 className="text-2xl font-bold text-text-primary">Your AI-powered focus for today</h1>
         </div>
+
+        {/* AI Insight */}
+        <AiInsightCard text={briefingInsightText} />
 
         {/* Developer profile card */}
         <motion.div
@@ -186,6 +196,9 @@ export function DeveloperBriefing() {
         <Sparkles size={14} className="text-accent" />
         <span>Your AI-powered focus for today</span>
       </motion.div>
+
+      {/* AI Insight */}
+      <AiInsightCard text={briefingInsightText} />
 
       {/* Sticky filter bar */}
       <div className="sticky top-14 z-10 bg-bg border-b border-border py-3 flex gap-2 items-center flex-wrap mb-6 -mx-4 px-4 md:-mx-6 md:px-6">
