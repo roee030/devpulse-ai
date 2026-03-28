@@ -1,5 +1,5 @@
 // src/pages/ExecutiveDashboard.tsx
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GitPullRequest, AlertTriangle, Target, Zap, ChevronRight } from 'lucide-react'
 import { useUser } from '../context/UserContext'
@@ -206,12 +206,19 @@ export function ExecutiveDashboard() {
   const devsForTeam      = drill.teamId     ? getDevelopersByTeam(drill.teamId)    : visibleDevelopers
   const gridKey = `${drill.level}-${drill.divisionId ?? ''}-${drill.teamId ?? ''}`
 
-  const criticalDevCount = visibleDevelopers.filter(d => d.riskLevel === 'critical').length
-  const insightText = computeDashboardInsight(
-    companyHealthScore,
-    teams,
-    criticalDevCount,
-  )
+  const insightText = useMemo(() => {
+    if (drill.level === 'team' && currentTeam) {
+      const scopedCritical = devsForTeam.filter(d => d.riskLevel === 'critical').length
+      return computeDashboardInsight('team', currentTeam.name, currentTeam.healthScore, [currentTeam], scopedCritical)
+    }
+    if (drill.level === 'division' && currentDivision) {
+      const divDevs = visibleDevelopers.filter(d => d.divisionId === drill.divisionId)
+      const scopedCritical = divDevs.filter(d => d.riskLevel === 'critical').length
+      return computeDashboardInsight('division', currentDivision.name, currentDivision.healthScore, teamsForDivision, scopedCritical)
+    }
+    const scopedCritical = visibleDevelopers.filter(d => d.riskLevel === 'critical').length
+    return computeDashboardInsight('top', 'Company', companyHealthScore, teams, scopedCritical)
+  }, [drill, visibleDevelopers, currentTeam, currentDivision, teamsForDivision, devsForTeam])
 
   return (
     <div>
