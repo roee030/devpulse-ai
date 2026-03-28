@@ -8,7 +8,7 @@ import { HealthBreakdown } from '../components/ui/HealthBreakdown'
 import { MetricCard } from '../components/ui/MetricCard'
 import { DeveloperCard } from '../components/ui/DeveloperCard'
 import {
-  divisions, teams, companyHealthScore, companyStalePRs, companyAtRiskTasks,
+  companyHealthScore, companyStalePRs, companyAtRiskTasks,
   sprint, getDevelopersByTeam, getTeamsByDivision, getDivisionById, getTeamById,
   getHealthBreakdown, getAvgVelocityForTeam, getAvgVelocityForDivision,
 } from '../data/mockData'
