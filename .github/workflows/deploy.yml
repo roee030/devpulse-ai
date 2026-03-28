@@ -20,6 +20,15 @@ jobs:
 
       - run: rm -f package-lock.json && npm install
 
+      - name: Debug env vars
+        run: |
+          echo "API_KEY present: ${{ vars.VITE_FIREBASE_API_KEY != '' }}"
+          echo "API_KEY first 8: ${VITE_FIREBASE_API_KEY:0:8}"
+          echo "PROJECT_ID: $VITE_FIREBASE_PROJECT_ID"
+        env:
+          VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_PROJECT_ID: ${{ vars.VITE_FIREBASE_PROJECT_ID }}
+
       - name: Build
         run: npm run build
         env:
