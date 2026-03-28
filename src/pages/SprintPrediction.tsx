@@ -2,7 +2,8 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-import { Sparkles, ChevronDown, AlertTriangle } from 'lucide-react'
+import { ChevronDown, AlertTriangle } from 'lucide-react'
+import { AiInsightCard } from '../components/ui/AiInsightCard'
 import { sprint } from '../data/mockData'
 import { useUser } from '../context/UserContext'
 
@@ -63,22 +64,7 @@ export function SprintPrediction() {
       </motion.div>
 
       {/* AI Insight banner */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
-        className="bg-gradient-to-r from-accent/20 to-accent/5 border border-accent/30 rounded-xl p-5 mb-6"
-      >
-        <div className="flex items-start gap-3">
-          <Sparkles size={18} className="text-accent mt-0.5 flex-shrink-0" />
-          <div>
-            <p className="text-text-primary text-sm font-medium mb-1">
-              At current velocity, the team will complete {completionPct}% of Sprint commitments by end of day {sprint.endDate}.
-            </p>
-            <p className="text-text-secondary text-xs">Confidence: <span className="text-accent font-medium">84%</span></p>
-          </div>
-        </div>
-      </motion.div>
+      <AiInsightCard text={`At current velocity, the team will complete ${completionPct}% of Sprint commitments by end of day ${sprint.endDate}. Confidence: 84%`} />
 
       {/* Deep Dive toggle */}
       <motion.button
