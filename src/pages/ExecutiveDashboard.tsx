@@ -7,6 +7,8 @@ import { HealthRing } from '../components/ui/HealthRing'
 import { HealthBreakdown } from '../components/ui/HealthBreakdown'
 import { MetricCard } from '../components/ui/MetricCard'
 import { DeveloperCard } from '../components/ui/DeveloperCard'
+import { AiInsightCard } from '../components/ui/AiInsightCard'
+import { computeDashboardInsight } from '../lib/insights'
 import {
   companyHealthScore, companyStalePRs, companyAtRiskTasks,
   sprint, getDevelopersByTeam, getTeamsByDivision, getDivisionById, getTeamById,
@@ -204,6 +206,13 @@ export function ExecutiveDashboard() {
   const devsForTeam      = drill.teamId     ? getDevelopersByTeam(drill.teamId)    : visibleDevelopers
   const gridKey = `${drill.level}-${drill.divisionId ?? ''}-${drill.teamId ?? ''}`
 
+  const criticalDevCount = visibleDevelopers.filter(d => d.riskLevel === 'critical').length
+  const insightText = computeDashboardInsight(
+    displayHealthScore,
+    visibleTeams,
+    criticalDevCount,
+  )
+
   return (
     <div>
       {/* Page header */}
@@ -211,6 +220,9 @@ export function ExecutiveDashboard() {
         <h1 className="text-xl md:text-2xl font-bold text-text-primary">Executive Dashboard</h1>
         <p className="text-text-secondary text-sm mt-1">{sprint.name} · {sprint.completedPoints}/{sprint.totalPoints} pts</p>
       </div>
+
+      {/* AI Insight */}
+      <AiInsightCard text={insightText} />
 
       {/* Health score + Metrics */}
       <div className="flex flex-col lg:flex-row gap-4 md:gap-6 mb-6 md:mb-8">
