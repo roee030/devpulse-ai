@@ -1,6 +1,6 @@
 // src/components/layout/Sidebar.tsx
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, TrendingUp, User, AlertTriangle, Calculator } from 'lucide-react'
+import { LayoutDashboard, TrendingUp, User, AlertTriangle, Calculator, Plug, Building2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const navItems = [
@@ -9,6 +9,11 @@ const navItems = [
   { path: '/briefing',   icon: User,            label: 'Developer Briefing' },
   { path: '/burnout',    icon: AlertTriangle,   label: 'Burnout Risk' },
   { path: '/roi',        icon: Calculator,      label: 'ROI Calculator' },
+]
+
+const settingsItems = [
+  { path: '/settings/integrations', icon: Plug,      label: 'Integrations' },
+  { path: '/settings/company',      icon: Building2, label: 'Company' },
 ]
 
 export function Sidebar() {
@@ -32,6 +37,30 @@ export function Sidebar() {
             key={path}
             to={path}
             end={path === '/'}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
+                isActive
+                  ? 'bg-accent/15 text-accent'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <Icon size={16} className={isActive ? 'text-accent' : ''} />
+                {label}
+              </>
+            )}
+          </NavLink>
+        ))}
+      </nav>
+
+      <nav className="px-3 pb-4 border-t border-border pt-4 space-y-1">
+        <p className="px-3 pb-1 text-text-secondary text-xs font-semibold uppercase tracking-wider">Settings</p>
+        {settingsItems.map(({ path, icon: Icon, label }) => (
+          <NavLink
+            key={path}
+            to={path}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
                 isActive
