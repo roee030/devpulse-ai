@@ -58,7 +58,7 @@ export function DeveloperBriefing() {
   }, [visibleTeamsList, visibleDevelopers, filters])
 
   const totalVisible    = Object.values(filteredDevsByTeam).reduce((s, d) => s + d.length, 0)
-  const hasActiveFilter = filters.teamIds.length > 0 || filters.riskLevels.length > 0
+  const hasActiveFilter = filters.teamIds.length > 0 || filters.riskLevels.length > 0 || filters.sort !== 'none'
 
   function toggleRisk(level: RiskLevel) {
     setFilters(f => ({
@@ -116,7 +116,7 @@ export function DeveloperBriefing() {
             </div>
           </div>
           <p className="text-text-secondary text-sm italic leading-relaxed border-t border-border pt-3">
-            "You're {Math.round((dev.velocity / 8) * 100)}% through your weekly velocity goal. Keep the momentum going."
+            "You're {Math.min(100, Math.round((dev.velocity / 8) * 100))}% through your weekly velocity goal. Keep the momentum going."
           </p>
         </motion.div>
 
@@ -273,7 +273,7 @@ export function DeveloperBriefing() {
                       {teamDevs.length} dev{teamDevs.length !== 1 ? 's' : ''}
                     </span>
                   </div>
-                  <motion.div animate={{ rotate: isCollapsed ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                  <motion.div animate={{ rotate: isCollapsed ? 0 : 180 }} transition={{ duration: 0.2 }}>
                     <ChevronDown size={16} className="text-text-secondary flex-shrink-0" />
                   </motion.div>
                 </div>
