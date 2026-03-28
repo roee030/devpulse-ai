@@ -2,6 +2,7 @@ import {
   computeDashboardInsight,
   computeBriefingInsight,
   computeBurnoutInsight,
+  computeDeveloperInsight,
 } from '../lib/insights'
 
 // ── computeDashboardInsight ────────────────────────────────────────────────
@@ -146,5 +147,59 @@ describe('computeBurnoutInsight', () => {
     ]
     const result = computeBurnoutInsight(devs, teams)
     expect(result).toContain('healthy')
+  })
+})
+
+// ── computeDeveloperInsight ────────────────────────────────────────────────
+describe('computeDeveloperInsight', () => {
+  const base = {
+    name: 'Alex Chen',
+    riskSignal: 'Commit frequency dropped 40%',
+    commitPattern: 'Irregular',
+    velocityTrend: 'stable' as const,
+    velocity: 5,
+    tasks: [] as { status: string }[],
+    lastActive: '2 days ago',
+  }
+
+  it('returns positive message for healthy dev with stable trend', () => {
+    const result = computeDeveloperInsight({ ...base, riskLevel: 'healthy' })
+    expect(result).toContain('Alex')
+    expect(result).toContain('performing well')
+    expect(result).toContain('stable')
+  })
+
+  it('returns positive message for healthy dev with up trend', () => {
+    const result = computeDeveloperInsight({ ...base, riskLevel: 'healthy', velocityTrend: 'up' })
+    expect(result).toContain('trending up')
+  })
+
+  it('mentions monitoring for watch level', () => {
+    const result = computeDeveloperInsight({ ...base, riskLevel: 'watch' })
+    expect(result).toContain('Alex')
+    expect(result).toContain('monitoring')
+  })
+
+  it('includes blocked task count for at-risk with blockers', () => {
+    const devWithBlockers = {
+      ...base,
+      riskLevel: 'at-risk',
+      tasks: [{ status: 'blocked' }, { status: 'blocked' }, { status: 'done' }],
+    }
+    const result = computeDeveloperInsight(devWithBlockers)
+    expect(result).toContain('2 tasks are')
+    expect(result).toContain('check-in')
+  })
+
+  it('returns critical message with immediate action', () => {
+    const result = computeDeveloperInsight({ ...base, riskLevel: 'critical' })
+    expect(result).toContain('critical risk')
+    expect(result).toContain('Immediate')
+  })
+
+  it('includes blocked count in critical message', () => {
+    const devWithBlocker = { ...base, riskLevel: 'critical', tasks: [{ status: 'blocked' }] }
+    const result = computeDeveloperInsight(devWithBlocker)
+    expect(result).toContain('1 task blocked')
   })
 })

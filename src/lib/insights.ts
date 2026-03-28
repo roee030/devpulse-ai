@@ -130,3 +130,52 @@ export function computeBurnoutInsight(
 
   return text
 }
+
+export function computeDeveloperInsight(dev: {
+  name: string
+  riskLevel: string
+  riskSignal: string
+  commitPattern: string
+  velocityTrend: string
+  velocity: number
+  tasks: { status: string }[]
+  lastActive: string
+}): string {
+  const firstName = dev.name.split(' ')[0]
+  const blockedCount = dev.tasks.filter(t => t.status === 'blocked').length
+
+  switch (dev.riskLevel) {
+    case 'healthy': {
+      const trendNote =
+        dev.velocityTrend === 'up'   ? 'Velocity is trending up with no active blockers this week.' :
+        dev.velocityTrend === 'down' ? 'Velocity has dipped slightly but no immediate concerns.'    :
+                                       'Velocity is stable with no active blockers.'
+      return `${firstName} is performing well. ${trendNote}`
+    }
+    case 'watch':
+      return (
+        `${firstName}'s activity has shifted — ${dev.riskSignal.toLowerCase()}. ` +
+        `No immediate action needed, but worth monitoring.`
+      )
+    case 'at-risk': {
+      const blockerNote = blockedCount > 0
+        ? ` ${blockedCount} task${blockedCount !== 1 ? 's are' : ' is'} currently blocked.`
+        : ''
+      return (
+        `${firstName} is showing early warning signs: ${dev.riskSignal.toLowerCase()}.` +
+        `${blockerNote} A brief check-in could prevent further impact.`
+      )
+    }
+    case 'critical': {
+      const signals: string[] = [dev.riskSignal.toLowerCase()]
+      if (blockedCount > 0) signals.push(`${blockedCount} task${blockedCount !== 1 ? 's' : ''} blocked`)
+      if (dev.velocityTrend === 'down') signals.push('velocity declining')
+      return (
+        `${firstName} is at critical risk: ${signals.join(', ')}. ` +
+        `Immediate 1:1 check-in recommended.`
+      )
+    }
+    default:
+      return `${firstName}: ${dev.riskSignal}`
+  }
+}
