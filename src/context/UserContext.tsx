@@ -5,9 +5,6 @@ import {
 } from 'react'
 import type { User, Team, Developer, Division } from '../data/mockData'
 import { createProvider } from '../lib/providers/createProvider'
-import {
-  getDevelopersByTeam, getDevelopersByDivision, getTeamsByDivision,
-} from '../data/mockData'
 
 interface UserContextValue {
   activeUser: User
@@ -56,7 +53,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const visibleTeams = useMemo(() => {
     if (!activeUser) return []
     if (activeUser.role === 'cto') return teams
-    if (activeUser.role === 'divisionHead') return getTeamsByDivision(activeUser.divisionId!)
+    if (activeUser.role === 'divisionHead') return teams.filter(t => t.divisionId === activeUser.divisionId)
     if (activeUser.role === 'teamLead') return teams.filter(t => t.id === activeUser.teamId)
     return []
   }, [activeUser, teams])
@@ -64,8 +61,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const visibleDevelopers = useMemo(() => {
     if (!activeUser) return []
     if (activeUser.role === 'cto') return developers
-    if (activeUser.role === 'divisionHead') return getDevelopersByDivision(activeUser.divisionId!)
-    if (activeUser.role === 'teamLead') return getDevelopersByTeam(activeUser.teamId!)
+    if (activeUser.role === 'divisionHead') return developers.filter(d => d.divisionId === activeUser.divisionId)
+    if (activeUser.role === 'teamLead') return developers.filter(d => d.teamId === activeUser.teamId)
     if (activeUser.role === 'developer') return developers.filter(d => d.id === activeUser.developerId)
     return []
   }, [activeUser, developers])
