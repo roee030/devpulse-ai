@@ -11,7 +11,7 @@ import { AiInsightCard } from '../components/ui/AiInsightCard'
 import { computeDashboardInsight } from '../lib/insights'
 import {
   companyHealthScore, companyStalePRs, companyAtRiskTasks,
-  sprint, getDevelopersByTeam, getTeamsByDivision, getDivisionById, getTeamById,
+  teams, sprint, getDevelopersByTeam, getTeamsByDivision, getDivisionById, getTeamById,
   getHealthBreakdown, getAvgVelocityForTeam, getAvgVelocityForDivision,
 } from '../data/mockData'
 import type { Division, Team } from '../data/mockData'
@@ -208,8 +208,8 @@ export function ExecutiveDashboard() {
 
   const criticalDevCount = visibleDevelopers.filter(d => d.riskLevel === 'critical').length
   const insightText = computeDashboardInsight(
-    displayHealthScore,
-    visibleTeams,
+    companyHealthScore,
+    teams,
     criticalDevCount,
   )
 
@@ -221,8 +221,8 @@ export function ExecutiveDashboard() {
         <p className="text-text-secondary text-sm mt-1">{sprint.name} · {sprint.completedPoints}/{sprint.totalPoints} pts</p>
       </div>
 
-      {/* AI Insight */}
-      <AiInsightCard text={insightText} />
+      {/* AI Insight — not shown for individual developer view */}
+      {activeUser.role !== 'developer' && <AiInsightCard text={insightText} />}
 
       {/* Health score + Metrics */}
       <div className="flex flex-col lg:flex-row gap-4 md:gap-6 mb-6 md:mb-8">
