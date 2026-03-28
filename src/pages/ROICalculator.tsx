@@ -40,9 +40,9 @@ export function ROICalculator() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-text-primary">See what DevPulse saves you</h1>
-        <p className="text-text-secondary text-sm mt-1">Based on your team size and meeting habits</p>
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-xl md:text-2xl font-bold text-text-primary">See what DevPulse saves you</h1>
+        <p className="text-text-secondary text-sm mt-1">Calculate the efficiency gains based on your team size and meeting habits</p>
       </div>
 
       {/* Inputs */}
@@ -77,7 +77,7 @@ export function ROICalculator() {
       </div>
 
       {/* Output cards */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         <AnimatedStat label="Monthly meeting cost" value={meetingCost} prefix="₪" icon={DollarSign} color="text-danger" delay={0} />
         <AnimatedStat label="Monthly savings with DevPulse" value={savings} prefix="₪" icon={TrendingUp} color="text-success" delay={0.05} />
         <AnimatedStat label="Pays for itself in" value={paybackWeeks} suffix=" weeks" icon={Calendar} color="text-accent" delay={0.1} />
@@ -89,7 +89,7 @@ export function ROICalculator() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="bg-gradient-to-r from-accent/20 via-accent/10 to-transparent border border-accent/30 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6"
+        className="bg-gradient-to-r from-accent/20 via-accent/10 to-transparent border border-accent/30 rounded-2xl p-5 md:p-8 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6"
       >
         <div>
           <h2 className="text-text-primary text-xl font-bold mb-2">Ready to reclaim your team's time?</h2>

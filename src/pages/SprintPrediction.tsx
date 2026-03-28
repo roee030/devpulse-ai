@@ -27,9 +27,14 @@ export function SprintPrediction() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-text-primary">Sprint Prediction</h1>
-        <p className="text-text-secondary text-sm mt-1">
-          {sprint.name} · {sprint.startDate} → {sprint.endDate} · {sprint.totalPoints} committed points
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="text-xl md:text-2xl font-bold text-text-primary">Sprint Prediction</h1>
+          <span className="flex-shrink-0 bg-success/10 text-success border border-success/20 text-xs font-semibold px-2.5 py-1 rounded-full">
+            {completionPct}% predicted
+          </span>
+        </div>
+        <p className="text-text-secondary text-sm mt-1 leading-relaxed">
+          {sprint.name} · {sprint.totalPoints} pts
         </p>
       </div>
 
@@ -41,7 +46,8 @@ export function SprintPrediction() {
         className="bg-card border border-border rounded-xl p-6 mb-6"
       >
         <h2 className="text-text-primary font-semibold mb-4">Burndown Chart</h2>
-        <ResponsiveContainer width="100%" height={320}>
+        <div className="h-[200px] md:h-[320px]">
+        <ResponsiveContainer width="100%" height="100%">
           <LineChart data={sprint.burndownData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" />
             <XAxis dataKey="day" stroke="#64748b" tick={{ fontSize: 12 }} label={{ value: 'Sprint Day', position: 'insideBottom', offset: -2, fill: '#64748b', fontSize: 12 }} />
@@ -53,6 +59,7 @@ export function SprintPrediction() {
             <Line type="monotone" dataKey="predicted" name="AI Predicted" stroke="#f59e0b" strokeDasharray="6 3" strokeWidth={2} dot={false} connectNulls={false} />
           </LineChart>
         </ResponsiveContainer>
+        </div>
       </motion.div>
 
       {/* AI Insight banner */}
@@ -92,7 +99,7 @@ export function SprintPrediction() {
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {/* Top blockers */}
               <div className="bg-card border border-border rounded-xl p-5">
                 <h3 className="text-text-primary font-semibold mb-4 flex items-center gap-2">

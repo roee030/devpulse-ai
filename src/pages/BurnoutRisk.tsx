@@ -37,14 +37,15 @@ export function BurnoutRisk() {
         })}
       </div>
 
-      {/* Table */}
+      {/* Developer list — card on mobile, table on desktop */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
         className="bg-card border border-border rounded-xl overflow-hidden"
       >
-        <div className="grid grid-cols-[1fr_1fr_120px_2fr_100px_80px] gap-4 px-5 py-3 border-b border-border text-text-secondary text-xs font-medium uppercase tracking-wider">
+        {/* Desktop table header */}
+        <div className="hidden md:grid grid-cols-[1fr_1fr_120px_2fr_100px_80px] gap-4 px-5 py-3 border-b border-border text-text-secondary text-xs font-medium uppercase tracking-wider">
           <span>Developer</span>
           <span>Team</span>
           <span>Risk Level</span>
@@ -60,21 +61,41 @@ export function BurnoutRisk() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.03 }}
               onClick={() => setSelected(dev)}
-              className={`grid grid-cols-[1fr_1fr_120px_2fr_100px_80px] gap-4 px-5 py-3.5 border-b border-border last:border-0 cursor-pointer hover:bg-white/[0.03] transition-colors ${
+              className={`border-b border-border last:border-0 cursor-pointer hover:bg-white/[0.03] transition-colors ${
                 activeUser.role === 'developer' && dev.id === visibleDevelopers[0]?.id ? 'bg-accent/5' : ''
               }`}
             >
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0">
+              {/* Mobile card layout */}
+              <div className="md:hidden px-4 py-3.5 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0">
                   <span className="text-accent text-xs font-semibold">{dev.initials}</span>
                 </div>
-                <span className="text-text-primary text-sm font-medium truncate">{dev.name}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-text-primary text-sm font-medium truncate">{dev.name}</span>
+                    <RiskBadge level={dev.riskLevel} />
+                  </div>
+                  <p className="text-text-secondary text-xs truncate">{dev.riskSignal}</p>
+                </div>
+                <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                  <TrendIcon trend={dev.velocityTrend} />
+                  <span className="text-text-secondary text-xs">{dev.lastActive}</span>
+                </div>
               </div>
-              <span className="text-text-secondary text-sm self-center truncate">{dev.teamId.replace('team-', '').replace('-', ' ')}</span>
-              <span className="self-center"><RiskBadge level={dev.riskLevel} /></span>
-              <span className="text-text-secondary text-xs self-center leading-relaxed">{dev.riskSignal}</span>
-              <span className="text-text-secondary text-xs self-center">{dev.lastActive}</span>
-              <span className="self-center"><TrendIcon trend={dev.velocityTrend} /></span>
+              {/* Desktop table row */}
+              <div className="hidden md:grid grid-cols-[1fr_1fr_120px_2fr_100px_80px] gap-4 px-5 py-3.5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0">
+                    <span className="text-accent text-xs font-semibold">{dev.initials}</span>
+                  </div>
+                  <span className="text-text-primary text-sm font-medium truncate">{dev.name}</span>
+                </div>
+                <span className="text-text-secondary text-sm self-center truncate">{dev.teamId.replace('team-', '').replace('-', ' ')}</span>
+                <span className="self-center"><RiskBadge level={dev.riskLevel} /></span>
+                <span className="text-text-secondary text-xs self-center leading-relaxed">{dev.riskSignal}</span>
+                <span className="text-text-secondary text-xs self-center">{dev.lastActive}</span>
+                <span className="self-center"><TrendIcon trend={dev.velocityTrend} /></span>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -96,7 +117,7 @@ export function BurnoutRisk() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="fixed right-0 top-0 h-full w-[420px] bg-card border-l border-border z-50 overflow-y-auto"
+              className="fixed right-0 top-0 h-full w-full sm:w-[420px] bg-card border-l border-border z-50 overflow-y-auto"
             >
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
