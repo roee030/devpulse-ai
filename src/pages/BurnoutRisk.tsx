@@ -1,9 +1,11 @@
 // src/pages/BurnoutRisk.tsx
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { TrendingUp, TrendingDown, Minus, X, MessageSquare } from 'lucide-react'
 import { useUser } from '../context/UserContext'
-import { Developer } from '../data/mockData'
+import { Developer, getTeamById } from '../data/mockData'
+import { AiInsightCard } from '../components/ui/AiInsightCard'
+import { computeBurnoutInsight } from '../lib/insights'
 import { RiskBadge } from '../components/ui/RiskBadge'
 import { ActivityHeatmap } from '../components/ui/ActivityHeatmap'
 
@@ -17,12 +19,32 @@ export function BurnoutRisk() {
   const { visibleDevelopers, activeUser } = useUser()
   const [selected, setSelected] = useState<Developer | null>(null)
 
+  const teamRefs = useMemo(() => {
+    const seen = new Set<string>()
+    const result: { id: string; name: string }[] = []
+    for (const dev of visibleDevelopers) {
+      if (!seen.has(dev.teamId)) {
+        seen.add(dev.teamId)
+        const team = getTeamById(dev.teamId)
+        if (team) result.push({ id: team.id, name: team.name })
+      }
+    }
+    return result
+  }, [visibleDevelopers])
+
+  const burnoutInsightText = useMemo(
+    () => computeBurnoutInsight(visibleDevelopers, teamRefs),
+    [visibleDevelopers, teamRefs],
+  )
+
   return (
     <div className="relative">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-text-primary">Team Wellbeing Radar</h1>
         <p className="text-text-secondary text-sm mt-1">Early signals, before they become problems</p>
       </div>
+
+      <AiInsightCard text={burnoutInsightText} />
 
       {/* Summary badges */}
       <div className="flex gap-3 mb-6 flex-wrap">
