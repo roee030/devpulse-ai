@@ -1,5 +1,6 @@
 // src/App.tsx
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AuthProvider } from './context/AuthContext'
 import { UserProvider } from './context/UserContext'
@@ -16,6 +17,12 @@ const pageVariants = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
   exit:    { opacity: 0, y: -8 },
+}
+
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  return null
 }
 
 function AnimatedRoutes() {
@@ -46,7 +53,8 @@ function AnimatedRoutes() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/devpulse-ai">
+      <ScrollToTop />
       <AuthProvider>
         <UserProvider>
           <AppShell>

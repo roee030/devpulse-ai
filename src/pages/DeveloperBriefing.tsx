@@ -268,7 +268,7 @@ export function DeveloperBriefing() {
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-text-primary font-semibold">{team.name}</span>
                     <span className="text-text-secondary text-xs hidden sm:inline">Lead: {leadName}</span>
-                    <HealthRing score={team.healthScore} size={28} />
+                    <HealthRing score={team.healthScore} size={48} />
                     <span className="text-text-secondary text-xs">
                       {teamDevs.length} dev{teamDevs.length !== 1 ? 's' : ''}
                     </span>

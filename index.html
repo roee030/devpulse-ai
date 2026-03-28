@@ -8,6 +8,14 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Restore path saved by 404.html for GitHub Pages SPA routing
+      var redirect = sessionStorage.getItem('spa-redirect');
+      if (redirect) {
+        sessionStorage.removeItem('spa-redirect');
+        window.history.replaceState(null, '', '/devpulse-ai' + redirect);
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
