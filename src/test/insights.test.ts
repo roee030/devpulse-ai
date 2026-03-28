@@ -5,7 +5,7 @@ import {
 } from '../lib/insights'
 
 // ── computeDashboardInsight ────────────────────────────────────────────────
-describe('computeDashboardInsight', () => {
+describe('computeDashboardInsight — top level', () => {
   const teams = [
     { name: 'Frontend',       healthScore: 45, stalePRs: 8, atRiskTasks: 4 },
     { name: 'Backend',        healthScore: 80, stalePRs: 1, atRiskTasks: 0 },
@@ -13,7 +13,7 @@ describe('computeDashboardInsight', () => {
   ]
 
   it('names the worst team and its stats', () => {
-    const result = computeDashboardInsight(72, teams, 0)
+    const result = computeDashboardInsight('top', 'Company', 72, teams, 0)
     expect(result).toContain('72/100')
     expect(result).toContain('Frontend')
     expect(result).toContain('45')
@@ -21,19 +21,55 @@ describe('computeDashboardInsight', () => {
   })
 
   it('mentions critical dev count when > 0', () => {
-    const result = computeDashboardInsight(72, teams, 3)
+    const result = computeDashboardInsight('top', 'Company', 72, teams, 3)
     expect(result).toContain('3 developers')
     expect(result).toContain('critical')
   })
 
   it('omits critical sentence when count is 0', () => {
-    const result = computeDashboardInsight(72, teams, 0)
+    const result = computeDashboardInsight('top', 'Company', 72, teams, 0)
     expect(result).not.toContain('critical')
   })
 
   it('handles empty teams array gracefully', () => {
-    const result = computeDashboardInsight(90, [], 0)
+    const result = computeDashboardInsight('top', 'Company', 90, [], 0)
     expect(result).toContain('90/100')
+  })
+})
+
+describe('computeDashboardInsight — division level', () => {
+  const divTeams = [
+    { name: 'Frontend', healthScore: 45, stalePRs: 8, atRiskTasks: 4 },
+    { name: 'Backend',  healthScore: 80, stalePRs: 1, atRiskTasks: 0 },
+  ]
+
+  it('uses division label and names worst team', () => {
+    const result = computeDashboardInsight('division', 'Platform', 62, divTeams, 0)
+    expect(result).toContain('Platform division health is 62/100')
+    expect(result).toContain('Frontend')
+  })
+
+  it('mentions critical devs when present', () => {
+    const result = computeDashboardInsight('division', 'Platform', 62, divTeams, 2)
+    expect(result).toContain('2 developers')
+    expect(result).toContain('critical')
+  })
+})
+
+describe('computeDashboardInsight — team level', () => {
+  const teamArr = [{ name: 'Frontend', healthScore: 45, stalePRs: 8, atRiskTasks: 4 }]
+
+  it('uses team label and describes team metrics directly', () => {
+    const result = computeDashboardInsight('team', 'Frontend', 45, teamArr, 0)
+    expect(result).toContain('Frontend team health is 45/100')
+    expect(result).toContain('8')
+    expect(result).not.toContain('primary drag')
+  })
+
+  it('mentions critical devs when present', () => {
+    const result = computeDashboardInsight('team', 'Frontend', 45, teamArr, 1)
+    expect(result).toContain('1 developer')
+    expect(result).toContain('critical')
   })
 })
 

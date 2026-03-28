@@ -20,26 +20,41 @@ interface TeamRef {
 }
 
 export function computeDashboardInsight(
+  level: 'top' | 'division' | 'team',
+  entityName: string,
   healthScore: number,
   teams: TeamSummary[],
   criticalDevCount: number,
 ): string {
-  if (teams.length === 0) {
-    return `Company health is ${healthScore}/100.`
+  let text: string
+
+  if (level === 'team') {
+    const team = teams[0]
+    if (!team) {
+      text = `${entityName} team health is ${healthScore}/100.`
+    } else {
+      text =
+        `${entityName} team health is ${healthScore}/100. ` +
+        `The team has ${team.stalePRs} stale PR${team.stalePRs !== 1 ? 's' : ''} ` +
+        `and ${team.atRiskTasks} at-risk task${team.atRiskTasks !== 1 ? 's' : ''}.`
+    }
+  } else if (teams.length === 0) {
+    const label = level === 'division' ? `${entityName} division` : entityName
+    text = `${label} health is ${healthScore}/100.`
+  } else {
+    const worst = [...teams].sort((a, b) => a.healthScore - b.healthScore)[0]
+    const label = level === 'division' ? `${entityName} division` : entityName
+    text =
+      `${label} health is ${healthScore}/100. ` +
+      `The ${worst.name} team is the primary drag (score ${worst.healthScore}) ` +
+      `with ${worst.stalePRs} stale PR${worst.stalePRs !== 1 ? 's' : ''} ` +
+      `and ${worst.atRiskTasks} at-risk task${worst.atRiskTasks !== 1 ? 's' : ''}.`
   }
-
-  const worst = [...teams].sort((a, b) => a.healthScore - b.healthScore)[0]
-
-  let text =
-    `Company health is ${healthScore}/100. ` +
-    `The ${worst.name} team is the primary drag (score ${worst.healthScore}) ` +
-    `with ${worst.stalePRs} stale PR${worst.stalePRs !== 1 ? 's' : ''} ` +
-    `and ${worst.atRiskTasks} at-risk task${worst.atRiskTasks !== 1 ? 's' : ''}.`
 
   if (criticalDevCount > 0) {
     text +=
       ` ${criticalDevCount} developer${criticalDevCount !== 1 ? 's are' : ' is'} ` +
-      `at critical burnout risk this sprint.`
+      `at critical burnout risk.`
   }
 
   return text
