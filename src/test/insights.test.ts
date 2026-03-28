@@ -1,0 +1,114 @@
+import {
+  computeDashboardInsight,
+  computeBriefingInsight,
+  computeBurnoutInsight,
+} from '../lib/insights'
+
+// ── computeDashboardInsight ────────────────────────────────────────────────
+describe('computeDashboardInsight', () => {
+  const teams = [
+    { name: 'Frontend',       healthScore: 45, stalePRs: 8, atRiskTasks: 4 },
+    { name: 'Backend',        healthScore: 80, stalePRs: 1, atRiskTasks: 0 },
+    { name: 'Infrastructure', healthScore: 60, stalePRs: 3, atRiskTasks: 2 },
+  ]
+
+  it('names the worst team and its stats', () => {
+    const result = computeDashboardInsight(72, teams, 0)
+    expect(result).toContain('72/100')
+    expect(result).toContain('Frontend')
+    expect(result).toContain('45')
+    expect(result).toContain('8')
+  })
+
+  it('mentions critical dev count when > 0', () => {
+    const result = computeDashboardInsight(72, teams, 3)
+    expect(result).toContain('3 developers')
+    expect(result).toContain('critical')
+  })
+
+  it('omits critical sentence when count is 0', () => {
+    const result = computeDashboardInsight(72, teams, 0)
+    expect(result).not.toContain('critical')
+  })
+
+  it('handles empty teams array gracefully', () => {
+    const result = computeDashboardInsight(90, [], 0)
+    expect(result).toContain('90/100')
+  })
+})
+
+// ── computeBriefingInsight ─────────────────────────────────────────────────
+describe('computeBriefingInsight', () => {
+  const teams = [
+    { id: 'team-1', name: 'Infrastructure' },
+    { id: 'team-2', name: 'Frontend' },
+  ]
+
+  const developers = [
+    { riskLevel: 'critical', teamId: 'team-1', tasks: [{ status: 'blocked' }, { status: 'blocked' }] },
+    { riskLevel: 'critical', teamId: 'team-1', tasks: [{ status: 'blocked' }] },
+    { riskLevel: 'at-risk',  teamId: 'team-2', tasks: [{ status: 'done' }] },
+    { riskLevel: 'healthy',  teamId: 'team-2', tasks: [] },
+  ]
+
+  it('reports critical and at-risk counts', () => {
+    const result = computeBriefingInsight(developers, teams)
+    expect(result).toContain('2')
+    expect(result).toContain('critical')
+    expect(result).toContain('1')
+    expect(result).toContain('at-risk')
+  })
+
+  it('names the team with the most blockers', () => {
+    const result = computeBriefingInsight(developers, teams)
+    expect(result).toContain('Infrastructure')
+  })
+
+  it('returns healthy message when everyone is healthy', () => {
+    const healthyDevs = [
+      { riskLevel: 'healthy', teamId: 'team-1', tasks: [] },
+      { riskLevel: 'healthy', teamId: 'team-2', tasks: [] },
+    ]
+    const result = computeBriefingInsight(healthyDevs, teams)
+    expect(result).toContain('healthy')
+  })
+})
+
+// ── computeBurnoutInsight ──────────────────────────────────────────────────
+describe('computeBurnoutInsight', () => {
+  const teams = [
+    { id: 'team-1', name: 'Infrastructure' },
+    { id: 'team-2', name: 'Frontend' },
+  ]
+
+  it('reports elevated count vs total', () => {
+    const devs = [
+      { riskLevel: 'critical', teamId: 'team-1' },
+      { riskLevel: 'critical', teamId: 'team-1' },
+      { riskLevel: 'at-risk',  teamId: 'team-2' },
+      { riskLevel: 'healthy',  teamId: 'team-2' },
+    ]
+    const result = computeBurnoutInsight(devs, teams)
+    expect(result).toContain('3 of 4')
+  })
+
+  it('names the hotspot team when it has 2+ critical devs', () => {
+    const devs = [
+      { riskLevel: 'critical', teamId: 'team-1' },
+      { riskLevel: 'critical', teamId: 'team-1' },
+      { riskLevel: 'healthy',  teamId: 'team-2' },
+    ]
+    const result = computeBurnoutInsight(devs, teams)
+    expect(result).toContain('Infrastructure')
+    expect(result).toContain('team-level')
+  })
+
+  it('returns all-healthy message when no elevated signals', () => {
+    const devs = [
+      { riskLevel: 'healthy', teamId: 'team-1' },
+      { riskLevel: 'healthy', teamId: 'team-2' },
+    ]
+    const result = computeBurnoutInsight(devs, teams)
+    expect(result).toContain('healthy')
+  })
+})
