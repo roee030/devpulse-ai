@@ -1,7 +1,7 @@
 // src/pages/ExecutiveDashboard.tsx
 import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence, Reorder } from 'framer-motion'
-import { GitPullRequest, AlertTriangle, Target, Zap, ChevronRight, Pencil, Check, Bug } from 'lucide-react'
+import { GitPullRequest, AlertTriangle, Target, Zap, ChevronRight, ChevronDown, Pencil, Check, Bug } from 'lucide-react'
 import { useUser } from '../context/UserContext'
 import { HealthRing } from '../components/ui/HealthRing'
 import { HealthBreakdown } from '../components/ui/HealthBreakdown'
@@ -163,6 +163,7 @@ export function ExecutiveDashboard() {
   const [showMainBreakdown, setShowMainBreakdown] = useState(false)
   const [cardBreakdownId,   setCardBreakdownId]   = useState<string | null>(null)
   const [isEditMode, setIsEditMode] = useState(false)
+  const [bugRadarOpen, setBugRadarOpen] = useState(true)
   const [cardOrder, setCardOrder] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('devpulse-dashboard-card-order')
@@ -399,61 +400,86 @@ export function ExecutiveDashboard() {
           transition={{ duration: 0.35, delay: 0.1 }}
           className="mb-6 md:mb-8"
         >
-          <h2 className="text-text-primary font-semibold mb-4 flex items-center gap-2">
-            <Bug size={15} className="text-danger" />
-            Bug &amp; Blocker Radar
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <button
+            onClick={() => setBugRadarOpen(v => !v)}
+            className="w-full flex items-center justify-between mb-4 group"
+          >
+            <span className="text-text-primary font-semibold flex items-center gap-2">
+              <Bug size={15} className="text-danger" />
+              Bug &amp; Blocker Radar
+            </span>
+            <ChevronDown
+              size={16}
+              className={`text-text-secondary transition-transform duration-200 ${bugRadarOpen ? 'rotate-180' : ''}`}
+            />
+          </button>
+          <AnimatePresence initial={false}>
+            {bugRadarOpen && (
+              <motion.div
+                key="bug-radar-content"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                style={{ overflow: 'hidden' }}
+              >
+                <p className="text-text-secondary text-sm mb-4">
+                  {totalBlocked} blocked task{totalBlocked !== 1 ? 's' : ''} across {blockedByTeam.length} team{blockedByTeam.length !== 1 ? 's' : ''} this sprint
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-            {/* Top Blockers */}
-            <div className="bg-card border border-border rounded-xl p-5">
-              <p className="text-text-secondary text-xs font-medium uppercase tracking-wider mb-4">
-                Top Blockers · <span className="text-danger">{totalBlocked} blocked task{totalBlocked !== 1 ? 's' : ''}</span>
-              </p>
-              <div className="space-y-3">
-                {sprint.topBlockers.map((b, i) => (
-                  <div key={b.id} className="flex items-start gap-3">
-                    <span className="w-5 h-5 rounded-full bg-danger/15 text-danger text-xs font-semibold flex items-center justify-center flex-shrink-0 mt-0.5">
-                      {i + 1}
-                    </span>
-                    <div>
-                      <p className="text-text-primary text-sm">{b.description}</p>
-                      <p className="text-danger text-xs mt-0.5">
-                        {b.tasksDelayed} task{b.tasksDelayed !== 1 ? 's' : ''} delayed
-                      </p>
+                  {/* Top Blockers */}
+                  <div className="bg-card border border-border rounded-xl p-5">
+                    <p className="text-text-secondary text-xs font-medium uppercase tracking-wider mb-4">
+                      Top Blockers · <span className="text-danger">{totalBlocked} blocked task{totalBlocked !== 1 ? 's' : ''}</span>
+                    </p>
+                    <div className="space-y-3">
+                      {sprint.topBlockers.map((b, i) => (
+                        <div key={b.id} className="flex items-start gap-3">
+                          <span className="w-5 h-5 rounded-full bg-danger/15 text-danger text-xs font-semibold flex items-center justify-center flex-shrink-0 mt-0.5">
+                            {i + 1}
+                          </span>
+                          <div>
+                            <p className="text-text-primary text-sm">{b.description}</p>
+                            <p className="text-danger text-xs mt-0.5">
+                              {b.tasksDelayed} task{b.tasksDelayed !== 1 ? 's' : ''} delayed
+                            </p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Blocked by Team */}
-            <div className="bg-card border border-border rounded-xl p-5">
-              <p className="text-text-secondary text-xs font-medium uppercase tracking-wider mb-4">
-                Blocked by Team · <span className="text-danger">{blockedByTeam.length} team{blockedByTeam.length !== 1 ? 's' : ''} affected</span>
-              </p>
-              <div className="space-y-3">
-                {blockedByTeam.map(({ teamName, count }) => {
-                  const maxCount = blockedByTeam[0]?.count ?? 1
-                  return (
-                    <div key={teamName} className="flex items-center gap-3">
-                      <span className="text-text-secondary text-xs w-28 truncate flex-shrink-0">{teamName}</span>
-                      <div className="flex-1 h-2 bg-border rounded-full overflow-hidden">
-                        <motion.div
-                          className="h-full bg-danger rounded-full"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${(count / maxCount) * 100}%` }}
-                          transition={{ duration: 0.6, delay: 0.2 }}
-                        />
-                      </div>
-                      <span className="text-danger text-xs w-4 text-right flex-shrink-0 font-semibold">{count}</span>
+                  {/* Blocked by Team */}
+                  <div className="bg-card border border-border rounded-xl p-5">
+                    <p className="text-text-secondary text-xs font-medium uppercase tracking-wider mb-4">
+                      Blocked by Team · <span className="text-danger">{blockedByTeam.length} team{blockedByTeam.length !== 1 ? 's' : ''} affected</span>
+                    </p>
+                    <div className="space-y-3">
+                      {blockedByTeam.map(({ teamName, count }) => {
+                        const maxCount = blockedByTeam[0]?.count ?? 1
+                        return (
+                          <div key={teamName} className="flex items-center gap-3">
+                            <span className="text-text-secondary text-xs w-28 truncate flex-shrink-0">{teamName}</span>
+                            <div className="flex-1 h-2 bg-border rounded-full overflow-hidden">
+                              <motion.div
+                                className="h-full bg-danger rounded-full"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${(count / maxCount) * 100}%` }}
+                                transition={{ duration: 0.6, delay: 0.2 }}
+                              />
+                            </div>
+                            <span className="text-danger text-xs w-4 text-right flex-shrink-0 font-semibold">{count}</span>
+                          </div>
+                        )
+                      })}
                     </div>
-                  )
-                })}
-              </div>
-            </div>
+                  </div>
 
-          </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       )}
 
