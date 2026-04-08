@@ -1,6 +1,6 @@
 // src/components/ui/MetricCard.tsx
 import { ReactNode } from 'react'
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, GripVertical } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useCountUp } from '../../hooks/useCountUp'
 
@@ -13,6 +13,7 @@ interface Props {
   icon?: ReactNode
   color?: 'default' | 'danger' | 'warning' | 'success'
   delay?: number
+  dragMode?: boolean
 }
 
 const colorMap = {
@@ -22,7 +23,7 @@ const colorMap = {
   success: 'text-success',
 }
 
-export function MetricCard({ label, value, unit, trend, trendLabel, icon, color = 'default', delay = 0 }: Props) {
+export function MetricCard({ label, value, unit, trend, trendLabel, icon, color = 'default', delay = 0, dragMode = false }: Props) {
   const animated = useCountUp(value)
 
   return (
@@ -31,11 +32,14 @@ export function MetricCard({ label, value, unit, trend, trendLabel, icon, color 
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay }}
       whileHover={{ scale: 1.02, transition: { duration: 0.15 } }}
-      className="bg-card border border-border rounded-xl p-5 cursor-default card-glow"
+      className={`bg-card border border-border rounded-xl p-5 card-glow ${dragMode ? 'cursor-grab active:cursor-grabbing border-accent/40' : 'cursor-default'}`}
     >
       <div className="flex items-start justify-between mb-3">
         <p className="text-text-secondary text-sm font-medium">{label}</p>
-        {icon && <span className="text-text-secondary">{icon}</span>}
+        <div className="flex items-center gap-1.5">
+          {dragMode && <GripVertical size={14} className="text-text-secondary/50" />}
+          {icon && <span className="text-text-secondary">{icon}</span>}
+        </div>
       </div>
       <div className="flex items-end gap-2">
         <span className={`text-3xl font-bold ${colorMap[color]}`}>
