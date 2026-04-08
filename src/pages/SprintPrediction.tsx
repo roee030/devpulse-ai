@@ -21,12 +21,13 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export function SprintPrediction() {
   const { visibleDevelopers } = useUser()
-  const [deepDiveOpen, setDeepDiveOpen] = useState(false)
+  const [deepDiveOpen, setDeepDiveOpen] = useState(true)
 
   const completionPct = Math.round((sprint.projectedPoints / sprint.totalPoints) * 100)
 
   return (
     <div>
+      {/* Page header */}
       <div className="mb-6">
         <div className="flex items-start justify-between gap-3">
           <h1 className="text-xl md:text-2xl font-bold text-text-primary">Sprint Prediction</h1>
@@ -38,30 +39,6 @@ export function SprintPrediction() {
           {sprint.name} · {sprint.totalPoints} pts
         </p>
       </div>
-
-      {/* Burndown chart */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="bg-card border border-border rounded-xl p-6 mb-6"
-      >
-        <h2 className="text-text-primary font-semibold mb-4">Burndown Chart</h2>
-        <div className="h-[200px] md:h-[320px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={sprint.burndownData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" />
-            <XAxis dataKey="day" stroke="#64748b" tick={{ fontSize: 12 }} label={{ value: 'Sprint Day', position: 'insideBottom', offset: -2, fill: '#64748b', fontSize: 12 }} />
-            <YAxis stroke="#64748b" tick={{ fontSize: 12 }} label={{ value: 'Points Remaining', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 12 }} />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend wrapperStyle={{ fontSize: 12, color: '#64748b' }} />
-            <Line type="monotone" dataKey="ideal" name="Ideal" stroke="#64748b" strokeDasharray="6 3" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="actual" name="Actual" stroke="#6366f1" strokeWidth={2.5} dot={{ r: 3, fill: '#6366f1' }} connectNulls={false} />
-            <Line type="monotone" dataKey="predicted" name="AI Predicted" stroke="#f59e0b" strokeDasharray="6 3" strokeWidth={2} dot={false} connectNulls={false} />
-          </LineChart>
-        </ResponsiveContainer>
-        </div>
-      </motion.div>
 
       {/* AI Insight banner */}
       <AiInsightCard text={`At current velocity, the team will complete ${completionPct}% of Sprint commitments by end of day ${sprint.endDate}. Confidence: 84%`} />
@@ -147,6 +124,30 @@ export function SprintPrediction() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Burndown chart */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="bg-card border border-border rounded-xl p-6 mt-6"
+      >
+        <h2 className="text-text-primary font-semibold mb-4">Burndown Chart</h2>
+        <div className="h-[200px] md:h-[320px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={sprint.burndownData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" />
+            <XAxis dataKey="day" stroke="#64748b" tick={{ fontSize: 12 }} label={{ value: 'Sprint Day', position: 'insideBottom', offset: -2, fill: '#64748b', fontSize: 12 }} />
+            <YAxis stroke="#64748b" tick={{ fontSize: 12 }} label={{ value: 'Points Remaining', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 12 }} />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend wrapperStyle={{ fontSize: 12, color: '#64748b' }} />
+            <Line type="monotone" dataKey="ideal" name="Ideal" stroke="#64748b" strokeDasharray="6 3" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="actual" name="Actual" stroke="#6366f1" strokeWidth={2.5} dot={{ r: 3, fill: '#6366f1' }} connectNulls={false} />
+            <Line type="monotone" dataKey="predicted" name="AI Predicted" stroke="#f59e0b" strokeDasharray="6 3" strokeWidth={2} dot={false} connectNulls={false} />
+          </LineChart>
+        </ResponsiveContainer>
+        </div>
+      </motion.div>
     </div>
   )
 }
