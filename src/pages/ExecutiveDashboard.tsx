@@ -1,7 +1,7 @@
 // src/pages/ExecutiveDashboard.tsx
-import { useState, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { GitPullRequest, AlertTriangle, Target, Zap, ChevronRight } from 'lucide-react'
+import { useState, useMemo, useEffect } from 'react'
+import { motion, AnimatePresence, Reorder } from 'framer-motion'
+import { GitPullRequest, AlertTriangle, Target, Zap, ChevronRight, Pencil, Check } from 'lucide-react'
 import { useUser } from '../context/UserContext'
 import { HealthRing } from '../components/ui/HealthRing'
 import { HealthBreakdown } from '../components/ui/HealthBreakdown'
@@ -134,6 +134,20 @@ function TeamCard({
   )
 }
 
+// ── Card config ───────────────────────────────────────────────────────────────
+const DEFAULT_CARD_ORDER = ['stale-prs', 'at-risk', 'sprint-pts', 'avg-velocity']
+
+interface CardConfig {
+  id: string
+  label: string
+  value: number
+  unit?: string
+  color: 'default' | 'danger' | 'warning' | 'success'
+  icon: JSX.Element
+  trend: 'up' | 'down' | 'stable'
+  trendLabel: string
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 export function ExecutiveDashboard() {
   const { activeUser, visibleDivisions, visibleTeams, visibleDevelopers } = useUser()
@@ -148,6 +162,21 @@ export function ExecutiveDashboard() {
   const [expandedDevId, setExpandedDevId] = useState<string | null>(null)
   const [showMainBreakdown, setShowMainBreakdown] = useState(false)
   const [cardBreakdownId,   setCardBreakdownId]   = useState<string | null>(null)
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [cardOrder, setCardOrder] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('devpulse-dashboard-card-order')
+      if (saved) {
+        const parsed = JSON.parse(saved) as string[]
+        if (DEFAULT_CARD_ORDER.every(id => parsed.includes(id))) return parsed
+      }
+    } catch {}
+    return DEFAULT_CARD_ORDER
+  })
+
+  useEffect(() => {
+    localStorage.setItem('devpulse-dashboard-card-order', JSON.stringify(cardOrder))
+  }, [cardOrder])
 
   // Navigation helpers
   function drillIntoDiv(divId: string) {
@@ -220,12 +249,39 @@ export function ExecutiveDashboard() {
     return computeDashboardInsight('top', 'Company', companyHealthScore, teams, scopedCritical)
   }, [drill, visibleDevelopers, currentTeam, currentDivision, teamsForDivision, devsForTeam])
 
+  const cardConfigs = useMemo((): CardConfig[] => [
+    { id: 'stale-prs',    label: 'Stale PRs',     value: displayStalePRs,        color: 'warning', icon: <GitPullRequest size={16} />, trend: 'up',     trendLabel: 'vs last sprint' },
+    { id: 'at-risk',      label: 'At-Risk Tasks',  value: displayAtRisk,          color: 'danger',  icon: <AlertTriangle  size={16} />, trend: 'up',     trendLabel: `${Math.round((displayAtRisk / sprint.totalPoints) * 100)}% of sprint` },
+    { id: 'sprint-pts',   label: 'Sprint Points',  value: sprint.completedPoints, color: 'default', icon: <Target         size={16} />, trend: 'stable', trendLabel: 'points done', unit: `/${sprint.totalPoints}` },
+    { id: 'avg-velocity', label: 'Avg Velocity',   value: avgVelocity,            color: 'success', icon: <Zap            size={16} />, trend: 'stable', trendLabel: 'across team',  unit: ' pts/day' },
+  ], [displayStalePRs, displayAtRisk, avgVelocity])
+
+  const sortedCards = useMemo(
+    () => cardOrder.map(id => cardConfigs.find(c => c.id === id)!).filter(Boolean),
+    [cardOrder, cardConfigs],
+  )
+
   return (
     <div>
       {/* Page header */}
-      <div className="mb-5">
-        <h1 className="text-xl md:text-2xl font-bold text-text-primary">Executive Dashboard</h1>
-        <p className="text-text-secondary text-sm mt-1">{sprint.name} · {sprint.completedPoints}/{sprint.totalPoints} pts</p>
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold text-text-primary">Executive Dashboard</h1>
+          <p className="text-text-secondary text-sm mt-1">{sprint.name} · {sprint.completedPoints}/{sprint.totalPoints} pts</p>
+        </div>
+        {activeUser.role !== 'developer' && (
+          <button
+            onClick={() => setIsEditMode(v => !v)}
+            className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors flex-shrink-0 ${
+              isEditMode
+                ? 'bg-accent text-white border-accent'
+                : 'bg-card border-border text-text-secondary hover:text-text-primary hover:border-accent/50'
+            }`}
+          >
+            {isEditMode ? <Check size={13} /> : <Pencil size={13} />}
+            {isEditMode ? 'Done' : 'Edit'}
+          </button>
+        )}
       </div>
 
       {/* AI Insight — not shown for individual developer view */}
@@ -269,14 +325,54 @@ export function ExecutiveDashboard() {
           </AnimatePresence>
         </motion.div>
 
-        {/* Metric tiles — 2×2 on mobile, 4-wide on xl */}
-        <div className="flex-1 grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
-          <MetricCard label="Stale PRs"        value={displayStalePRs} color="warning" icon={<GitPullRequest size={16} />} trend="up"     trendLabel="vs last sprint"                                              delay={0.1}  />
-          <MetricCard label="At-Risk Tasks"    value={displayAtRisk}   color="danger"  icon={<AlertTriangle  size={16} />} trend="up"     trendLabel={`${Math.round((displayAtRisk / sprint.totalPoints) * 100)}% of sprint`} delay={0.15} />
-          <MetricCard label="Sprint Points"    value={sprint.completedPoints} unit={`/${sprint.totalPoints}`} color="default" icon={<Target size={16} />} trend="stable" trendLabel="points done"          delay={0.2}  />
-          <MetricCard label="Avg Velocity"     value={avgVelocity}     unit=" pts/day" color="success" icon={<Zap size={16} />}            trend="stable" trendLabel="across team"                           delay={0.25} />
-        </div>
+        {/* Metric tiles — reorderable in edit mode */}
+        {isEditMode ? (
+          <Reorder.Group
+            as="div"
+            axis="x"
+            values={sortedCards}
+            onReorder={(newOrder) => setCardOrder(newOrder.map(c => c.id))}
+            className="flex-1 grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4"
+          >
+            {sortedCards.map((card) => (
+              <Reorder.Item key={card.id} value={card} as="div">
+                <MetricCard
+                  label={card.label}
+                  value={card.value}
+                  unit={card.unit}
+                  color={card.color}
+                  icon={card.icon}
+                  trend={card.trend}
+                  trendLabel={card.trendLabel}
+                  dragMode={true}
+                />
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
+        ) : (
+          <div className="flex-1 grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
+            {sortedCards.map((card, i) => (
+              <MetricCard
+                key={card.id}
+                label={card.label}
+                value={card.value}
+                unit={card.unit}
+                color={card.color}
+                icon={card.icon}
+                trend={card.trend}
+                trendLabel={card.trendLabel}
+                delay={i * 0.05}
+              />
+            ))}
+          </div>
+        )}
       </div>
+
+      {isEditMode && (
+        <p className="text-text-secondary text-xs text-center mb-4 -mt-2">
+          Drag cards to reorder · click Done when finished
+        </p>
+      )}
 
       {/* Developer solo view */}
       {activeUser.role === 'developer' && visibleDevelopers[0] && (
