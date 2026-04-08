@@ -263,20 +263,20 @@ export function ExecutiveDashboard() {
   )
 
   const blockedByTeam = useMemo(() => {
-    const map: Record<string, { teamName: string; count: number }> = {}
+    const map: Record<string, { teamId: string; teamName: string; count: number }> = {}
     for (const dev of visibleDevelopers) {
       const blocked = dev.tasks.filter(t => t.status === 'blocked').length
       if (blocked === 0) continue
       const team = getTeamById(dev.teamId)
-      if (!map[dev.teamId]) map[dev.teamId] = { teamName: team?.name ?? dev.teamId, count: 0 }
+      if (!map[dev.teamId]) map[dev.teamId] = { teamId: dev.teamId, teamName: team?.name ?? dev.teamId, count: 0 }
       map[dev.teamId].count += blocked
     }
     return Object.values(map).sort((a, b) => b.count - a.count)
   }, [visibleDevelopers])
 
   const totalBlocked = useMemo(
-    () => visibleDevelopers.reduce((s, d) => s + d.tasks.filter(t => t.status === 'blocked').length, 0),
-    [visibleDevelopers],
+    () => blockedByTeam.reduce((s, e) => s + e.count, 0),
+    [blockedByTeam],
   )
 
   return (
@@ -456,10 +456,10 @@ export function ExecutiveDashboard() {
                       Blocked by Team · <span className="text-danger">{blockedByTeam.length} team{blockedByTeam.length !== 1 ? 's' : ''} affected</span>
                     </p>
                     <div className="space-y-3">
-                      {blockedByTeam.map(({ teamName, count }) => {
+                      {(() => {
                         const maxCount = blockedByTeam[0]?.count ?? 1
-                        return (
-                          <div key={teamName} className="flex items-center gap-3">
+                        return blockedByTeam.map(({ teamId, teamName, count }) => (
+                          <div key={teamId} className="flex items-center gap-3">
                             <span className="text-text-secondary text-xs w-28 truncate flex-shrink-0">{teamName}</span>
                             <div className="flex-1 h-2 bg-border rounded-full overflow-hidden">
                               <motion.div
@@ -471,8 +471,8 @@ export function ExecutiveDashboard() {
                             </div>
                             <span className="text-danger text-xs w-4 text-right flex-shrink-0 font-semibold">{count}</span>
                           </div>
-                        )
-                      })}
+                        ))
+                      })()}
                     </div>
                   </div>
 
