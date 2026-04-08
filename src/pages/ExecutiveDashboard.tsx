@@ -1,7 +1,7 @@
 // src/pages/ExecutiveDashboard.tsx
 import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence, Reorder } from 'framer-motion'
-import { GitPullRequest, AlertTriangle, Target, Zap, ChevronRight, Pencil, Check } from 'lucide-react'
+import { GitPullRequest, AlertTriangle, Target, Zap, ChevronRight, Pencil, Check, Bug } from 'lucide-react'
 import { useUser } from '../context/UserContext'
 import { HealthRing } from '../components/ui/HealthRing'
 import { HealthBreakdown } from '../components/ui/HealthBreakdown'
@@ -261,6 +261,23 @@ export function ExecutiveDashboard() {
     [cardOrder, cardConfigs],
   )
 
+  const blockedByTeam = useMemo(() => {
+    const map: Record<string, { teamName: string; count: number }> = {}
+    for (const dev of visibleDevelopers) {
+      const blocked = dev.tasks.filter(t => t.status === 'blocked').length
+      if (blocked === 0) continue
+      const team = getTeamById(dev.teamId)
+      if (!map[dev.teamId]) map[dev.teamId] = { teamName: team?.name ?? dev.teamId, count: 0 }
+      map[dev.teamId].count += blocked
+    }
+    return Object.values(map).sort((a, b) => b.count - a.count)
+  }, [visibleDevelopers])
+
+  const totalBlocked = useMemo(
+    () => visibleDevelopers.reduce((s, d) => s + d.tasks.filter(t => t.status === 'blocked').length, 0),
+    [visibleDevelopers],
+  )
+
   return (
     <div>
       {/* Page header */}
@@ -372,6 +389,72 @@ export function ExecutiveDashboard() {
         <p className="text-text-secondary text-xs text-center mb-4 -mt-2">
           Drag cards to reorder · click Done when finished
         </p>
+      )}
+
+      {/* Bug & Blocker Radar */}
+      {activeUser.role !== 'developer' && totalBlocked > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.1 }}
+          className="mb-6 md:mb-8"
+        >
+          <h2 className="text-text-primary font-semibold mb-4 flex items-center gap-2">
+            <Bug size={15} className="text-danger" />
+            Bug &amp; Blocker Radar
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            {/* Top Blockers */}
+            <div className="bg-card border border-border rounded-xl p-5">
+              <p className="text-text-secondary text-xs font-medium uppercase tracking-wider mb-4">
+                Top Blockers · <span className="text-danger">{totalBlocked} blocked task{totalBlocked !== 1 ? 's' : ''}</span>
+              </p>
+              <div className="space-y-3">
+                {sprint.topBlockers.map((b, i) => (
+                  <div key={b.id} className="flex items-start gap-3">
+                    <span className="w-5 h-5 rounded-full bg-danger/15 text-danger text-xs font-semibold flex items-center justify-center flex-shrink-0 mt-0.5">
+                      {i + 1}
+                    </span>
+                    <div>
+                      <p className="text-text-primary text-sm">{b.description}</p>
+                      <p className="text-danger text-xs mt-0.5">
+                        {b.tasksDelayed} task{b.tasksDelayed !== 1 ? 's' : ''} delayed
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Blocked by Team */}
+            <div className="bg-card border border-border rounded-xl p-5">
+              <p className="text-text-secondary text-xs font-medium uppercase tracking-wider mb-4">
+                Blocked by Team · <span className="text-danger">{blockedByTeam.length} team{blockedByTeam.length !== 1 ? 's' : ''} affected</span>
+              </p>
+              <div className="space-y-3">
+                {blockedByTeam.map(({ teamName, count }) => {
+                  const maxCount = blockedByTeam[0]?.count ?? 1
+                  return (
+                    <div key={teamName} className="flex items-center gap-3">
+                      <span className="text-text-secondary text-xs w-28 truncate flex-shrink-0">{teamName}</span>
+                      <div className="flex-1 h-2 bg-border rounded-full overflow-hidden">
+                        <motion.div
+                          className="h-full bg-danger rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${(count / maxCount) * 100}%` }}
+                          transition={{ duration: 0.6, delay: 0.2 }}
+                        />
+                      </div>
+                      <span className="text-danger text-xs w-4 text-right flex-shrink-0 font-semibold">{count}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+          </div>
+        </motion.div>
       )}
 
       {/* Developer solo view */}
