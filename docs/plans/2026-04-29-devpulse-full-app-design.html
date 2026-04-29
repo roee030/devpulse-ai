@@ -1,0 +1,1812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevPulse — Engineering Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07090D;
+  --surface: #0C1018;
+  --elevated: #131B24;
+  --hover: #192130;
+  --border: #1C2A38;
+  --border-hi: #28404F;
+  --accent: #00C4A0;
+  --danger: #F04848;
+  --warn: #F5A623;
+  --ok: #0FD48A;
+  --txt: #D4E4F0;
+  --txt2: #5A7A90;
+  --txt3: #2E4055;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--txt);
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── DEMO TAB STRIP ── */
+#demo-strip {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9999;
+  background: #020407;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+#demo-strip::-webkit-scrollbar { display: none; }
+.demo-tab {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  color: var(--txt2);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  background: transparent;
+}
+.demo-tab:hover { border-color: var(--border-hi); color: var(--txt); background: var(--elevated); }
+.demo-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(0,196,160,0.08); }
+#demo-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--txt3);
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+/* ── LAYOUT ── */
+#app {
+  display: flex;
+  min-height: 100vh;
+  padding-top: 36px;
+}
+
+/* ── SIDEBAR ── */
+#sidebar {
+  width: 220px;
+  min-height: calc(100vh - 36px);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 36px;
+  left: 0;
+  bottom: 0;
+  transition: transform 0.3s ease;
+  z-index: 100;
+}
+#sidebar.hidden { display: none; }
+
+.sb-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.sb-logo-mark {
+  width: 32px; height: 32px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  color: #07090D;
+  flex-shrink: 0;
+}
+.sb-logo-text {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--txt);
+  letter-spacing: 0.02em;
+}
+.sb-logo-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--txt3);
+  margin-top: 1px;
+}
+
+.sb-section {
+  padding: 12px 8px 4px;
+}
+.sb-section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--txt3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0 8px 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--txt2);
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s;
+  margin-bottom: 1px;
+  border: 1px solid transparent;
+}
+.nav-item:hover { background: var(--hover); color: var(--txt); border-color: var(--border); }
+.nav-item.active { background: rgba(0,196,160,0.1); color: var(--accent); border-color: rgba(0,196,160,0.25); }
+.nav-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: rgba(240,72,72,0.15);
+  color: var(--danger);
+  border: 1px solid rgba(240,72,72,0.3);
+}
+
+.sb-footer {
+  margin-top: auto;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sb-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a3a5c, #00C4A0);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--txt);
+}
+.sb-user-name { font-size: 12px; font-weight: 600; color: var(--txt); }
+.sb-user-role { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--txt3); }
+
+/* ── MAIN CONTENT ── */
+#main {
+  flex: 1;
+  margin-left: 220px;
+  min-height: calc(100vh - 36px);
+  transition: margin-left 0.3s ease;
+}
+#main.full-width { margin-left: 0; }
+
+/* ── SCREENS ── */
+.screen { display: none; animation: fadeIn 0.25s ease; }
+.screen.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── SCREEN 0: LOGIN ── */
+#screen-0 {
+  display: none;
+  min-height: calc(100vh - 36px);
+}
+#screen-0.active { display: flex; }
+.login-left {
+  width: 50%;
+  background: linear-gradient(160deg, #07090D 0%, #0C1A2A 50%, #071814 100%);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px;
+  position: relative;
+  overflow: hidden;
+}
+.login-left::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(0,196,160,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.login-dp-logo {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 48px;
+}
+.login-dp-mark {
+  width: 48px; height: 48px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  color: #07090D;
+}
+.login-dp-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; color: var(--txt); }
+.login-dp-tag { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--txt3); margin-top: 2px; }
+.login-tagline {
+  font-family: 'Fraunces', serif;
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--txt);
+  line-height: 1.3;
+  margin-bottom: 36px;
+}
+.login-tagline span { color: var(--accent); }
+.login-usp {
+  display: flex; flex-direction: column; gap: 14px;
+}
+.login-usp-item {
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.usp-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+.usp-text { font-size: 13px; color: var(--txt2); line-height: 1.5; }
+.usp-text strong { color: var(--txt); font-weight: 600; }
+
+.login-right {
+  width: 50%;
+  background: #F7F9FC;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px;
+}
+.login-form-box { width: 100%; max-width: 360px; }
+.login-welcome { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700; color: #0C1018; margin-bottom: 6px; }
+.login-sub { font-size: 13px; color: #5A7A90; margin-bottom: 32px; }
+.form-label { font-family: 'DM Mono', monospace; font-size: 11px; color: #2E4055; font-weight: 500; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+.form-input {
+  width: 100%;
+  padding: 11px 14px;
+  background: #fff;
+  border: 1.5px solid #C8D8E8;
+  border-radius: 8px;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  color: #0C1018;
+  margin-bottom: 20px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.form-input:focus { border-color: #00C4A0; }
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #07090D;
+  cursor: pointer;
+  margin-bottom: 14px;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-oauth {
+  width: 100%;
+  padding: 11px;
+  background: #fff;
+  border: 1.5px solid #C8D8E8;
+  border-radius: 8px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  color: #2E4055;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: border-color 0.15s;
+}
+.btn-oauth:hover { border-color: #00C4A0; }
+.google-g {
+  width: 18px; height: 18px;
+  background: linear-gradient(135deg, #4285F4, #EA4335, #FBBC05, #34A853);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: #fff;
+}
+.or-divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+.or-line { flex: 1; height: 1px; background: #E0EAF0; }
+.or-text { font-family: 'DM Mono', monospace; font-size: 11px; color: #8AACBC; }
+.login-footer-note { font-family: 'DM Mono', monospace; font-size: 11px; color: #8AACBC; text-align: center; margin-top: 20px; }
+
+/* ── PAGE HEADER ── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.page-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--txt); }
+.page-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--txt2); margin-top: 2px; }
+.breadcrumb { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--txt3); }
+.breadcrumb span { color: var(--txt2); }
+.content { padding: 24px 28px; }
+
+/* ── HEALTH ANCHOR ── */
+.health-anchor {
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+.health-score {
+  font-family: 'Fraunces', serif;
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.health-score.ok { color: var(--ok); }
+.health-score.warn { color: var(--warn); }
+.health-score.danger { color: var(--danger); }
+.health-anchor-info { flex: 1; }
+.health-anchor-title { font-size: 14px; font-weight: 600; color: var(--txt); margin-bottom: 4px; }
+.health-anchor-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--txt2); margin-bottom: 8px; }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.badge-ok { background: rgba(15,212,138,0.12); color: var(--ok); border: 1px solid rgba(15,212,138,0.25); }
+.badge-warn { background: rgba(245,166,35,0.12); color: var(--warn); border: 1px solid rgba(245,166,35,0.25); }
+.badge-danger { background: rgba(240,72,72,0.12); color: var(--danger); border: 1px solid rgba(240,72,72,0.25); }
+.badge-neutral { background: rgba(90,122,144,0.12); color: var(--txt2); border: 1px solid var(--border); }
+.badge-accent { background: rgba(0,196,160,0.12); color: var(--accent); border: 1px solid rgba(0,196,160,0.25); }
+@keyframes pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(240,72,72,0.4); }
+  50% { box-shadow: 0 0 0 5px rgba(240,72,72,0); }
+}
+.badge-critical { background: rgba(240,72,72,0.15); color: var(--danger); border: 1px solid rgba(240,72,72,0.4); animation: pulse-ring 2s infinite; }
+
+/* ── METRIC TILES ── */
+.metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.metric-tile {
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  transition: border-color 0.15s;
+}
+.metric-tile:hover { border-color: var(--border-hi); }
+.metric-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--txt3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+.metric-value {
+  font-family: 'Fraunces', serif;
+  font-size: 36px;
+  font-weight: 600;
+  color: var(--txt);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.metric-value.warn { color: var(--warn); }
+.metric-value.danger { color: var(--danger); }
+.metric-delta {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--txt2);
+}
+.metric-delta.down { color: var(--danger); }
+.metric-delta.up { color: var(--ok); }
+
+/* ── AI INSIGHT STRIP ── */
+.ai-insight {
+  background: rgba(0,196,160,0.06);
+  border: 1px solid rgba(0,196,160,0.2);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.ai-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+.ai-text { font-size: 13px; color: var(--txt); line-height: 1.5; }
+
+/* ── CARD ── */
+.card {
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.card-header:hover { background: var(--hover); }
+.card-title { font-size: 13px; font-weight: 600; color: var(--txt); display: flex; align-items: center; gap: 8px; }
+.card-body { padding: 16px 18px; }
+
+/* ── TABLE ── */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--txt3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td { padding: 11px 12px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--txt2); vertical-align: middle; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--hover); color: var(--txt); }
+.score-cell { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; }
+
+/* ── SECTION HEADERS ── */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+.section-title.danger { color: var(--danger); }
+.section-title.warn { color: var(--warn); }
+.section-title.ok { color: var(--ok); }
+.section-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+.section-count.danger { background: rgba(240,72,72,0.12); color: var(--danger); }
+.section-count.warn { background: rgba(245,166,35,0.12); color: var(--warn); }
+.section-count.ok { background: rgba(15,212,138,0.12); color: var(--ok); }
+
+/* ── ACTION ITEMS ── */
+.action-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+.action-item.danger { border-left: 3px solid var(--danger); }
+.action-item.warn { border-left: 3px solid var(--warn); }
+.action-item.ok { border-left: 3px solid var(--ok); }
+.action-item-title { font-size: 13px; font-weight: 600; color: var(--txt); margin-bottom: 6px; }
+.action-item-cause { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--txt2); margin-bottom: 5px; }
+.action-item-rec { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); margin-bottom: 10px; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-sm {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border-hi);
+  background: transparent;
+  color: var(--txt2);
+  transition: all 0.15s;
+}
+.btn-sm:hover { background: var(--hover); color: var(--txt); }
+.btn-sm.primary { background: rgba(0,196,160,0.12); color: var(--accent); border-color: rgba(0,196,160,0.3); }
+.btn-sm.primary:hover { background: rgba(0,196,160,0.2); }
+.btn-sm.danger { background: rgba(240,72,72,0.1); color: var(--danger); border-color: rgba(240,72,72,0.3); }
+
+/* ── SCREEN 1: CONNECT ── */
+.connect-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.integration-card {
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.2s;
+}
+.integration-card:hover { border-color: var(--border-hi); }
+.int-header { display: flex; align-items: center; gap: 12px; }
+.int-logo {
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.int-logo.github { background: #24292E; }
+.int-logo.jira { background: #0052CC; }
+.int-logo.monday { background: #FF3D57; }
+.int-logo.slack { background: #4A154B; }
+.int-name { font-size: 15px; font-weight: 700; color: var(--txt); }
+.int-scope { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--txt2); }
+.progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+.progress-fill.warn { background: var(--warn); }
+.ai-baseline {
+  background: rgba(0,196,160,0.05);
+  border: 1px solid rgba(0,196,160,0.15);
+  border-radius: 8px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(0,196,160,0.2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── SCREEN 3: EXEC DASHBOARD ── */
+.blocker-bars { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.blocker-bar-row { display: flex; align-items: center; gap: 10px; }
+.blocker-bar-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--txt2); width: 80px; flex-shrink: 0; }
+.blocker-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.blocker-bar-fill { height: 100%; border-radius: 3px; }
+.blocker-bar-count { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--txt2); width: 20px; text-align: right; }
+
+/* ── SCREEN 4: SPRINT PREDICTION ── */
+.sprint-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+.burndown-svg-wrap { background: var(--elevated); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.burndown-svg-wrap h3 { font-size: 12px; font-weight: 600; color: var(--txt2); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.06em; font-family: 'DM Mono', monospace; }
+.ai-analysis { background: var(--elevated); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+.analysis-block { margin-bottom: 14px; }
+.analysis-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--txt3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+.analysis-text { font-size: 13px; color: var(--txt); line-height: 1.5; }
+.analysis-text.danger { color: var(--danger); }
+.analysis-text.warn { color: var(--warn); }
+
+/* ── SCREEN 5: DEVELOPER BRIEFING ── */
+.dev-row-expanded {
+  background: var(--surface);
+  border-left: 3px solid var(--accent);
+  padding: 14px 16px;
+  display: none;
+}
+.dev-row-expanded.open { display: block; }
+.signal-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.signal-item { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--txt2); display: flex; align-items: center; gap: 8px; }
+.signal-item::before { content: '↗'; color: var(--warn); font-size: 12px; }
+.talking-point { background: rgba(0,196,160,0.06); border: 1px solid rgba(0,196,160,0.15); border-radius: 6px; padding: 10px 12px; font-size: 12px; color: var(--txt); line-height: 1.5; font-style: italic; }
+
+/* ── SCREEN 6: TEAM WELLBEING ── */
+.wellbeing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.wellbeing-card {
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+}
+.wb-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.wb-name { font-size: 14px; font-weight: 600; color: var(--txt); }
+.wb-role { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--txt3); margin-top: 2px; }
+.wb-signals { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.wb-signal { display: flex; align-items: flex-start; gap: 8px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--txt2); }
+.wb-signal-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 3px; flex-shrink: 0; }
+.wb-talking-point-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+.wb-talking-point { font-size: 12px; color: var(--txt); line-height: 1.5; border-left: 2px solid rgba(0,196,160,0.3); padding-left: 10px; font-style: italic; }
+
+/* ── SCREEN 7: ROADMAP ── */
+.roadmap-layout { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+.gantt-wrap { background: var(--elevated); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.gantt-header { display: flex; margin-bottom: 8px; padding-left: 140px; }
+.gantt-quarter { flex: 1; text-align: center; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--txt3); text-transform: uppercase; letter-spacing: 0.06em; }
+.gantt-row { display: flex; align-items: center; margin-bottom: 8px; }
+.gantt-label { width: 140px; font-size: 12px; color: var(--txt2); font-weight: 500; flex-shrink: 0; padding-right: 12px; }
+.gantt-track { flex: 1; display: flex; position: relative; }
+.gantt-bar {
+  height: 24px;
+  border-radius: 4px;
+  display: flex; align-items: center;
+  padding: 0 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,0.8);
+  font-weight: 500;
+  position: relative;
+}
+.gantt-bar.ok { background: linear-gradient(90deg, rgba(15,212,138,0.7), rgba(15,212,138,0.4)); border: 1px solid rgba(15,212,138,0.4); }
+.gantt-bar.warn { background: linear-gradient(90deg, rgba(245,166,35,0.7), rgba(245,166,35,0.4)); border: 1px solid rgba(245,166,35,0.4); }
+.gantt-bar.danger { background: linear-gradient(90deg, rgba(240,72,72,0.7), rgba(240,72,72,0.4)); border: 1px solid rgba(240,72,72,0.4); }
+.gantt-bar.dashed { background: transparent; border: 1.5px dashed var(--txt3); color: var(--txt3); }
+
+/* ── RIPPLE EFFECT PANEL ── */
+.ripple-panel {
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  position: sticky;
+  top: 60px;
+}
+.ripple-header {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--danger);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 18px;
+}
+.ripple-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--danger);
+  animation: pulse-red 1.5s infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+.ripple-chain { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.ripple-card {
+  width: 100%;
+  border-radius: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+}
+.ripple-card.c-danger { border-color: rgba(240,72,72,0.4); background: rgba(240,72,72,0.06); }
+.ripple-card.c-warn { border-color: rgba(245,166,35,0.3); background: rgba(245,166,35,0.06); }
+.ripple-card.c-dark { border-color: rgba(240,72,72,0.2); background: rgba(30,10,10,0.6); }
+.ripple-card-quarter { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.ripple-card-title { font-size: 13px; font-weight: 600; color: var(--txt); margin-bottom: 3px; }
+.ripple-card-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--txt2); }
+.ripple-connector {
+  width: 2px;
+  height: 28px;
+  background: var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.ripple-connector::after {
+  content: '';
+  position: absolute;
+  top: -8px; left: -2px;
+  width: 6px; height: 8px;
+  background: #fff;
+  border-radius: 3px;
+  animation: travel 2s linear infinite;
+}
+.ripple-connector:nth-child(4)::after { animation-delay: 0.5s; }
+.ripple-connector:nth-child(6)::after { animation-delay: 1s; }
+.ripple-connector:nth-child(8)::after { animation-delay: 1.5s; }
+@keyframes travel { from { top: -8px; } to { top: 28px; } }
+.btn-resolve {
+  width: 100%;
+  margin-top: 16px;
+  padding: 11px;
+  background: var(--danger);
+  border: none;
+  border-radius: 8px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-resolve:hover { opacity: 0.85; }
+
+/* ── SCREEN 8: ANNUAL VIEW ── */
+.quarter-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.quarter-card {
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+.quarter-card.current { border-color: rgba(245,166,35,0.3); }
+.quarter-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--txt3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+.quarter-score { font-family: 'Fraunces', serif; font-size: 40px; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+.quarter-initiatives { display: flex; flex-direction: column; gap: 5px; margin-top: 12px; }
+.quarter-init { font-size: 12px; color: var(--txt2); display: flex; align-items: center; gap: 6px; }
+.init-icon { font-size: 11px; flex-shrink: 0; }
+.annual-brief { background: var(--elevated); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+.annual-brief-title { font-size: 14px; font-weight: 700; color: var(--txt); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+.risk-section { margin-bottom: 16px; }
+.risk-section-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+.risk-section-label.high { color: var(--danger); }
+.risk-section-label.watch { color: var(--warn); }
+.risk-section-label.safe { color: var(--ok); }
+.risk-items { display: flex; flex-wrap: wrap; gap: 6px; }
+.risk-item { font-size: 12px; color: var(--txt2); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); }
+.year-prediction { background: rgba(0,196,160,0.05); border: 1px solid rgba(0,196,160,0.2); border-radius: 8px; padding: 14px 18px; }
+.year-pred-title { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+.year-pred-main { font-family: 'Fraunces', serif; font-size: 16px; color: var(--txt); margin-bottom: 10px; }
+.year-pred-actions { display: flex; flex-direction: column; gap: 5px; }
+.year-pred-action { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--txt2); display: flex; align-items: center; gap: 8px; }
+.year-pred-action::before { content: '→'; color: var(--accent); }
+
+/* ── MISC ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.skip-link { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--txt3); text-align: center; display: block; margin-top: 16px; cursor: pointer; text-decoration: underline; }
+.skip-link:hover { color: var(--txt2); }
+.toggle-arrow { font-size: 10px; color: var(--txt3); transition: transform 0.2s; }
+.toggle-arrow.open { transform: rotate(90deg); }
+.collapse-btn { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--txt3); cursor: pointer; }
+.collapsible-body { }
+.collapsible-body.hidden { display: none; }
+
+/* Wellbeing team aggregate */
+.wb-aggregate {
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+}
+.wb-agg-title { font-size: 13px; font-weight: 600; color: var(--txt); margin-bottom: 12px; }
+.wb-agg-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.wb-stat { text-align: center; }
+.wb-stat-value { font-family: 'Fraunces', serif; font-size: 28px; color: var(--warn); font-weight: 600; }
+.wb-stat-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--txt3); text-transform: uppercase; margin-top: 3px; }
+</style>
+</head>
+<body>
+
+<!-- DEMO TAB STRIP -->
+<div id="demo-strip">
+  <span id="demo-label">SCREEN:</span>
+  <div class="demo-tab active" onclick="showScreen(0)">0 · Login</div>
+  <div class="demo-tab" onclick="showScreen(1)">1 · Connect</div>
+  <div class="demo-tab" onclick="showScreen(2)">2 · Today</div>
+  <div class="demo-tab" onclick="showScreen(3)">3 · Exec Dashboard</div>
+  <div class="demo-tab" onclick="showScreen(4)">4 · Sprint Prediction</div>
+  <div class="demo-tab" onclick="showScreen(5)">5 · Dev Briefing</div>
+  <div class="demo-tab" onclick="showScreen(6)">6 · Team Wellbeing</div>
+  <div class="demo-tab" onclick="showScreen(7)">7 · Roadmap</div>
+  <div class="demo-tab" onclick="showScreen(8)">8 · Annual View</div>
+</div>
+
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <nav id="sidebar" class="hidden">
+    <div class="sb-logo">
+      <div class="sb-logo-mark">DP</div>
+      <div>
+        <div class="sb-logo-text">DevPulse</div>
+        <div class="sb-logo-sub">Engineering Intelligence</div>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-section-label">Overview</div>
+      <div class="nav-item active" onclick="switchNav(this, 2)">
+        <span class="nav-icon">◉</span> Today's Briefing
+        <span class="nav-badge">2</span>
+      </div>
+      <div class="nav-item" onclick="switchNav(this, 3)">
+        <span class="nav-icon">▦</span> Executive Dashboard
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-section-label">Delivery</div>
+      <div class="nav-item" onclick="switchNav(this, 4)">
+        <span class="nav-icon">◈</span> Sprint Prediction
+      </div>
+      <div class="nav-item" onclick="switchNav(this, 7)">
+        <span class="nav-icon">◫</span> Roadmap
+      </div>
+      <div class="nav-item" onclick="switchNav(this, 8)">
+        <span class="nav-icon">◷</span> Annual View
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-section-label">People</div>
+      <div class="nav-item" onclick="switchNav(this, 5)">
+        <span class="nav-icon">◎</span> Developer Briefing
+        <span class="nav-badge">3</span>
+      </div>
+      <div class="nav-item" onclick="switchNav(this, 6)">
+        <span class="nav-icon">♡</span> Team Wellbeing
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-section-label">Setup</div>
+      <div class="nav-item" onclick="switchNav(this, 1)">
+        <span class="nav-icon">⊕</span> Connect Tools
+      </div>
+    </div>
+
+    <div class="sb-footer">
+      <div class="sb-avatar">RA</div>
+      <div>
+        <div class="sb-user-name">Roee Angel</div>
+        <div class="sb-user-role">Engineering Manager</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main id="main" class="full-width">
+
+    <!-- ══ SCREEN 0: LOGIN ══ -->
+    <div id="screen-0" class="screen active">
+      <div class="login-left">
+        <div class="login-dp-logo">
+          <div class="login-dp-mark">DP</div>
+          <div>
+            <div class="login-dp-name">DevPulse</div>
+            <div class="login-dp-tag">Engineering Intelligence Platform</div>
+          </div>
+        </div>
+        <div class="login-tagline">Engineering intelligence<br>that asks <span>"so what?"</span></div>
+        <div class="login-usp">
+          <div class="login-usp-item">
+            <div class="usp-dot"></div>
+            <div class="usp-text"><strong>Predict sprint failures 3 days early</strong> — not after the retrospective.</div>
+          </div>
+          <div class="login-usp-item">
+            <div class="usp-dot"></div>
+            <div class="usp-text"><strong>Spot burnout signals before they become resignations</strong> — 11 behavioral indicators tracked silently.</div>
+          </div>
+          <div class="login-usp-item">
+            <div class="usp-dot"></div>
+            <div class="usp-text"><strong>Connect GitHub, Jira &amp; Slack in 30 seconds</strong> — AI builds your team baseline overnight.</div>
+          </div>
+        </div>
+      </div>
+      <div class="login-right">
+        <div class="login-form-box">
+          <div class="login-welcome">Welcome back</div>
+          <div class="login-sub">Sign in to your DevPulse workspace</div>
+          <label class="form-label" for="email">Work email</label>
+          <input class="form-input" type="email" id="email" placeholder="you@company.com" value="mr.roee.angel@gmail.com">
+          <button class="btn-primary" onclick="doLogin()">Sign In →</button>
+          <div class="or-divider"><div class="or-line"></div><div class="or-text">or</div><div class="or-line"></div></div>
+          <button class="btn-oauth" onclick="doLogin()">
+            <div class="google-g">G</div>
+            Continue with Google
+          </button>
+          <div class="login-footer-note">Connect your tools in 30 seconds · No credit card required</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SCREEN 1: CONNECT ══ -->
+    <div id="screen-1" class="screen">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Connect your tools</div>
+          <div class="page-sub">2 of 4 connected — insights improving as more data arrives</div>
+        </div>
+        <span class="badge badge-warn">⚡ Baseline building...</span>
+      </div>
+      <div class="content">
+        <div class="connect-grid">
+          <div class="integration-card">
+            <div class="int-header">
+              <div class="int-logo github">🐙</div>
+              <div>
+                <div class="int-name">GitHub</div>
+                <div class="int-scope">Commits, PRs, cycle time, review lag</div>
+              </div>
+            </div>
+            <span class="badge badge-ok">● Connected · Last sync 2m ago</span>
+          </div>
+          <div class="integration-card">
+            <div class="int-header">
+              <div class="int-logo jira">◈</div>
+              <div>
+                <div class="int-name">Jira</div>
+                <div class="int-scope">Sprints, issues, epics, blockers, velocity</div>
+              </div>
+            </div>
+            <span class="badge badge-ok">● Connected · Last sync 2m ago</span>
+          </div>
+          <div class="integration-card">
+            <div class="int-header">
+              <div class="int-logo monday">▦</div>
+              <div>
+                <div class="int-name">Monday.com</div>
+                <div class="int-scope">Boards, timelines, items, dependencies</div>
+              </div>
+            </div>
+            <span class="badge badge-warn" style="margin-bottom:6px;">⟳ Connecting... 34%</span>
+            <div class="progress-bar"><div class="progress-fill warn" style="width:34%"></div></div>
+          </div>
+          <div class="integration-card">
+            <div class="int-header">
+              <div class="int-logo slack">✦</div>
+              <div>
+                <div class="int-name">Slack</div>
+                <div class="int-scope">Message volume, after-hours activity, sentiment</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <span class="badge badge-neutral">○ Not connected</span>
+              <button class="btn-sm primary">Connect</button>
+            </div>
+          </div>
+        </div>
+        <div class="ai-baseline">
+          <div class="spinner"></div>
+          <div>
+            <div class="ai-label">AI Baseline Building</div>
+            <div style="font-size:13px; color:var(--txt);">Analyzing 847 commits, 234 PRs, and 3 sprints of Jira history. Velocity baseline, cycle time norms, and team health baseline ready in ~4 minutes.</div>
+          </div>
+        </div>
+        <a class="skip-link" onclick="switchNav(document.querySelector('.nav-item'), 2)">Skip for now — I'll connect more tools later</a>
+      </div>
+    </div>
+
+    <!-- ══ SCREEN 2: TODAY ══ -->
+    <div id="screen-2" class="screen">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Good morning, Roee.</div>
+          <div class="page-sub" style="font-family:'DM Mono',monospace; font-size:12px; color:var(--txt2);">Wednesday, April 29 · Week 18 · Q2 · 8 weeks to quarter end</div>
+        </div>
+        <span class="badge badge-warn">AMBER · AT RISK</span>
+      </div>
+      <div class="content">
+        <div class="health-anchor">
+          <div class="health-score warn">71</div>
+          <div class="health-anchor-info">
+            <div class="health-anchor-title">Engineering Health Score</div>
+            <div class="health-anchor-sub">Sprint 23 · 3 teams · 18 active devs · Updated 4 minutes ago</div>
+            <span class="badge badge-warn">AMBER · AT RISK</span>
+          </div>
+          <div style="font-size:13px; color:var(--txt2); max-width:220px; line-height:1.5;">Velocity is down 18% and 3 developers show elevated burnout signals. Two critical path blockers unresolved since Monday.</div>
+        </div>
+
+        <!-- NEEDS ACTION -->
+        <div class="section-header">
+          <span class="section-title danger">Needs Action</span>
+          <span class="section-count danger">2</span>
+        </div>
+        <div class="action-item danger">
+          <div class="action-item-title">Backend team sprint at risk — 8 story points unstarted with 4 days remaining</div>
+          <div class="action-item-cause">Cause: Auth service blocker unresolved since Sprint 22. Amir Shapiro blocked on external API approval (now Day 6).</div>
+          <div class="action-item-rec">→ Recommended action: Escalate API approval to VP Engineering today. Move DEV-1847 to next sprint or descope.</div>
+          <div class="btn-row">
+            <button class="btn-sm primary">Escalate Blocker</button>
+            <button class="btn-sm">Descope Story</button>
+            <button class="btn-sm">View in Jira</button>
+          </div>
+        </div>
+        <div class="action-item danger">
+          <div class="action-item-title">Sara Chen: 11 consecutive working days including last weekend — burnout risk elevated</div>
+          <div class="action-item-cause">Cause: Absorbed Frontend team backlog after Tom's absence. 38% of commits after 10pm this week. No PTO in 6 weeks.</div>
+          <div class="action-item-rec">→ Recommended action: Schedule 1:1 today. Redistribute 3 unassigned tickets. Suggest Friday as a protected focus day.</div>
+          <div class="btn-row">
+            <button class="btn-sm primary">Draft 1:1 Agenda</button>
+            <button class="btn-sm">Redistribute Tasks</button>
+            <button class="btn-sm">View Signals</button>
+          </div>
+        </div>
+
+        <!-- WATCH -->
+        <div class="section-header" style="margin-top:20px;">
+          <span class="section-title warn">Watch</span>
+          <span class="section-count warn">1</span>
+        </div>
+        <div class="action-item warn">
+          <div class="action-item-title">12 PRs awaiting review — median wait time now 34 hours (target: 8h)</div>
+          <div class="action-item-cause">Cause: Two senior reviewers in offsite Monday–Tuesday. Review queue built up. No critical PRs blocked, but cycle time trending up.</div>
+          <div class="action-item-rec">→ Recommended action: Assign Daniel Levy as temporary review lead for today. Flag 3 PRs older than 48h for priority review.</div>
+          <div class="btn-row">
+            <button class="btn-sm primary">Assign Reviewer</button>
+            <button class="btn-sm">View PR Queue</button>
+          </div>
+        </div>
+
+        <!-- ON TRACK -->
+        <div class="section-header" style="margin-top:20px;">
+          <span class="section-title ok">On Track</span>
+          <span class="section-count ok">5</span>
+          <button class="btn-sm" style="margin-left:auto; font-size:10px;" onclick="toggleCollapse('on-track-body', this)">Show ▾</button>
+        </div>
+        <div id="on-track-body" class="collapsible-body hidden">
+          <div class="action-item ok" style="border-left-color:var(--ok);">
+            <div class="action-item-title">Mobile team: Sprint 23 on track — 92% completion rate projected</div>
+          </div>
+          <div class="action-item ok" style="border-left-color:var(--ok);">
+            <div class="action-item-title">Data team: Pipeline migration completed 2 days ahead of schedule</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SCREEN 3: EXECUTIVE DASHBOARD ══ -->
+    <div id="screen-3" class="screen">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb">All Teams <span>› Q2 Overview</span></div>
+          <div class="page-title" style="margin-top:4px;">Executive Dashboard</div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span class="badge badge-neutral">Week 18 · Q2</span>
+          <button class="btn-sm primary">Export Report</button>
+        </div>
+      </div>
+      <div class="content">
+        <div class="metric-grid">
+          <div class="metric-tile">
+            <div class="metric-label">Sprint Velocity</div>
+            <div class="metric-value warn">34 <span style="font-size:18px;">pts</span></div>
+            <div class="metric-delta down">↓ 18% vs last sprint · Target: 42pts</div>
+          </div>
+          <div class="metric-tile">
+            <div class="metric-label">Blocked Tasks</div>
+            <div class="metric-value danger">7 🔴</div>
+            <div class="metric-delta down">↑ 3 new since Monday · Across 3 teams</div>
+          </div>
+          <div class="metric-tile">
+            <div class="metric-label">PRs Awaiting Review</div>
+            <div class="metric-value warn">12</div>
+            <div class="metric-delta down">Median wait: 34h · Target: 8h</div>
+          </div>
+          <div class="metric-tile">
+            <div class="metric-label">At-Risk Developers</div>
+            <div class="metric-value danger">3 👤</div>
+            <div class="metric-delta">Sara Chen, Yuki T., Amir S.</div>
+          </div>
+        </div>
+
+        <div class="ai-insight">
+          <div style="font-size:20px;">✦</div>
+          <div>
+            <div class="ai-label">AI Insight · Velocity Pattern</div>
+            <div class="ai-text">Velocity drop is meeting-load, not performance. Tue/Thu average 4.2 meetings per developer this sprint — double the Q1 baseline. Protect morning blocks on those days and projected velocity recovers to 40pts next sprint.</div>
+          </div>
+        </div>
+
+        <!-- Bug & Blocker Radar -->
+        <div class="card">
+          <div class="card-header" onclick="toggleCollapse('radar-body', this.querySelector('.toggle-arrow'))">
+            <div class="card-title">
+              <span style="color:var(--danger);">●</span>
+              Bug &amp; Blocker Radar
+              <span class="badge badge-danger">7 blocked</span>
+            </div>
+            <span class="toggle-arrow open">▶</span>
+          </div>
+          <div id="radar-body" class="card-body">
+            <div style="font-family:'DM Mono',monospace; font-size:11px; color:var(--txt2); margin-bottom:14px;">7 blocked tasks across 3 teams this sprint · 2 on critical path · Est. impact: 14 story points at risk</div>
+            <div class="two-col" style="gap:24px;">
+              <div>
+                <div style="font-family:'DM Mono',monospace; font-size:10px; color:var(--txt3); text-transform:uppercase; margin-bottom:8px; letter-spacing:.08em;">Top Blockers</div>
+                <table class="data-table">
+                  <thead><tr><th>Ticket</th><th>Team</th><th>Blocked Since</th><th>Impact</th></tr></thead>
+                  <tbody>
+                    <tr><td style="color:var(--txt);">DEV-1847 Auth API</td><td>Backend</td><td><span style="color:var(--danger);">6 days</span></td><td><span class="badge badge-danger">Critical</span></td></tr>
+                    <tr><td style="color:var(--txt);">FE-0293 Design QA</td><td>Frontend</td><td>3 days</td><td><span class="badge badge-warn">High</span></td></tr>
+                    <tr><td style="color:var(--txt);">MOB-0441 Push certs</td><td>Mobile</td><td>2 days</td><td><span class="badge badge-warn">Medium</span></td></tr>
+                    <tr><td style="color:var(--txt);">DAT-0112 Infra quota</td><td>Data</td><td>1 day</td><td><span class="badge badge-neutral">Low</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div>
+                <div style="font-family:'DM Mono',monospace; font-size:10px; color:var(--txt3); text-transform:uppercase; margin-bottom:8px; letter-spacing:.08em;">Blockers by Team</div>
+                <div class="blocker-bars">
+                  <div class="blocker-bar-row">
+                    <div class="blocker-bar-label">Backend</div>
+                    <div class="blocker-bar-track"><div class="blocker-bar-fill" style="width:57%; background:var(--danger);"></div></div>
+                    <div class="blocker-bar-count">4</div>
+                  </div>
+                  <div class="blocker-bar-row">
+                    <div class="blocker-bar-label">Frontend</div>
+                    <div class="blocker-bar-track"><div class="blocker-bar-fill" style="width:29%; background:var(--warn);"></div></div>
+                    <div class="blocker-bar-count">2</div>
+                  </div>
+                  <div class="blocker-bar-row">
+                    <div class="blocker-bar-label">Mobile</div>
+                    <div class="blocker-bar-track"><div class="blocker-bar-fill" style="width:14%; background:var(--txt3);"></div></div>
+                    <div class="blocker-bar-count">1</div>
+                  </div>
+                  <div class="blocker-bar-row">
+                    <div class="blocker-bar-label">Data</div>
+                    <div class="blocker-bar-track"><div class="blocker-bar-fill" style="width:0%; background:var(--ok);"></div></div>
+                    <div class="blocker-bar-count">0</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Teams Table -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Team Health Overview</div>
+            <span class="badge badge-neutral">4 teams · 18 devs</span>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <table class="data-table">
+              <thead><tr><th>Team</th><th>Health Score</th><th>Velocity</th><th>Blockers</th><th>At-Risk Devs</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td style="color:var(--txt); font-weight:600;">Frontend</td>
+                  <td><span class="score-cell" style="color:var(--warn);">68</span></td>
+                  <td>28pts <span style="color:var(--danger); font-family:'DM Mono',monospace; font-size:10px;">↓22%</span></td>
+                  <td>2</td>
+                  <td>Sara Chen</td>
+                  <td><span class="badge badge-warn">AT RISK</span></td>
+                </tr>
+                <tr>
+                  <td style="color:var(--txt); font-weight:600;">Mobile</td>
+                  <td><span class="score-cell" style="color:var(--ok);">84</span></td>
+                  <td>36pts <span style="color:var(--ok); font-family:'DM Mono',monospace; font-size:10px;">↑5%</span></td>
+                  <td>1</td>
+                  <td>—</td>
+                  <td><span class="badge badge-ok">HEALTHY</span></td>
+                </tr>
+                <tr>
+                  <td style="color:var(--txt); font-weight:600;">Backend</td>
+                  <td><span class="score-cell" style="color:var(--danger);">58</span></td>
+                  <td>21pts <span style="color:var(--danger); font-family:'DM Mono',monospace; font-size:10px;">↓38%</span></td>
+                  <td>4</td>
+                  <td>Amir S., Yuki T.</td>
+                  <td><span class="badge badge-danger">CRITICAL</span></td>
+                </tr>
+                <tr>
+                  <td style="color:var(--txt); font-weight:600;">Data</td>
+                  <td><span class="score-cell" style="color:var(--ok);">79</span></td>
+                  <td>31pts <span style="color:var(--txt2); font-family:'DM Mono',monospace; font-size:10px;">→0%</span></td>
+                  <td>0</td>
+                  <td>—</td>
+                  <td><span class="badge badge-ok">ON TRACK</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SCREEN 4: SPRINT PREDICTION ══ -->
+    <div id="screen-4" class="screen">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Sprint Prediction</div>
+          <div class="page-sub">Sprint 23 · Day 6 of 10 · 4 days remaining</div>
+        </div>
+        <span class="badge badge-danger">AT RISK · 64/100</span>
+      </div>
+      <div class="content">
+        <div class="health-anchor">
+          <div class="health-score danger">64</div>
+          <div class="health-anchor-info">
+            <div class="health-anchor-title">Sprint 23 · Day 6 of 10</div>
+            <div class="health-anchor-sub">42 story points committed · 18 completed · 16 in-progress · 8 unstarted</div>
+            <span class="badge badge-danger">AT RISK — Predicted completion: 81%</span>
+          </div>
+        </div>
+
+        <div class="sprint-layout">
+          <div class="burndown-svg-wrap">
+            <h3>Burndown Chart — Sprint 23</h3>
+            <svg viewBox="0 0 400 220" style="width:100%; height:auto;">
+              <defs>
+                <linearGradient id="actualGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#F04848" stop-opacity="0.3"/>
+                  <stop offset="100%" stop-color="#F04848" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- Grid lines -->
+              <line x1="40" y1="20" x2="40" y2="190" stroke="#1C2A38" stroke-width="1"/>
+              <line x1="40" y1="190" x2="380" y2="190" stroke="#1C2A38" stroke-width="1"/>
+              <line x1="40" y1="60" x2="380" y2="60" stroke="#1C2A38" stroke-width="0.5" stroke-dasharray="3,3"/>
+              <line x1="40" y1="105" x2="380" y2="105" stroke="#1C2A38" stroke-width="0.5" stroke-dasharray="3,3"/>
+              <line x1="40" y1="150" x2="380" y2="150" stroke="#1C2A38" stroke-width="0.5" stroke-dasharray="3,3"/>
+              <!-- Y axis labels -->
+              <text x="32" y="24" text-anchor="end" font-family="DM Mono" font-size="8" fill="#2E4055">42</text>
+              <text x="32" y="64" text-anchor="end" font-family="DM Mono" font-size="8" fill="#2E4055">30</text>
+              <text x="32" y="109" text-anchor="end" font-family="DM Mono" font-size="8" fill="#2E4055">18</text>
+              <text x="32" y="154" text-anchor="end" font-family="DM Mono" font-size="8" fill="#2E4055">8</text>
+              <text x="32" y="194" text-anchor="end" font-family="DM Mono" font-size="8" fill="#2E4055">0</text>
+              <!-- X axis labels Day 1–10 -->
+              <text x="40"  y="204" text-anchor="middle" font-family="DM Mono" font-size="8" fill="#2E4055">D1</text>
+              <text x="78"  y="204" text-anchor="middle" font-family="DM Mono" font-size="8" fill="#2E4055">D2</text>
+              <text x="116" y="204" text-anchor="middle" font-family="DM Mono" font-size="8" fill="#2E4055">D3</text>
+              <text x="154" y="204" text-anchor="middle" font-family="DM Mono" font-size="8" fill="#2E4055">D4</text>
+              <text x="192" y="204" text-anchor="middle" font-family="DM Mono" font-size="8" fill="#2E4055">D5</text>
+              <text x="230" y="204" text-anchor="middle" font-family="DM Mono" font-size="8" fill="#2E4055">D6</text>
+              <text x="268" y="204" text-anchor="middle" font-family="DM Mono" font-size="8" fill="#5A7A90">D7</text>
+              <text x="306" y="204" text-anchor="middle" font-family="DM Mono" font-size="8" fill="#5A7A90">D8</text>
+              <text x="344" y="204" text-anchor="middle" font-family="DM Mono" font-size="8" fill="#5A7A90">D9</text>
+              <text x="380" y="204" text-anchor="middle" font-family="DM Mono" font-size="8" fill="#5A7A90">D10</text>
+              <!-- Ideal line -->
+              <line x1="40" y1="20" x2="380" y2="190" stroke="#0FD48A" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.5"/>
+              <text x="300" y="155" font-family="DM Mono" font-size="9" fill="#0FD48A" opacity="0.7">Ideal</text>
+              <!-- Actual area fill -->
+              <polygon points="40,20 78,55 116,82 154,100 192,118 230,128 230,190 40,190" fill="url(#actualGrad)"/>
+              <!-- Actual line -->
+              <polyline points="40,20 78,55 116,82 154,100 192,118 230,128" fill="none" stroke="#F04848" stroke-width="2"/>
+              <!-- Projected (dashed) -->
+              <line x1="230" y1="128" x2="380" y2="163" stroke="#F04848" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+              <!-- Current day marker -->
+              <line x1="230" y1="20" x2="230" y2="190" stroke="#F5A623" stroke-width="1" stroke-dasharray="2,2" opacity="0.5"/>
+              <text x="234" y="30" font-family="DM Mono" font-size="9" fill="#F5A623">Today</text>
+              <!-- Actual point dots -->
+              <circle cx="40"  cy="20"  r="3" fill="#F04848"/>
+              <circle cx="78"  cy="55"  r="3" fill="#F04848"/>
+              <circle cx="116" cy="82"  r="3" fill="#F04848"/>
+              <circle cx="154" cy="100" r="3" fill="#F04848"/>
+              <circle cx="192" cy="118" r="3" fill="#F04848"/>
+              <circle cx="230" cy="128" r="4" fill="#F04848" stroke="#07090D" stroke-width="2"/>
+            </svg>
+            <div style="display:flex; gap:16px; margin-top:6px;">
+              <div style="display:flex; align-items:center; gap:6px;"><div style="width:20px; height:2px; background:#0FD48A; opacity:.6;"></div><span style="font-family:'DM Mono',monospace; font-size:10px; color:var(--txt3);">Ideal burn</span></div>
+              <div style="display:flex; align-items:center; gap:6px;"><div style="width:20px; height:2px; background:#F04848;"></div><span style="font-family:'DM Mono',monospace; font-size:10px; color:var(--txt3);">Actual</span></div>
+              <div style="display:flex; align-items:center; gap:6px;"><div style="width:20px; height:2px; background:#F04848; opacity:.5;"></div><span style="font-family:'DM Mono',monospace; font-size:10px; color:var(--txt3);">Projected</span></div>
+            </div>
+          </div>
+
+          <div class="ai-analysis">
+            <div class="ai-label" style="margin-bottom:12px;">AI Sprint Analysis</div>
+            <div class="analysis-block">
+              <div class="analysis-label">What is happening</div>
+              <div class="analysis-text">Sprint is burning down 26% slower than the ideal rate. 8 story points are completely unstarted with 4 days remaining.</div>
+            </div>
+            <div class="analysis-block">
+              <div class="analysis-label">Why it's happening</div>
+              <div class="analysis-text warn">DEV-1847 (Auth API blocker) is holding 2 developers for 6 days. Backend team capacity effectively reduced to 60% this sprint.</div>
+            </div>
+            <div class="analysis-block">
+              <div class="analysis-label">Consequence if unchanged</div>
+              <div class="analysis-text danger">Predicted 81% sprint completion. 8 story points carry into Sprint 24, compressing next sprint's capacity by ~19%.</div>
+            </div>
+            <div class="analysis-block">
+              <div class="analysis-label">Recommended action</div>
+              <div class="analysis-text">Descope DEV-1847 and DEV-1849 today. Reassign Amir to FE-0287 (unblocked, 5pts). Sprint completion recovers to 95%.</div>
+            </div>
+            <div class="btn-row" style="margin-top:14px;">
+              <button class="btn-sm primary">Descope Blocked Stories</button>
+              <button class="btn-sm">Reassign Tasks</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Team Breakdown — Sprint 23</div></div>
+          <div class="card-body" style="padding:0;">
+            <table class="data-table">
+              <thead><tr><th>Team</th><th>Committed</th><th>Completed</th><th>Remaining</th><th>Projected</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td style="color:var(--txt);font-weight:600;">Frontend</td><td>14pts</td><td>9pts</td><td>5pts</td><td>95%</td><td><span class="badge badge-warn">WATCH</span></td></tr>
+                <tr><td style="color:var(--txt);font-weight:600;">Mobile</td><td>10pts</td><td>9pts</td><td>1pt</td><td>100%</td><td><span class="badge badge-ok">ON TRACK</span></td></tr>
+                <tr><td style="color:var(--txt);font-weight:600;">Backend</td><td>12pts</td><td>5pts</td><td>7pts</td><td>58%</td><td><span class="badge badge-danger">AT RISK</span></td></tr>
+                <tr><td style="color:var(--txt);font-weight:600;">Data</td><td>6pts</td><td>6pts</td><td>0pts</td><td>100%</td><td><span class="badge badge-ok">COMPLETE</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="section-header">
+          <span class="section-title danger">Active Blockers</span>
+          <span class="section-count danger">2</span>
+        </div>
+        <div class="action-item danger">
+          <div class="action-item-title">DEV-1847 — Auth Service: External OAuth API approval pending (Day 6)</div>
+          <div class="action-item-cause">Impact: 2 developers blocked · 8 story points at risk · Critical path for Payment Gateway feature (Q2)</div>
+          <div class="action-item-rec">→ Escalate to VP Engineering. External vendor SLA was 3 business days — now 3 days overdue.</div>
+          <div class="btn-row"><button class="btn-sm danger">Escalate Now</button><button class="btn-sm">View Ticket</button></div>
+        </div>
+        <div class="action-item warn">
+          <div class="action-item-title">FE-0293 — Design QA sign-off on checkout flow (Day 3)</div>
+          <div class="action-item-cause">Impact: 1 developer blocked · 3 story points · Design lead in offsite until Thursday</div>
+          <div class="action-item-rec">→ Request async review via Figma comments. Designate backup reviewer (Noa Katz has context).</div>
+          <div class="btn-row"><button class="btn-sm primary">Request Async Review</button><button class="btn-sm">View Design</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SCREEN 5: DEVELOPER BRIEFING ══ -->
+    <div id="screen-5" class="screen">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Developer Briefing</div>
+          <div class="page-sub">18 developers · 3 at-risk · Updated 4 minutes ago · Click a row to expand signals</div>
+        </div>
+        <span class="badge badge-danger">3 require attention</span>
+      </div>
+      <div class="content">
+        <div class="card">
+          <div class="card-body" style="padding:0;">
+            <table class="data-table">
+              <thead><tr><th>Developer</th><th>Team</th><th>Risk Level</th><th>Key Signal</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr style="cursor:pointer;" onclick="toggleDevRow('dev-sara')">
+                  <td style="color:var(--txt);font-weight:600;">Sara Chen</td>
+                  <td>Frontend</td>
+                  <td><span class="badge badge-critical">CRITICAL</span></td>
+                  <td style="font-family:'DM Mono',monospace; font-size:11px;">11 consecutive days · 38% late commits</td>
+                  <td><button class="btn-sm danger">1:1 Urgent</button></td>
+                </tr>
+                <tr><td colspan="5" style="padding:0; border:none;"><div id="dev-sara" class="dev-row-expanded">
+                  <div class="signal-list">
+                    <div class="signal-item">11 consecutive working days including Saturday and Sunday</div>
+                    <div class="signal-item">38% of commits pushed after 10pm this week (vs 8% baseline)</div>
+                    <div class="signal-item">Absorbed 6 additional tickets after Tom Morris absence (no capacity review)</div>
+                  </div>
+                  <div class="talking-point">"Hey Sara — I've noticed you've been heads-down this past couple of weeks. I want to make sure we're setting you up sustainably, not just shipping. Can we talk today about what's on your plate and what we can take off it?"</div>
+                </div></td></tr>
+
+                <tr style="cursor:pointer;" onclick="toggleDevRow('dev-amir')">
+                  <td style="color:var(--txt);font-weight:600;">Amir Shapiro</td>
+                  <td>Backend</td>
+                  <td><span class="badge badge-danger">AT RISK</span></td>
+                  <td style="font-family:'DM Mono',monospace; font-size:11px;">Blocked 6 days · Velocity 0 this sprint</td>
+                  <td><button class="btn-sm danger">Unblock</button></td>
+                </tr>
+                <tr><td colspan="5" style="padding:0; border:none;"><div id="dev-amir" class="dev-row-expanded">
+                  <div class="signal-list">
+                    <div class="signal-item">0 story points completed this sprint — fully blocked on DEV-1847</div>
+                    <div class="signal-item">6 days waiting on external API approval with no progress path</div>
+                    <div class="signal-item">Submitted 3 Slack messages in #blockers channel with no management response</div>
+                  </div>
+                  <div class="talking-point">"Amir, I can see you've been stuck on this API blocker for nearly a week — that's on me, not you. I'm escalating this today. In the meantime, let's find something meaningful you can make progress on so this sprint doesn't feel like a write-off."</div>
+                </div></td></tr>
+
+                <tr style="cursor:pointer;" onclick="toggleDevRow('dev-yuki')">
+                  <td style="color:var(--txt);font-weight:600;">Yuki Tanaka</td>
+                  <td>Backend</td>
+                  <td><span class="badge badge-warn">WATCH</span></td>
+                  <td style="font-family:'DM Mono',monospace; font-size:11px;">Commit frequency -40% vs 4wk avg</td>
+                  <td><button class="btn-sm">Check In</button></td>
+                </tr>
+                <tr><td colspan="5" style="padding:0; border:none;"><div id="dev-yuki" class="dev-row-expanded">
+                  <div class="signal-list">
+                    <div class="signal-item">Commit frequency dropped 40% over past 2 weeks (not blocked — self-directed drop)</div>
+                    <div class="signal-item">PR comments becoming shorter and less detailed — possible disengagement signal</div>
+                    <div class="signal-item">No 1:1 in 3 weeks (cancelled twice by manager)</div>
+                  </div>
+                  <div class="talking-point">"Hey Yuki, I've missed our last couple of 1:1s and I want to fix that. Nothing alarming from my side — I just want to check in properly. How are you feeling about the work right now? What's exciting you, and what's feeling heavy?"</div>
+                </div></td></tr>
+
+                <tr><td style="color:var(--txt);font-weight:600;">Daniel Levy</td><td>Mobile</td><td><span class="badge badge-ok">HEALTHY</span></td><td style="font-family:'DM Mono',monospace; font-size:11px;">100% sprint completion · 3 PRs merged</td><td>—</td></tr>
+                <tr><td style="color:var(--txt);font-weight:600;">Noa Katz</td><td>Frontend</td><td><span class="badge badge-ok">HEALTHY</span></td><td style="font-family:'DM Mono',monospace; font-size:11px;">Avg cycle time 6.2h · Below target</td><td>—</td></tr>
+                <tr><td style="color:var(--txt);font-weight:600;">Priya Patel</td><td>Data</td><td><span class="badge badge-ok">HEALTHY</span></td><td style="font-family:'DM Mono',monospace; font-size:11px;">Completed migration 2 days early</td><td>—</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SCREEN 6: TEAM WELLBEING ══ -->
+    <div id="screen-6" class="screen">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Team Wellbeing</div>
+          <div class="page-sub">3 developers showing elevated risk signals · Trend: worsening over 2 weeks</div>
+        </div>
+        <span class="badge badge-danger">Intervention recommended</span>
+      </div>
+      <div class="content">
+        <div class="health-anchor">
+          <div class="health-score danger">62</div>
+          <div class="health-anchor-info">
+            <div class="health-anchor-title">Team Wellbeing Score — Week 18</div>
+            <div class="health-anchor-sub">3 developers showing elevated risk · Most common stressor: workload distribution</div>
+            <span class="badge badge-danger">↓ 11 points vs Week 16</span>
+          </div>
+        </div>
+
+        <div class="wellbeing-grid">
+          <div class="wellbeing-card" style="border-color:rgba(240,72,72,0.3);">
+            <div class="wb-card-header">
+              <div><div class="wb-name">Sara Chen</div><div class="wb-role">Frontend · Senior Engineer</div></div>
+              <span class="badge badge-critical">CRITICAL</span>
+            </div>
+            <div class="wb-signals">
+              <div class="wb-signal"><div class="wb-signal-dot" style="background:var(--danger);"></div>11 consecutive working days including last weekend</div>
+              <div class="wb-signal"><div class="wb-signal-dot" style="background:var(--danger);"></div>34% of commits after 9pm (baseline: 7%)</div>
+              <div class="wb-signal"><div class="wb-signal-dot" style="background:var(--warn);"></div>Absorbed 6 extra tickets with no capacity adjustment</div>
+            </div>
+            <div class="wb-talking-point-label">Recommended 1:1 talking point</div>
+            <div class="wb-talking-point">"I want to make sure we're setting you up sustainably. Let's look at what we can take off your plate today — not next sprint, today."</div>
+          </div>
+
+          <div class="wellbeing-card" style="border-color:rgba(240,72,72,0.2);">
+            <div class="wb-card-header">
+              <div><div class="wb-name">Amir Shapiro</div><div class="wb-role">Backend · Engineer II</div></div>
+              <span class="badge badge-danger">AT RISK</span>
+            </div>
+            <div class="wb-signals">
+              <div class="wb-signal"><div class="wb-signal-dot" style="background:var(--danger);"></div>0 story points completed in 6 days (fully blocked)</div>
+              <div class="wb-signal"><div class="wb-signal-dot" style="background:var(--warn);"></div>3 unacknowledged blocker messages in #engineering</div>
+              <div class="wb-signal"><div class="wb-signal-dot" style="background:var(--warn);"></div>Frustration language detected in Slack — 2 instances</div>
+            </div>
+            <div class="wb-talking-point-label">Recommended 1:1 talking point</div>
+            <div class="wb-talking-point">"This blocker is on me to resolve — you did everything right. I'm escalating today. What would help you feel unblocked mentally in the meantime?"</div>
+          </div>
+
+          <div class="wellbeing-card" style="border-color:rgba(245,166,35,0.2);">
+            <div class="wb-card-header">
+              <div><div class="wb-name">Yuki Tanaka</div><div class="wb-role">Backend · Engineer III</div></div>
+              <span class="badge badge-warn">WATCH</span>
+            </div>
+            <div class="wb-signals">
+              <div class="wb-signal"><div class="wb-signal-dot" style="background:var(--warn);"></div>Commit frequency -40% vs 4-week average</div>
+              <div class="wb-signal"><div class="wb-signal-dot" style="background:var(--warn);"></div>PR review comments -60% shorter and less detailed</div>
+              <div class="wb-signal"><div class="wb-signal-dot" style="background:var(--txt3);"></div>No 1:1 in 3 weeks (2 cancellations by manager)</div>
+            </div>
+            <div class="wb-talking-point-label">Recommended 1:1 talking point</div>
+            <div class="wb-talking-point">"I've cancelled on you twice and I want to fix that. How are you genuinely feeling about the work right now — what's energizing you and what's draining you?"</div>
+          </div>
+        </div>
+
+        <div class="wb-aggregate">
+          <div class="wb-agg-title">Team Aggregate — Week 18</div>
+          <div class="wb-agg-stats">
+            <div class="wb-stat">
+              <div class="wb-stat-value">34<span style="font-size:16px;">%</span></div>
+              <div class="wb-stat-label">After-hours commits (team avg)</div>
+            </div>
+            <div class="wb-stat">
+              <div class="wb-stat-value">3</div>
+              <div class="wb-stat-label">Developers at risk</div>
+            </div>
+            <div class="wb-stat">
+              <div class="wb-stat-value" style="color:var(--danger);">↓</div>
+              <div class="wb-stat-label">Trend: worsening 2 weeks</div>
+            </div>
+          </div>
+          <div style="margin-top:14px; padding:10px 14px; background:var(--surface); border-radius:6px; border:1px solid var(--border);">
+            <div style="font-family:'DM Mono',monospace; font-size:10px; color:var(--txt3); text-transform:uppercase; margin-bottom:4px;">Most common stressor</div>
+            <div style="font-size:13px; color:var(--txt);">Workload distribution — 2 of 3 at-risk developers are absorbing work from blocked or absent teammates without capacity rebalancing.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SCREEN 7: ROADMAP ══ -->
+    <div id="screen-7" class="screen">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Roadmap</div>
+          <div class="page-sub">Q2 2026 · Week 18 · 8 weeks remaining · 2 active blockers on critical path</div>
+        </div>
+        <span class="badge badge-warn">2 BLOCKERS ON CRITICAL PATH</span>
+      </div>
+      <div class="content">
+        <div class="health-anchor">
+          <div class="health-score warn">66</div>
+          <div class="health-anchor-info">
+            <div class="health-anchor-title">Q2 2026 · Week 18 of 26</div>
+            <div class="health-anchor-sub">5 active initiatives · 2 on track · 2 at risk · 1 critical path blocker</div>
+            <span class="badge badge-warn">8 weeks to quarter end</span>
+          </div>
+        </div>
+
+        <div class="roadmap-layout">
+          <div class="gantt-wrap">
+            <div class="gantt-header">
+              <div class="gantt-quarter">Q1 2026</div>
+              <div class="gantt-quarter">Q2 2026</div>
+              <div class="gantt-quarter">Q3 2026</div>
+              <div class="gantt-quarter">Q4 2026</div>
+            </div>
+            <!-- Today marker line (visual) -->
+
+            <div class="gantt-row">
+              <div class="gantt-label">Auth Overhaul</div>
+              <div class="gantt-track" style="gap:4px;">
+                <div style="flex:0.4;"></div>
+                <div class="gantt-bar danger" style="flex:0.7;">Auth Blocker 🔴</div>
+              </div>
+            </div>
+            <div class="gantt-row">
+              <div class="gantt-label">Payment Gateway</div>
+              <div class="gantt-track">
+                <div style="flex:0.8;"></div>
+                <div class="gantt-bar warn" style="flex:0.9;">Depends on Auth ⚠</div>
+              </div>
+            </div>
+            <div class="gantt-row">
+              <div class="gantt-label">Mobile v3.0</div>
+              <div class="gantt-track">
+                <div style="flex:0.3;"></div>
+                <div class="gantt-bar ok" style="flex:0.8;">On Track ✓</div>
+              </div>
+            </div>
+            <div class="gantt-row">
+              <div class="gantt-label">Data Pipeline</div>
+              <div class="gantt-track">
+                <div style="flex:0.1;"></div>
+                <div class="gantt-bar ok" style="flex:0.6;">Complete ✓</div>
+              </div>
+            </div>
+            <div class="gantt-row">
+              <div class="gantt-label">Enterprise Tier</div>
+              <div class="gantt-track" style="gap:4px;">
+                <div style="flex:1.2;"></div>
+                <div class="gantt-bar dashed" style="flex:0.8;">Projected Risk</div>
+              </div>
+            </div>
+
+            <!-- Legend -->
+            <div style="display:flex; gap:14px; margin-top:14px; flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:6px;"><div style="width:12px;height:10px;background:rgba(15,212,138,0.5);border-radius:2px;"></div><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--txt3);">On Track</span></div>
+              <div style="display:flex;align-items:center;gap:6px;"><div style="width:12px;height:10px;background:rgba(245,166,35,0.5);border-radius:2px;"></div><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--txt3);">At Risk</span></div>
+              <div style="display:flex;align-items:center;gap:6px;"><div style="width:12px;height:10px;background:rgba(240,72,72,0.5);border-radius:2px;"></div><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--txt3);">Blocked</span></div>
+              <div style="display:flex;align-items:center;gap:6px;"><div style="width:12px;height:10px;border:1.5px dashed var(--txt3);border-radius:2px;"></div><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--txt3);">Projected</span></div>
+            </div>
+          </div>
+
+          <!-- Ripple Effect Panel -->
+          <div class="ripple-panel">
+            <div class="ripple-header">
+              <div class="ripple-dot"></div>
+              ACTIVE RISK CHAIN
+            </div>
+            <div class="ripple-chain">
+              <div class="ripple-card c-danger">
+                <div class="ripple-card-quarter" style="color:var(--danger);">Q2 · NOW BLOCKED</div>
+                <div class="ripple-card-title">Auth Service Blocker</div>
+                <div class="ripple-card-sub">External API approval · Day 6 overdue · DEV-1847</div>
+              </div>
+              <div class="ripple-connector"></div>
+              <div class="ripple-card c-warn">
+                <div class="ripple-card-quarter" style="color:var(--warn);">Q2/Q3 · AT RISK</div>
+                <div class="ripple-card-title">Payment Gateway Blocked</div>
+                <div class="ripple-card-sub">Depends on Auth completion · 3-week cascade delay</div>
+              </div>
+              <div class="ripple-connector"></div>
+              <div class="ripple-card c-danger">
+                <div class="ripple-card-quarter" style="color:var(--danger);">Q4 · PROJECTED RISK</div>
+                <div class="ripple-card-title">Enterprise Tier Jeopardised</div>
+                <div class="ripple-card-sub">Requires Payment Gateway · Launch target: Dec 1</div>
+              </div>
+              <div class="ripple-connector"></div>
+              <div class="ripple-card c-dark">
+                <div class="ripple-card-quarter" style="color:#c43a3a;">BUSINESS CONSEQUENCE</div>
+                <div class="ripple-card-title">Enterprise Sales Season Missed</div>
+                <div class="ripple-card-sub">Q4 budget cycles · Est. $2.4M ARR at risk · Next window: Q1 2027</div>
+              </div>
+            </div>
+            <button class="btn-resolve">Resolve This Now →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SCREEN 8: ANNUAL VIEW ══ -->
+    <div id="screen-8" class="screen">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Annual View</div>
+          <div class="page-sub">FY 2026 · Week 18 of 52 · On track for 6 of 9 annual objectives</div>
+        </div>
+        <span class="badge badge-warn">6/9 OBJECTIVES ON TRACK</span>
+      </div>
+      <div class="content">
+        <div class="health-anchor">
+          <div class="health-score warn">72</div>
+          <div class="health-anchor-info">
+            <div class="health-anchor-title">FY 2026 Engineering Health — Week 18</div>
+            <div class="health-anchor-sub">9 annual objectives · 6 on track · 2 at risk · 1 off track</div>
+            <span class="badge badge-warn">Requires 2 interventions to hit 9/9</span>
+          </div>
+        </div>
+
+        <div class="quarter-grid">
+          <div class="quarter-card">
+            <div class="quarter-label">Q1 2026 · Completed</div>
+            <div class="quarter-score" style="color:var(--ok);">88</div>
+            <span class="badge badge-ok" style="margin-bottom:10px;">COMPLETED</span>
+            <div class="quarter-initiatives">
+              <div class="quarter-init"><span class="init-icon">✓</span>CI/CD pipeline rebuild</div>
+              <div class="quarter-init"><span class="init-icon">✓</span>Mobile v2.4 launch</div>
+              <div class="quarter-init"><span class="init-icon">✓</span>Data infra migration</div>
+              <div class="quarter-init"><span class="init-icon">✓</span>Eng hiring (4 of 4)</div>
+            </div>
+          </div>
+          <div class="quarter-card current">
+            <div class="quarter-label">Q2 2026 · Current</div>
+            <div class="quarter-score" style="color:var(--warn);">66</div>
+            <span class="badge badge-warn" style="margin-bottom:10px;">IN PROGRESS</span>
+            <div class="quarter-initiatives">
+              <div class="quarter-init"><span class="init-icon" style="color:var(--ok);">✓</span>Mobile v3.0 — on track</div>
+              <div class="quarter-init"><span class="init-icon" style="color:var(--warn);">⚠</span>Auth overhaul — blocked</div>
+              <div class="quarter-init"><span class="init-icon" style="color:var(--warn);">⚠</span>Payment Gateway — delayed</div>
+              <div class="quarter-init"><span class="init-icon" style="color:var(--ok);">✓</span>Perf. baseline — complete</div>
+            </div>
+          </div>
+          <div class="quarter-card">
+            <div class="quarter-label">Q3 2026 · Projected</div>
+            <div class="quarter-score" style="color:var(--warn);">61</div>
+            <span class="badge badge-warn" style="margin-bottom:10px;">AT RISK</span>
+            <div class="quarter-initiatives">
+              <div class="quarter-init"><span class="init-icon" style="color:var(--warn);">⚠</span>Payment Gateway launch</div>
+              <div class="quarter-init"><span class="init-icon" style="color:var(--ok);">→</span>API v2 public release</div>
+              <div class="quarter-init"><span class="init-icon" style="color:var(--ok);">→</span>Platform scalability</div>
+              <div class="quarter-init"><span class="init-icon" style="color:var(--txt3);">?</span>Enterprise beta (depends)</div>
+            </div>
+          </div>
+          <div class="quarter-card">
+            <div class="quarter-label">Q4 2026 · Projected</div>
+            <div class="quarter-score" style="color:var(--danger);">54</div>
+            <span class="badge badge-danger" style="margin-bottom:10px;">HIGH RISK</span>
+            <div class="quarter-initiatives">
+              <div class="quarter-init"><span class="init-icon" style="color:var(--danger);">✕</span>Enterprise Tier — jeopardised</div>
+              <div class="quarter-init"><span class="init-icon" style="color:var(--warn);">⚠</span>Sales season readiness</div>
+              <div class="quarter-init"><span class="init-icon" style="color:var(--ok);">→</span>Internationalisation</div>
+              <div class="quarter-init"><span class="init-icon" style="color:var(--ok);">→</span>Mobile v4 (scoped)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="annual-brief">
+          <div class="annual-brief-title">
+            <span style="font-size:16px;">✦</span>
+            AI Annual Briefing
+          </div>
+          <div class="two-col">
+            <div>
+              <div class="risk-section">
+                <div class="risk-section-label high">High Risk Objectives</div>
+                <div class="risk-items">
+                  <div class="risk-item" style="border-color:rgba(240,72,72,0.3); color:var(--danger);">Enterprise Tier Launch</div>
+                  <div class="risk-item" style="border-color:rgba(240,72,72,0.3); color:var(--danger);">Auth Overhaul (Q2)</div>
+                </div>
+              </div>
+              <div class="risk-section">
+                <div class="risk-section-label watch">Watch</div>
+                <div class="risk-items">
+                  <div class="risk-item" style="border-color:rgba(245,166,35,0.2);">Payment Gateway</div>
+                  <div class="risk-item" style="border-color:rgba(245,166,35,0.2);">Q4 Sales Readiness</div>
+                  <div class="risk-item" style="border-color:rgba(245,166,35,0.2);">Team Wellbeing Trend</div>
+                </div>
+              </div>
+              <div class="risk-section">
+                <div class="risk-section-label safe">Safe</div>
+                <div class="risk-items">
+                  <div class="risk-item">Mobile v3.0</div>
+                  <div class="risk-item">Data Infrastructure</div>
+                  <div class="risk-item">API v2 Release</div>
+                  <div class="risk-item">Platform Scalability</div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="year-prediction">
+                <div class="year-pred-title">Year-End Prediction</div>
+                <div class="year-pred-main">"At current velocity: <strong>6 of 9 objectives</strong> delivered by December."</div>
+                <div style="font-family:'DM Mono',monospace; font-size:11px; color:var(--txt2); margin-bottom:10px;">To hit 9 of 9, three actions required:</div>
+                <div class="year-pred-actions">
+                  <div class="year-pred-action">Resolve Auth blocker this week to unblock Payment Gateway</div>
+                  <div class="year-pred-action">Protect Backend team capacity in Sprint 24 (no new scope)</div>
+                  <div class="year-pred-action">Address burnout risk in Frontend — Sara Chen workload rebalance</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+var currentScreen = 0;
+
+function showScreen(n) {
+  // Update demo tabs
+  document.querySelectorAll('.demo-tab').forEach(function(t, i) {
+    t.classList.toggle('active', i === n);
+  });
+
+  // Hide/show screens
+  document.querySelectorAll('.screen').forEach(function(s) {
+    s.classList.remove('active');
+  });
+  var target = document.getElementById('screen-' + n);
+  if (target) target.classList.add('active');
+
+  // Sidebar visibility
+  var sidebar = document.getElementById('sidebar');
+  var main = document.getElementById('main');
+  if (n === 0) {
+    sidebar.classList.add('hidden');
+    main.classList.add('full-width');
+  } else {
+    sidebar.classList.remove('hidden');
+    main.classList.remove('full-width');
+  }
+
+  // Update active nav item
+  document.querySelectorAll('.nav-item').forEach(function(item) {
+    item.classList.remove('active');
+  });
+
+  currentScreen = n;
+}
+
+function switchNav(el, screenId) {
+  document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('active'); });
+  el.classList.add('active');
+  showScreen(screenId);
+}
+
+function doLogin() {
+  showScreen(2);
+  // Activate "Today's Briefing" nav
+  var navItems = document.querySelectorAll('.nav-item');
+  if (navItems.length > 0) navItems[0].classList.add('active');
+}
+
+function toggleCollapse(id, btn) {
+  var body = document.getElementById(id);
+  if (!body) {
+    // btn is the arrow span itself
+    var arrow = btn;
+    var card = arrow.closest('.card');
+    var body2 = card.querySelector('.card-body');
+    arrow.classList.toggle('open');
+    body2.style.display = body2.style.display === 'none' ? '' : 'none';
+    return;
+  }
+  body.classList.toggle('hidden');
+  if (btn && typeof btn === 'object' && btn.textContent) {
+    btn.textContent = body.classList.contains('hidden') ? 'Show ▾' : 'Hide ▴';
+  }
+}
+
+function toggleDevRow(id) {
+  var row = document.getElementById(id);
+  if (row) row.classList.toggle('open');
+}
+
+// Initialize
+showScreen(0);
+</script>
+</body>
+</html>
