@@ -48,7 +48,7 @@ export function ConnectModal({ integration, companyId, onClose, onSaved }: Props
     setError(null)
     try {
       await setDoc(
-        doc(db, 'companies', companyId, 'integrations', integration!.id),
+        doc(db!, 'companies', companyId, 'integrations', integration!.id),
         { type: integration!.type, config: values, status: 'active', lastSynced: serverTimestamp() },
       )
       onSaved()

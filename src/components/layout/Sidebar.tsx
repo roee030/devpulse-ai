@@ -1,14 +1,20 @@
 // src/components/layout/Sidebar.tsx
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, TrendingUp, User, AlertTriangle, Calculator, Plug, Building2 } from 'lucide-react'
+import {
+  Zap, LayoutDashboard, TrendingUp, User, AlertTriangle,
+  Calculator, Map, Calendar, Plug, Building2,
+} from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const navItems = [
-  { path: '/',           icon: LayoutDashboard, label: 'Executive Dashboard' },
-  { path: '/sprint',     icon: TrendingUp,      label: 'Sprint Prediction' },
-  { path: '/briefing',   icon: User,            label: 'Developer Briefing' },
-  { path: '/burnout',    icon: AlertTriangle,   label: 'Burnout Risk' },
-  { path: '/roi',        icon: Calculator,      label: 'ROI Calculator' },
+  { path: '/today',    icon: Zap,             label: "Today's Briefing" },
+  { path: '/',         icon: LayoutDashboard, label: 'Executive Dashboard' },
+  { path: '/sprint',   icon: TrendingUp,      label: 'Sprint Prediction' },
+  { path: '/briefing', icon: User,            label: 'Developer Briefing' },
+  { path: '/burnout',  icon: AlertTriangle,   label: 'Burnout Risk' },
+  { path: '/roadmap',  icon: Map,             label: 'Roadmap' },
+  { path: '/annual',   icon: Calendar,        label: 'Annual View' },
+  { path: '/roi',      icon: Calculator,      label: 'ROI Calculator' },
 ]
 
 const settingsItems = [
@@ -31,7 +37,7 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {navItems.map(({ path, icon: Icon, label }) => (
           <NavLink
             key={path}

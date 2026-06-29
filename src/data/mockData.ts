@@ -536,3 +536,210 @@ export const roiHistory = [
   { month: 'Feb', saved: 15000, invested: 4000 },
   { month: 'Mar', saved: 18000, invested: 4000 },
 ]
+
+// ─── AI Effort Data ───────────────────────────────────────────────────────────
+export interface DeveloperAiProfile {
+  devId: string
+  aiCreditsPerDay: number[]   // last 7 days Mon→Sun
+  aiEffortScore: number       // credits per story point this week
+  efficiencyTrend: 'up' | 'down' | 'stable'
+  topAiModules: string[]
+}
+
+export const developerAiProfiles: DeveloperAiProfile[] = [
+  { devId: 'dev-1',  aiCreditsPerDay: [45, 52, 38, 67, 43, 28, 51], aiEffortScore: 8.2,  efficiencyTrend: 'stable', topAiModules: ['JWT', 'Auth Middleware'] },
+  { devId: 'dev-2',  aiCreditsPerDay: [30, 25, 35, 28, 32, 20, 27], aiEffortScore: 5.4,  efficiencyTrend: 'up',     topAiModules: ['Redis', 'Session Store'] },
+  { devId: 'dev-3',  aiCreditsPerDay: [120, 145, 98, 167, 89, 52, 134], aiEffortScore: 24.1, efficiencyTrend: 'down', topAiModules: ['Payment Gateway', 'Webhooks'] },
+  { devId: 'dev-4',  aiCreditsPerDay: [22, 18, 25, 30, 21, 15, 20], aiEffortScore: 4.1,  efficiencyTrend: 'up',     topAiModules: ['SQL', 'Orders API'] },
+  { devId: 'dev-5',  aiCreditsPerDay: [85, 92, 78, 110, 65, 45, 88], aiEffortScore: 19.8, efficiencyTrend: 'down',  topAiModules: ['Auth API', 'Input Validation'] },
+  { devId: 'dev-6',  aiCreditsPerDay: [35, 42, 38, 45, 30, 22, 40], aiEffortScore: 6.2,  efficiencyTrend: 'stable', topAiModules: ['Terraform', 'K8s'] },
+  { devId: 'dev-7',  aiCreditsPerDay: [18, 12, 22, 15, 8, 5, 10],   aiEffortScore: 3.8,  efficiencyTrend: 'down',   topAiModules: ['CI Pipeline', 'GitHub Actions'] },
+  { devId: 'dev-8',  aiCreditsPerDay: [28, 32, 25, 35, 29, 20, 30], aiEffortScore: 5.8,  efficiencyTrend: 'up',     topAiModules: ['SRE', 'Alerting'] },
+  { devId: 'dev-9',  aiCreditsPerDay: [40, 38, 45, 42, 35, 25, 38], aiEffortScore: 7.5,  efficiencyTrend: 'stable', topAiModules: ['Helm Charts', 'K8s'] },
+  { devId: 'dev-10', aiCreditsPerDay: [55, 48, 62, 50, 45, 30, 52], aiEffortScore: 7.8,  efficiencyTrend: 'up',     topAiModules: ['Checkout UI', 'React'] },
+  { devId: 'dev-11', aiCreditsPerDay: [95, 110, 88, 125, 72, 40, 105], aiEffortScore: 22.5, efficiencyTrend: 'down', topAiModules: ['Safari Compat', 'Auth Redirect'] },
+  { devId: 'dev-12', aiCreditsPerDay: [25, 22, 28, 30, 24, 18, 26], aiEffortScore: 5.2,  efficiencyTrend: 'stable', topAiModules: ['Dark Mode', 'CSS'] },
+  { devId: 'dev-13', aiCreditsPerDay: [42, 45, 38, 48, 40, 28, 43], aiEffortScore: 8.8,  efficiencyTrend: 'stable', topAiModules: ['Analytics Events', 'A/B Tests'] },
+  { devId: 'dev-14', aiCreditsPerDay: [60, 55, 65, 58, 52, 35, 58], aiEffortScore: 11.5, efficiencyTrend: 'down',   topAiModules: ['Table Components', 'React'] },
+  { devId: 'dev-15', aiCreditsPerDay: [48, 52, 45, 55, 43, 30, 50], aiEffortScore: 7.2,  efficiencyTrend: 'up',     topAiModules: ['iOS Payment', 'StoreKit'] },
+  { devId: 'dev-16', aiCreditsPerDay: [15, 8, 12, 5, 3, 0, 8],     aiEffortScore: 2.8,  efficiencyTrend: 'down',   topAiModules: ['Android Auth', 'Biometrics'] },
+  { devId: 'dev-17', aiCreditsPerDay: [35, 38, 32, 40, 33, 22, 36], aiEffortScore: 6.8,  efficiencyTrend: 'stable', topAiModules: ['CI Pipeline', 'E2E Tests'] },
+  { devId: 'dev-18', aiCreditsPerDay: [20, 18, 22, 25, 19, 12, 21], aiEffortScore: 4.2,  efficiencyTrend: 'up',     topAiModules: ['Onboarding UX', 'Mobile'] },
+  { devId: 'dev-19', aiCreditsPerDay: [45, 50, 42, 55, 48, 32, 47], aiEffortScore: 7.4,  efficiencyTrend: 'up',     topAiModules: ['ETL Pipeline', 'Redshift'] },
+  { devId: 'dev-20', aiCreditsPerDay: [38, 35, 42, 40, 36, 25, 39], aiEffortScore: 6.5,  efficiencyTrend: 'stable', topAiModules: ['dbt Models', 'SQL'] },
+  { devId: 'dev-21', aiCreditsPerDay: [12, 15, 8, 10, 5, 2, 8],    aiEffortScore: 2.5,  efficiencyTrend: 'down',   topAiModules: ['Kafka', 'Event Streaming'] },
+  { devId: 'dev-22', aiCreditsPerDay: [18, 20, 16, 22, 17, 10, 19], aiEffortScore: 3.8,  efficiencyTrend: 'up',     topAiModules: ['Airflow DAGs', 'ETL'] },
+  { devId: 'dev-23', aiCreditsPerDay: [65, 70, 60, 75, 62, 45, 68], aiEffortScore: 9.8,  efficiencyTrend: 'stable', topAiModules: ['ML Training', 'PyTorch'] },
+  { devId: 'dev-24', aiCreditsPerDay: [88, 95, 82, 105, 78, 50, 92], aiEffortScore: 16.2, efficiencyTrend: 'down',  topAiModules: ['Feature Store', 'MLflow'] },
+  { devId: 'dev-25', aiCreditsPerDay: [30, 28, 32, 35, 28, 18, 30], aiEffortScore: 5.8,  efficiencyTrend: 'up',     topAiModules: ['Data Preprocessing', 'Pandas'] },
+]
+
+export const getDeveloperAiProfile = (devId: string) =>
+  developerAiProfiles.find(p => p.devId === devId)
+
+// ─── Roadmap Epics ─────────────────────────────────────────────────────────────
+// Week numbers for 2026: Q1 = 1-13, Q2 = 14-26, Q3 = 27-39, Q4 = 40-52
+// Current week ≈ 26 (June 29, 2026)
+export type EpicStatus = 'completed' | 'on-track' | 'at-risk' | 'delayed'
+
+export interface RippleCard {
+  id: string
+  quarter: string
+  timeframe: string
+  title: string
+  consequence: string
+  severity: 'danger' | 'warn' | 'business'
+}
+
+export interface Epic {
+  id: string
+  title: string
+  owner: string
+  teamId: string
+  startWeek: number
+  endWeek: number
+  status: EpicStatus
+  category: string
+  description: string
+  rippleChain?: RippleCard[]
+}
+
+export const epics: Epic[] = [
+  {
+    id: 'epic-1', title: 'Auth System Refactor', owner: 'Avi Shapiro', teamId: 'team-backend',
+    startWeek: 1, endWeek: 10, status: 'completed', category: 'Platform',
+    description: 'Migrate to JWT with refresh token rotation',
+  },
+  {
+    id: 'epic-2', title: 'CI/CD Pipeline Upgrade', owner: 'Dana Mizrahi', teamId: 'team-infra',
+    startWeek: 2, endWeek: 12, status: 'completed', category: 'Infrastructure',
+    description: 'GitHub Actions migration with parallel jobs',
+  },
+  {
+    id: 'epic-3', title: 'Payment Gateway Integration', owner: 'Michal Stern', teamId: 'team-backend',
+    startWeek: 8, endWeek: 26, status: 'at-risk', category: 'Platform',
+    description: 'Stripe integration with 3DS2 support',
+    rippleChain: [
+      { id: 'r1', quarter: 'Q2', timeframe: 'Now',      title: 'Payment Gateway delayed 3 weeks',  consequence: 'Auth bug blocking core payment flow — unresolved since Sprint 22', severity: 'danger' },
+      { id: 'r2', quarter: 'Q3', timeframe: 'Aug 2026', title: 'Enterprise Tier launch blocked',    consequence: 'Payment is a hard dependency — Enterprise pricing tiers cannot ship without it', severity: 'warn' },
+      { id: 'r3', quarter: 'Q4', timeframe: 'Nov 2026', title: 'Enterprise GA at risk',             consequence: 'Sales team committed Q4 pipeline to Enterprise customers. Delay = missed quota.', severity: 'business' },
+    ],
+  },
+  {
+    id: 'epic-4', title: 'Mobile Auth & Biometrics', owner: 'Tom Levi', teamId: 'team-mobile',
+    startWeek: 10, endWeek: 24, status: 'at-risk', category: 'Product',
+    description: 'Face ID / fingerprint login for iOS and Android',
+    rippleChain: [
+      { id: 'r4', quarter: 'Q2', timeframe: 'Now',      title: 'Android auth token blocked',   consequence: 'Ofer Ben-David blocked 3 days — no commits. Android biometrics cannot proceed.', severity: 'danger' },
+      { id: 'r5', quarter: 'Q3', timeframe: 'Aug 2026', title: 'Mobile v2.0 launch delayed',   consequence: 'Biometrics was anchor feature of v2.0. Release pushed to Sep at earliest.', severity: 'warn' },
+    ],
+  },
+  {
+    id: 'epic-5', title: 'Developer Portal v1', owner: 'Yael Katz', teamId: 'team-frontend',
+    startWeek: 14, endWeek: 26, status: 'on-track', category: 'Product',
+    description: 'API documentation and sandbox environment',
+  },
+  {
+    id: 'epic-6', title: 'ML Churn Prediction', owner: 'Paz Gonen', teamId: 'team-ml',
+    startWeek: 14, endWeek: 30, status: 'on-track', category: 'Data',
+    description: 'Real-time churn risk scoring pipeline',
+  },
+  {
+    id: 'epic-7', title: 'Enterprise Tier Features', owner: 'Roi Friedman', teamId: 'team-backend',
+    startWeek: 27, endWeek: 35, status: 'on-track', category: 'Platform',
+    description: 'SSO, audit logs, advanced permissions, SLA tiers',
+  },
+  {
+    id: 'epic-8', title: 'API v2 — Public Platform', owner: 'Avi Shapiro', teamId: 'team-backend',
+    startWeek: 27, endWeek: 39, status: 'on-track', category: 'Platform',
+    description: 'Versioned public API with GraphQL support',
+  },
+  {
+    id: 'epic-9', title: 'Mobile v2.0 Launch', owner: 'Tom Levi', teamId: 'team-mobile',
+    startWeek: 30, endWeek: 38, status: 'on-track', category: 'Product',
+    description: 'Full rewrite with biometrics and native payment',
+  },
+  {
+    id: 'epic-10', title: 'Data Platform v2', owner: 'Shira Goldberg', teamId: 'team-data-eng',
+    startWeek: 35, endWeek: 50, status: 'on-track', category: 'Data',
+    description: 'Real-time streaming + self-serve analytics',
+  },
+  {
+    id: 'epic-11', title: 'Enterprise GA Launch', owner: 'Lior Ben-David', teamId: 'team-backend',
+    startWeek: 40, endWeek: 48, status: 'on-track', category: 'Business',
+    description: 'GA of Enterprise tier with sales enablement',
+  },
+  {
+    id: 'epic-12', title: 'Platform Observability', owner: 'Dana Mizrahi', teamId: 'team-infra',
+    startWeek: 40, endWeek: 52, status: 'on-track', category: 'Infrastructure',
+    description: 'OpenTelemetry, distributed tracing, SLO dashboards',
+  },
+]
+
+// ─── Annual View Data ──────────────────────────────────────────────────────────
+export interface QuarterSummary {
+  id: 'Q1' | 'Q2' | 'Q3' | 'Q4'
+  label: string
+  dates: string
+  healthScore: number
+  status: 'completed' | 'current' | 'upcoming'
+  initiatives: { name: string; status: 'done' | 'on-track' | 'at-risk' | 'upcoming' }[]
+  deliveredPoints: number
+  totalPoints: number
+}
+
+export const quarterSummaries: QuarterSummary[] = [
+  {
+    id: 'Q1', label: 'Q1 2026', dates: 'Jan – Mar', healthScore: 82, status: 'completed',
+    initiatives: [
+      { name: 'Auth System Refactor', status: 'done' },
+      { name: 'CI/CD Pipeline Upgrade', status: 'done' },
+      { name: 'Frontend Component Library', status: 'done' },
+    ],
+    deliveredPoints: 186, totalPoints: 200,
+  },
+  {
+    id: 'Q2', label: 'Q2 2026', dates: 'Apr – Jun', healthScore: 68, status: 'current',
+    initiatives: [
+      { name: 'Payment Gateway Integration', status: 'at-risk' },
+      { name: 'Mobile Auth & Biometrics', status: 'at-risk' },
+      { name: 'Developer Portal v1', status: 'on-track' },
+      { name: 'ML Churn Prediction (started)', status: 'on-track' },
+    ],
+    deliveredPoints: 142, totalPoints: 210,
+  },
+  {
+    id: 'Q3', label: 'Q3 2026', dates: 'Jul – Sep', healthScore: 74, status: 'upcoming',
+    initiatives: [
+      { name: 'Enterprise Tier Features', status: 'upcoming' },
+      { name: 'API v2 — Public Platform', status: 'upcoming' },
+      { name: 'Mobile v2.0 Launch', status: 'upcoming' },
+      { name: 'ML Churn Prediction', status: 'upcoming' },
+    ],
+    deliveredPoints: 0, totalPoints: 230,
+  },
+  {
+    id: 'Q4', label: 'Q4 2026', dates: 'Oct – Dec', healthScore: 70, status: 'upcoming',
+    initiatives: [
+      { name: 'Enterprise GA Launch', status: 'upcoming' },
+      { name: 'Platform Observability', status: 'upcoming' },
+      { name: 'Data Platform v2', status: 'upcoming' },
+    ],
+    deliveredPoints: 0, totalPoints: 220,
+  },
+]
+
+export const monthlyVelocity = [
+  { month: 'Jan', actual: 58,   target: 60 },
+  { month: 'Feb', actual: 62,   target: 60 },
+  { month: 'Mar', actual: 66,   target: 65 },
+  { month: 'Apr', actual: 55,   target: 65 },
+  { month: 'May', actual: 48,   target: 65 },
+  { month: 'Jun', actual: 39,   target: 65 },
+  { month: 'Jul', actual: null, target: 65 },
+  { month: 'Aug', actual: null, target: 68 },
+  { month: 'Sep', actual: null, target: 68 },
+  { month: 'Oct', actual: null, target: 70 },
+  { month: 'Nov', actual: null, target: 70 },
+  { month: 'Dec', actual: null, target: 70 },
+]

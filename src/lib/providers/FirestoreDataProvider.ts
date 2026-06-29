@@ -12,7 +12,7 @@ export class FirestoreDataProvider implements IDataProvider {
   }
 
   private col(name: string) {
-    return collection(db, 'companies', this.companyId, name)
+    return collection(db!, 'companies', this.companyId, name)
   }
 
   async getTeams(): Promise<Team[]> {
