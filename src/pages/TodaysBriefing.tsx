@@ -171,7 +171,7 @@ export function TodaysBriefing() {
       items.push({
         id: 'low-health-teams',
         title: `${lowHealthTeams.map(t => t.name).join(' & ')} health score below 65`,
-        subtitle: `Mobile Team at ${lowHealthTeams[0].healthScore}/100 — consider checking in with team lead`,
+        subtitle: `${lowHealthTeams[0].name} at ${lowHealthTeams[0].healthScore}/100 — consider checking in with team lead`,
         route: '/',
         tag: 'Team Health',
       })

@@ -17,7 +17,7 @@ export function HealthRing({ score, size = 120 }: Props) {
   const cx = size / 2
 
   return (
-    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+    <div data-testid="health-score" className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
         <circle cx={cx} cy={cx} r={r} fill="none" stroke="#1e1e2e" strokeWidth={8} />
         <motion.circle

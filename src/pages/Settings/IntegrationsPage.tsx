@@ -1,11 +1,11 @@
 // src/pages/Settings/IntegrationsPage.tsx
 import { useState } from 'react'
-import { Github, MessageSquare, Trello, BarChart2 } from 'lucide-react'
+import { Github, MessageSquare, Trello, BarChart2, Sparkles } from 'lucide-react'
 import { IntegrationCard } from '../../components/integrations/IntegrationCard'
 import { ConnectModal } from '../../components/integrations/ConnectModal'
+import { CopilotPreviewModal } from '../../components/integrations/CopilotPreviewModal'
 import type { IntegrationConfig } from '../../components/integrations/types'
 
-// Fallback companyId — replace with real value from AuthContext when VITE_DATA_PROVIDER=firebase
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID ?? 'demo-company'
 
 const INTEGRATIONS: IntegrationConfig[] = [
@@ -41,17 +41,42 @@ const INTEGRATIONS: IntegrationConfig[] = [
     status: 'not_connected',
     icon: MessageSquare,
   },
+  {
+    id: 'copilot',
+    type: 'copilot',
+    label: 'GitHub Copilot Metrics',
+    description: 'Correlate AI credit usage with Jira tasks and sprint velocity',
+    status: 'not_connected',
+    icon: Sparkles,
+    badge: 'New',
+  },
 ]
 
 export function IntegrationsPage() {
   const [integrations, setIntegrations] = useState(INTEGRATIONS)
   const [active, setActive] = useState<IntegrationConfig | null>(null)
+  const [copilotOpen, setCopilotOpen] = useState(false)
+
+  function handleConnect(integration: IntegrationConfig) {
+    if (integration.type === 'copilot') {
+      setCopilotOpen(true)
+    } else {
+      setActive(integration)
+    }
+  }
 
   function handleSaved() {
     if (!active) return
     setIntegrations(prev =>
       prev.map(i => i.id === active.id ? { ...i, status: 'connected' } : i)
     )
+  }
+
+  function handleCopilotEnable() {
+    setIntegrations(prev =>
+      prev.map(i => i.id === 'copilot' ? { ...i, status: 'connected' } : i)
+    )
+    setCopilotOpen(false)
   }
 
   return (
@@ -66,7 +91,7 @@ export function IntegrationsPage() {
           <IntegrationCard
             key={integration.id}
             integration={integration}
-            onConnect={setActive}
+            onConnect={handleConnect}
           />
         ))}
       </div>
@@ -77,6 +102,13 @@ export function IntegrationsPage() {
         onClose={() => setActive(null)}
         onSaved={handleSaved}
       />
+
+      {copilotOpen && (
+        <CopilotPreviewModal
+          onClose={() => setCopilotOpen(false)}
+          onEnable={handleCopilotEnable}
+        />
+      )}
     </div>
   )
 }

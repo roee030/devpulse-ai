@@ -11,6 +11,8 @@ import { AiInsightCard } from '../components/ui/AiInsightCard'
 import { computeBurnoutInsight, computeDeveloperInsight } from '../lib/insights'
 import { RiskBadge } from '../components/ui/RiskBadge'
 import { ActivityHeatmap } from '../components/ui/ActivityHeatmap'
+import { PageSkeleton } from '../components/ui/PageSkeleton'
+import { useSimulatedLoad } from '../hooks/useSimulatedLoad'
 
 type Tab = 'wellbeing' | 'ai-effort'
 
@@ -34,6 +36,7 @@ function AiTrendIcon({ trend }: { trend: DeveloperAiProfile['efficiencyTrend'] }
 
 export function BurnoutRisk() {
   const { visibleDevelopers, activeUser } = useUser()
+  const isLoading = useSimulatedLoad()
   const [selected, setSelected]         = useState<Developer | null>(null)
   const [selectedAiDev, setSelectedAiDev] = useState<Developer | null>(null)
   const [tab, setTab]                   = useState<Tab>('wellbeing')
@@ -56,6 +59,8 @@ export function BurnoutRisk() {
     [visibleDevelopers, teamRefs],
   )
 
+  if (isLoading) return <PageSkeleton />
+
   return (
     <div className="relative">
       <div className="mb-6">
@@ -68,7 +73,11 @@ export function BurnoutRisk() {
         {([['wellbeing', 'Wellbeing'], ['ai-effort', 'AI Effort']] as [Tab, string][]).map(([key, label]) => (
           <button
             key={key}
-            onClick={() => setTab(key)}
+            onClick={() => {
+              setTab(key)
+              if (key === 'wellbeing') setSelectedAiDev(null)
+              if (key === 'ai-effort') setSelected(null)
+            }}
             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
               tab === key
                 ? 'bg-card text-text-primary shadow-sm'
@@ -131,7 +140,7 @@ export function BurnoutRisk() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
                         <span className="text-text-primary text-sm font-medium truncate">{dev.name}</span>
-                        <RiskBadge level={dev.riskLevel} />
+                        <RiskBadge level={dev.riskLevel} developerName={dev.name} />
                       </div>
                       <p className="text-text-secondary text-xs truncate">{dev.riskSignal}</p>
                     </div>
@@ -151,7 +160,7 @@ export function BurnoutRisk() {
                     <span className="text-text-secondary text-sm self-center truncate">
                       {dev.teamId.replace('team-', '').replace('-', ' ')}
                     </span>
-                    <span className="self-center"><RiskBadge level={dev.riskLevel} /></span>
+                    <span className="self-center"><RiskBadge level={dev.riskLevel} developerName={dev.name} /></span>
                     <span className="text-text-secondary text-xs self-center leading-relaxed">{dev.riskSignal}</span>
                     <span className="text-text-secondary text-xs self-center">{dev.lastActive}</span>
                     <span className="self-center"><TrendIcon trend={dev.velocityTrend} /></span>
@@ -177,7 +186,12 @@ export function BurnoutRisk() {
             <div className="hidden md:grid grid-cols-[1fr_110px_110px_80px_100px] gap-4 px-5 py-3 border-b border-border text-text-secondary text-xs font-medium uppercase tracking-wider">
               <span>Developer</span>
               <span>Daily Avg (credits)</span>
-              <span>Effort Score</span>
+              <span
+                title="AI Credits Used ÷ Story Points. Higher = more AI effort per unit of work."
+                className="cursor-help underline decoration-dotted"
+              >
+                Effort Score
+              </span>
               <span>Trend</span>
               <span>Status</span>
             </div>

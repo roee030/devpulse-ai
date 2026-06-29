@@ -26,7 +26,14 @@ export function IntegrationCard({ integration, onConnect }: Props) {
         <Icon className="w-5 h-5 text-slate-300" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-slate-200">{integration.label}</p>
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium text-slate-200">{integration.label}</p>
+          {integration.badge && (
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+              {integration.badge}
+            </span>
+          )}
+        </div>
         <p className="text-xs text-slate-500 truncate">{integration.description}</p>
       </div>
       <div className="flex items-center gap-2 shrink-0">

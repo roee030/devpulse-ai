@@ -14,6 +14,7 @@ interface Props {
   color?: 'default' | 'danger' | 'warning' | 'success'
   delay?: number
   dragMode?: boolean
+  testId?: string
 }
 
 const colorMap = {
@@ -23,11 +24,12 @@ const colorMap = {
   success: 'text-success',
 }
 
-export function MetricCard({ label, value, unit, trend, trendLabel, icon, color = 'default', delay = 0, dragMode = false }: Props) {
+export function MetricCard({ label, value, unit, trend, trendLabel, icon, color = 'default', delay = 0, dragMode = false, testId }: Props) {
   const animated = useCountUp(value)
 
   return (
     <motion.div
+      data-testid={testId}
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay }}
