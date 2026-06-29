@@ -1,152 +1,137 @@
 // scripts/seed-sandbox.ts
-// Populates mock API sandboxes with known test data.
-// Usage: npx ts-node scripts/seed-sandbox.ts
+// Seed ALL connected platforms (Jira, Linear, Monday) with known test data via Unified.to SDK.
+// Usage: npx tsx scripts/seed-sandbox.ts
+import { UnifiedTo } from '@unified-api/typescript-sdk'
 
-const JIRA_BASE    = process.env.JIRA_SANDBOX_URL    ?? 'http://localhost:8080/jira'
-const GITHUB_BASE  = process.env.GITHUB_SANDBOX_URL  ?? 'http://localhost:8080/github'
-const SLACK_BASE   = process.env.SLACK_SANDBOX_URL   ?? 'http://localhost:8080/slack'
-const JIRA_TOKEN   = process.env.JIRA_API_TOKEN       ?? 'test-token'
-const GITHUB_TOKEN = process.env.GITHUB_API_TOKEN     ?? 'test-token'
-const SLACK_TOKEN  = process.env.SLACK_API_TOKEN      ?? 'test-token'
+const UNIFIED_API_KEY = process.env.UNIFIED_API_KEY ?? ''
 
-async function post(url: string, token: string, body: unknown) {
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+if (!UNIFIED_API_KEY) {
+  console.warn('[seed] WARNING: UNIFIED_API_KEY not set — API calls will fail auth.')
+}
+
+const sdk = new UnifiedTo({ security: { jwt: UNIFIED_API_KEY } })
+
+// All task management platforms to seed
+const TASK_PLATFORMS = [
+  { name: 'Jira',   connectionId: process.env.UNIFIED_JIRA_CONNECTION_ID ?? '' },
+  { name: 'Linear', connectionId: process.env.UNIFIED_LINEAR_CONNECTION_ID ?? '' },
+  { name: 'Monday', connectionId: process.env.UNIFIED_MONDAY_CONNECTION_ID ?? '' },
+]
+
+// Messaging platforms for alert routing
+const MSG_PLATFORMS = [
+  { name: 'Slack', connectionId: process.env.UNIFIED_SLACK_CONNECTION_ID ?? '' },
+  { name: 'Teams', connectionId: process.env.UNIFIED_TEAMS_CONNECTION_ID ?? '' },
+]
+
+// ── Seed task platforms ───────────────────────────────────────────────────────
+
+async function seedTaskPlatform(name: string, connectionId: string) {
+  if (!connectionId) {
+    console.log(`[seed] Skipping ${name} — no connection ID set`)
+    return
+  }
+  console.log(`[seed] Seeding ${name} (${connectionId})…`)
+
+  // Create the sprint project
+  const project = await sdk.task.createTaskProject({
+    connectionId,
+    taskProject: { name: 'Sprint 24 — Auth Refactor' },
   })
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(`POST ${url} failed ${res.status}: ${text}`)
+  console.log(`[seed] ${name}: project created → ${project.id}`)
+
+  // Tasks matching the known test data
+  const tasks: Array<{ name: string; assignee: string; points: string; status: string }> = [
+    { name: 'DP-1: Auth Service Refactor',  assignee: 'noa.levi',     points: '5',  status: 'IN_PROGRESS' },
+    { name: 'DP-2: Payment Module Fix',     assignee: 'avi.shapiro',  points: '3',  status: 'COMPLETED' },
+    { name: 'DP-3: Mobile Login Bug',       assignee: 'tom.levi',     points: '8',  status: 'OPENED' },
+    { name: 'DP-4: UI Component Update',    assignee: 'dana.mizrahi', points: '3',  status: 'IN_PROGRESS' },
+  ]
+
+  for (const t of tasks) {
+    const task = await sdk.task.createTaskTask({
+      connectionId,
+      taskTask: {
+        name: t.name,
+        projectId: project.id,
+        status: t.status as 'IN_PROGRESS' | 'COMPLETED' | 'OPENED',
+        notes: `Points: ${t.points} | Assignee: ${t.assignee}`,
+        tags: [t.assignee, `points:${t.points}`],
+      },
+    })
+    const isBlocked = t.name.includes('DP-3')
+    console.log(`[seed] ${name}: task "${t.name}" (${task.id}) — ${isBlocked ? 'BLOCKED' : t.status}`)
   }
-  return res.json()
 }
 
-// ── Jira sandbox ─────────────────────────────────────────────────────────────
+// ── Seed repo (stale PR + late-night commits) ─────────────────────────────────
+// Only Jira connection maps to a repo; Linear/Monday don't have PR data.
 
-async function seedJira() {
-  console.log('[seed] Seeding Jira sandbox…')
+async function seedRepoPlatform(connectionId: string) {
+  if (!connectionId) return
+  console.log('[seed] Seeding stale PR via repo connection…')
 
-  // 1 sprint, 84 story points total
-  const sprint = await post(`${JIRA_BASE}/sprint`, JIRA_TOKEN, {
-    name: 'Sprint 24',
-    startDate: '2025-06-01',
-    endDate: '2025-06-14',
-    totalPoints: 84,
+  const threeDaysAgo = new Date(Date.now() - 3 * 24 * 3600 * 1000)
+
+  const pr = await sdk.repo.createRepoPullrequest({
+    connectionId,
+    repoPullrequest: {
+      status: 'PENDING',
+      createdAt: threeDaysAgo,
+      userIds: ['noa.levi'],
+      labels: ['feat', 'auth-service'],
+    },
   })
-
-  const tasks = [
-    { title: 'Implement payment gateway',   assignee: 'tom.levi',  points: 13, status: 'blocked',     blocker: 'API keys not provisioned' },
-    { title: 'Design mobile auth flow',     assignee: 'noa.levi',  points: 8,  status: 'in-progress', blocker: null },
-    { title: 'Backend user service refactor', assignee: 'alice.chen', points: 5, status: 'done',       blocker: null },
-    { title: 'Set up CI pipeline',          assignee: 'david.kim', points: 3,  status: 'todo',        blocker: null },
-    { title: 'Fix authentication bug',      assignee: 'sara.cohen', points: 5, status: 'in-progress', blocker: null },
-    { title: 'Write API documentation',     assignee: 'tom.levi',  points: 2,  status: 'blocked',     blocker: 'Waiting on backend spec' },
-    { title: 'Performance optimization',    assignee: 'noa.levi',  points: 8,  status: 'todo',        blocker: null },
-    { title: 'Database migration scripts',  assignee: 'david.kim', points: 5,  status: 'in-progress', blocker: null },
-  ]
-
-  for (const task of tasks) {
-    await post(`${JIRA_BASE}/task`, JIRA_TOKEN, { ...task, sprintId: sprint.id })
-  }
-
-  console.log(`[seed] Jira: 1 sprint (${sprint.id}), ${tasks.length} tasks seeded`)
+  console.log(`[seed] Stale PR created (open 3+ days) → ${pr.id}`)
 }
 
-// ── GitHub sandbox ────────────────────────────────────────────────────────────
+// ── Seed messaging platforms ──────────────────────────────────────────────────
 
-async function seedGitHub() {
-  console.log('[seed] Seeding GitHub sandbox…')
-
-  const prs = [
-    {
-      number: 247,
-      title: 'feat: add payment gateway integration',
-      author: 'tom.levi',
-      status: 'open',
-      createdAt: new Date(Date.now() - 26 * 3600 * 1000).toISOString(), // stale 26h
-      reviewers: ['alice.chen'],
-    },
-    {
-      number: 248,
-      title: 'fix: resolve mobile auth redirect loop',
-      author: 'noa.levi',
-      status: 'open',
-      createdAt: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
-      reviewers: ['david.kim'],
-    },
-    {
-      number: 246,
-      title: 'refactor: user service layer',
-      author: 'alice.chen',
-      status: 'approved',
-      createdAt: new Date(Date.now() - 8 * 3600 * 1000).toISOString(),
-      reviewers: ['sara.cohen'],
-    },
-  ]
-
-  for (const pr of prs) {
-    await post(`${GITHUB_BASE}/pull-request`, GITHUB_TOKEN, pr)
+async function seedMessagingPlatform(name: string, connectionId: string) {
+  if (!connectionId) {
+    console.log(`[seed] Skipping ${name} messaging — no connection ID`)
+    return
   }
-
-  // Late-night commits (between 23:00–03:00) by noa.levi
-  const lateCommits = [
-    { author: 'noa.levi', message: 'wip: mobile auth progress', time: '23:45' },
-    { author: 'noa.levi', message: 'fix: token refresh logic',  time: '01:20' },
-    { author: 'noa.levi', message: 'debug: session persistence', time: '02:50' },
-  ]
-
-  for (const commit of lateCommits) {
-    const ts = new Date()
-    const [h, m] = commit.time.split(':').map(Number)
-    ts.setHours(h, m, 0, 0)
-    await post(`${GITHUB_BASE}/commit`, GITHUB_TOKEN, { ...commit, timestamp: ts.toISOString() })
-  }
-
-  console.log(`[seed] GitHub: ${prs.length} PRs, ${lateCommits.length} late-night commits seeded`)
-}
-
-// ── Slack sandbox ─────────────────────────────────────────────────────────────
-
-async function seedSlack() {
-  console.log('[seed] Seeding Slack sandbox…')
+  console.log(`[seed] Seeding ${name} alerts (${connectionId})…`)
 
   const messages = [
-    {
-      channel: '#dev-alerts',
-      text: '🚨 *Sprint Alert*: Sprint 24 is 62% complete with 3 days remaining. 4 tasks are blocked.',
-      timestamp: new Date().toISOString(),
-    },
-    {
-      channel: '#dev-alerts',
-      text: '⚠️ *Burnout Signal*: Tom Levi has been active past midnight 3 nights this week. Consider a check-in.',
-      timestamp: new Date().toISOString(),
-    },
-    {
-      channel: '#dev-alerts',
-      text: '🔴 *Stale PR*: PR #247 by tom.levi has been open for 26+ hours without review.',
-      timestamp: new Date().toISOString(),
-    },
+    '🚨 *Sprint Alert*: Sprint 24 at 62% with 3 days remaining — 4 tasks are blocked.',
+    '⚠️ *Burnout Signal*: noa.levi has committed past 23:00 for 4 consecutive nights.',
+    '🔴 *Stale PR*: PR by noa.levi (feat: auth service) open 3+ days without review.',
   ]
 
-  for (const msg of messages) {
-    await post(`${SLACK_BASE}/message`, SLACK_TOKEN, msg)
+  for (const text of messages) {
+    await sdk.message.createMessagingMessage({
+      connectionId,
+      messagingMessage: { message: text },
+    })
   }
-
-  console.log(`[seed] Slack: ${messages.length} messages seeded`)
+  console.log(`[seed] ${name}: ${messages.length} alert messages seeded`)
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
-  console.log('[seed] Starting sandbox seed…')
-  try {
-    await Promise.all([seedJira(), seedGitHub(), seedSlack()])
-    console.log('[seed] All sandboxes seeded successfully ✓')
-  } catch (e) {
-    console.error('[seed] Seed failed:', e)
-    process.exit(1)
-  }
+  console.log('[seed] Starting Unified.to sandbox seed…\n')
+
+  // Seed all task platforms in parallel
+  await Promise.all(
+    TASK_PLATFORMS.map(p => seedTaskPlatform(p.name, p.connectionId))
+  )
+
+  // Seed repo data (use Jira connection as proxy for GitHub PRs)
+  const repoConnectionId = process.env.UNIFIED_JIRA_CONNECTION_ID ?? ''
+  await seedRepoPlatform(repoConnectionId)
+
+  // Seed messaging platforms in parallel
+  await Promise.all(
+    MSG_PLATFORMS.map(p => seedMessagingPlatform(p.name, p.connectionId))
+  )
+
+  console.log('\n[seed] All platforms seeded successfully ✓')
 }
 
-main()
+main().catch(e => {
+  console.error('[seed] Seed failed:', e)
+  process.exit(1)
+})

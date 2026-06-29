@@ -9,7 +9,7 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - uses: actions/checkout@v4
@@ -26,21 +26,27 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Seed sandbox data
-        run: npx ts-node scripts/seed-sandbox.ts
+      - name: Seed all platforms via Unified.to
+        run: npx tsx scripts/seed-sandbox.ts
         env:
-          JIRA_SANDBOX_URL: ${{ secrets.JIRA_SANDBOX_URL }}
-          GITHUB_SANDBOX_URL: ${{ secrets.GITHUB_SANDBOX_URL }}
-          SLACK_SANDBOX_URL: ${{ secrets.SLACK_SANDBOX_URL }}
-          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-          GITHUB_API_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
-          SLACK_API_TOKEN: ${{ secrets.SLACK_API_TOKEN }}
+          UNIFIED_API_KEY: ${{ secrets.UNIFIED_API_KEY }}
+          UNIFIED_JIRA_CONNECTION_ID: ${{ secrets.UNIFIED_JIRA_CONNECTION_ID }}
+          UNIFIED_LINEAR_CONNECTION_ID: ${{ secrets.UNIFIED_LINEAR_CONNECTION_ID }}
+          UNIFIED_MONDAY_CONNECTION_ID: ${{ secrets.UNIFIED_MONDAY_CONNECTION_ID }}
+          UNIFIED_SLACK_CONNECTION_ID: ${{ secrets.UNIFIED_SLACK_CONNECTION_ID }}
+          UNIFIED_TEAMS_CONNECTION_ID: ${{ secrets.UNIFIED_TEAMS_CONNECTION_ID }}
         continue-on-error: true
 
-      - name: Run Playwright E2E tests
+      - name: Run Playwright E2E tests (all platforms × all scenarios)
         run: npx playwright test
         env:
           CI: true
+          UNIFIED_API_KEY: ${{ secrets.UNIFIED_API_KEY }}
+          UNIFIED_JIRA_CONNECTION_ID: ${{ secrets.UNIFIED_JIRA_CONNECTION_ID }}
+          UNIFIED_LINEAR_CONNECTION_ID: ${{ secrets.UNIFIED_LINEAR_CONNECTION_ID }}
+          UNIFIED_MONDAY_CONNECTION_ID: ${{ secrets.UNIFIED_MONDAY_CONNECTION_ID }}
+          UNIFIED_SLACK_CONNECTION_ID: ${{ secrets.UNIFIED_SLACK_CONNECTION_ID }}
+          UNIFIED_TEAMS_CONNECTION_ID: ${{ secrets.UNIFIED_TEAMS_CONNECTION_ID }}
 
       - name: Upload HTML report on failure
         uses: actions/upload-artifact@v4
