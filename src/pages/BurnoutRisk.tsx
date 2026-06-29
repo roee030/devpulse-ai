@@ -73,6 +73,7 @@ export function BurnoutRisk() {
         {([['wellbeing', 'Wellbeing'], ['ai-effort', 'AI Effort']] as [Tab, string][]).map(([key, label]) => (
           <button
             key={key}
+            data-testid={`tab-${key}`}
             onClick={() => {
               setTab(key)
               if (key === 'wellbeing') setSelectedAiDev(null)
@@ -233,7 +234,10 @@ export function BurnoutRisk() {
                         <span className="text-text-primary text-sm font-medium truncate">{dev.name}</span>
                       </div>
                       <span className="text-text-primary text-sm font-medium">{avgCredits}</span>
-                      <span className="text-text-primary text-sm font-medium">{profile.aiEffortScore}</span>
+                      <span
+                        data-testid={`ai-effort-score-${dev.name.toLowerCase().replace(/\s+/g, '-')}`}
+                        className="text-text-primary text-sm font-medium"
+                      >{profile.aiEffortScore}</span>
                       <span><AiTrendIcon trend={profile.efficiencyTrend} /></span>
                       <span><AiEffortBadge score={profile.aiEffortScore} /></span>
                     </div>

@@ -16,6 +16,7 @@ import { Roadmap } from './pages/Roadmap'
 import { AnnualView } from './pages/AnnualView'
 import { IntegrationsPage } from './pages/Settings/IntegrationsPage'
 import { CompanyPage } from './pages/Settings/CompanyPage'
+import { Simulate } from './pages/Simulate'
 
 const pageVariants = {
   initial: { opacity: 0, y: 16 },
@@ -52,6 +53,7 @@ function AnimatedRoutes() {
           <Route path="/annual"    element={<AnnualView />} />
           <Route path="/settings/integrations" element={<IntegrationsPage />} />
           <Route path="/settings/company"      element={<CompanyPage />} />
+          <Route path="/simulate"              element={<Simulate />} />
         </Routes>
       </motion.div>
     </AnimatePresence>

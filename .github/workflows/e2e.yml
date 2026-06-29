@@ -9,7 +9,7 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
 
     steps:
       - uses: actions/checkout@v4
@@ -37,8 +37,34 @@ jobs:
           UNIFIED_TEAMS_CONNECTION_ID: ${{ secrets.UNIFIED_TEAMS_CONNECTION_ID }}
         continue-on-error: true
 
+      - name: Run Company Simulation (14 days)
+        run: npx tsx scripts/simulate-company.ts
+        env:
+          UNIFIED_API_KEY: ${{ secrets.UNIFIED_API_KEY }}
+          UNIFIED_JIRA_CONNECTION_ID: ${{ secrets.UNIFIED_JIRA_CONNECTION_ID }}
+          UNIFIED_SLACK_CONNECTION_ID: ${{ secrets.UNIFIED_SLACK_CONNECTION_ID }}
+          SIM_JIRA_USER_CTO:  ${{ secrets.SIM_JIRA_USER_CTO }}
+          SIM_JIRA_USER_DIV:  ${{ secrets.SIM_JIRA_USER_DIV }}
+          SIM_JIRA_USER_LEAD: ${{ secrets.SIM_JIRA_USER_LEAD }}
+          SIM_JIRA_USER_DEV1: ${{ secrets.SIM_JIRA_USER_DEV1 }}
+          SIM_JIRA_USER_DEV2: ${{ secrets.SIM_JIRA_USER_DEV2 }}
+          SIM_JIRA_USER_DEV3: ${{ secrets.SIM_JIRA_USER_DEV3 }}
+          SIM_GITHUB_USER_CTO:  ${{ secrets.SIM_GITHUB_USER_CTO }}
+          SIM_GITHUB_USER_DIV:  ${{ secrets.SIM_GITHUB_USER_DIV }}
+          SIM_GITHUB_USER_LEAD: ${{ secrets.SIM_GITHUB_USER_LEAD }}
+          SIM_GITHUB_USER_DEV1: ${{ secrets.SIM_GITHUB_USER_DEV1 }}
+          SIM_GITHUB_USER_DEV2: ${{ secrets.SIM_GITHUB_USER_DEV2 }}
+          SIM_GITHUB_USER_DEV3: ${{ secrets.SIM_GITHUB_USER_DEV3 }}
+          SIM_SLACK_USER_CTO:  ${{ secrets.SIM_SLACK_USER_CTO }}
+          SIM_SLACK_USER_DIV:  ${{ secrets.SIM_SLACK_USER_DIV }}
+          SIM_SLACK_USER_LEAD: ${{ secrets.SIM_SLACK_USER_LEAD }}
+          SIM_SLACK_USER_DEV1: ${{ secrets.SIM_SLACK_USER_DEV1 }}
+          SIM_SLACK_USER_DEV2: ${{ secrets.SIM_SLACK_USER_DEV2 }}
+          SIM_SLACK_USER_DEV3: ${{ secrets.SIM_SLACK_USER_DEV3 }}
+        continue-on-error: true
+
       - name: Run Playwright E2E tests (all platforms × all scenarios)
-        run: npx playwright test
+        run: npx playwright test --ignore=tests/e2e/simulation-verify.spec.ts
         env:
           CI: true
           UNIFIED_API_KEY: ${{ secrets.UNIFIED_API_KEY }}
@@ -47,6 +73,14 @@ jobs:
           UNIFIED_MONDAY_CONNECTION_ID: ${{ secrets.UNIFIED_MONDAY_CONNECTION_ID }}
           UNIFIED_SLACK_CONNECTION_ID: ${{ secrets.UNIFIED_SLACK_CONNECTION_ID }}
           UNIFIED_TEAMS_CONNECTION_ID: ${{ secrets.UNIFIED_TEAMS_CONNECTION_ID }}
+
+      - name: Verify Simulation Results
+        run: npx playwright test tests/e2e/simulation-verify.spec.ts
+        env:
+          CI: true
+          UNIFIED_API_KEY: ${{ secrets.UNIFIED_API_KEY }}
+          UNIFIED_JIRA_CONNECTION_ID: ${{ secrets.UNIFIED_JIRA_CONNECTION_ID }}
+          UNIFIED_SLACK_CONNECTION_ID: ${{ secrets.UNIFIED_SLACK_CONNECTION_ID }}
 
       - name: Upload HTML report on failure
         uses: actions/upload-artifact@v4

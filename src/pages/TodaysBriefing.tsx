@@ -56,7 +56,7 @@ function BriefingCard({
 
 // ── Section ───────────────────────────────────────────────────────────────────
 function Section({
-  icon: Icon, label, color, items, tint, startDelay,
+  icon: Icon, label, color, items, tint, startDelay, testId,
 }: {
   icon: typeof AlertTriangle
   label: string
@@ -64,6 +64,7 @@ function Section({
   items: BriefingItem[]
   tint: 'red' | 'yellow' | 'green'
   startDelay: number
+  testId?: string
 }) {
   if (items.length === 0) return null
   return (
@@ -73,7 +74,7 @@ function Section({
         <span className="text-sm font-semibold uppercase tracking-wider">{label}</span>
         <span className="ml-auto text-xs font-medium opacity-70">{items.length}</span>
       </div>
-      <div className="space-y-3">
+      <div className="space-y-3" data-testid={testId}>
         {items.map((item, i) => (
           <BriefingCard key={item.id} item={item} tint={tint} delay={startDelay + i * 0.05} />
         ))}
@@ -302,6 +303,7 @@ export function TodaysBriefing() {
           items={needsAction}
           tint="red"
           startDelay={0.1}
+          testId="needs-action-list"
         />
         <Section
           icon={Eye}
