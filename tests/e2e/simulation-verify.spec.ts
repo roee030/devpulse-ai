@@ -107,13 +107,13 @@ test.describe('Simulation Verify — Signal Detection', () => {
     expect(await criticals.count()).toBeGreaterThanOrEqual(1)
   })
 
-  test('burnout — tom.levi-pattern developer shows critical risk', async ({ page }) => {
+  test('burnout — lihi.ben-moshe-pattern developer shows critical risk', async ({ page }) => {
     await page.goto(BASE + '/burnout')
     await page.waitForLoadState('networkidle')
     await page.waitForTimeout(700)
 
-    const risk = await getRiskBadge(page, 'tom.levi')
-    // In demo mode: mock data has a critical developer matching the burnout pattern
+    // In demo mode: Lihi Ben-Moshe is the critical developer (late night commits + stale PR)
+    const risk = await getRiskBadge(page, 'lihi.ben-moshe')
     expect(risk).toBe('critical')
   })
 
@@ -122,12 +122,11 @@ test.describe('Simulation Verify — Signal Detection', () => {
     await page.waitForLoadState('networkidle')
     await page.waitForTimeout(700)
 
-    // Click first critical risk developer
-    const criticalRow = page.locator('[data-testid^="risk-badge-"]')
+    // Click the badge directly — click bubbles up to the row's onClick handler
+    const criticalBadge = page.locator('[data-testid^="risk-badge-"]')
       .filter({ hasText: 'Critical' })
-      .locator('../..')
       .first()
-    await criticalRow.click()
+    await criticalBadge.click()
     await expect(page.locator('text=Activity — Last 4 Weeks')).toBeVisible({ timeout: 5_000 })
   })
 
@@ -246,7 +245,7 @@ test.describe('Simulation Verify — Signal Detection', () => {
     // Should see burnout detection
     await expect(page.locator('text=Burnout: tom.levi')).toBeVisible({ timeout: 5_000 })
     // Should see sprint risk
-    await expect(page.locator('text=Sprint Risk')).toBeVisible()
+    await expect(page.locator('text=Sprint Risk').first()).toBeVisible()
     // Should see stale PR
     await expect(page.locator('text=Stale PR')).toBeVisible()
   })
