@@ -7,13 +7,14 @@ import {
 import { auth } from '../lib/firebase'
 
 const DEMO_KEY = 'devpulse-demo-auth'
-const isDemoMode = !import.meta.env.VITE_FIREBASE_API_KEY
+const hasFirebase = !!import.meta.env.VITE_FIREBASE_API_KEY
 
 interface AuthContextValue {
   firebaseUser: FirebaseUser | null
   isLoggedIn: boolean
   isAuthLoading: boolean
   loginWithGoogle: () => Promise<void>
+  loginWithDemo: () => void
   logout: () => Promise<void>
 }
 
@@ -22,12 +23,15 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null)
   const [isDemoLoggedIn, setIsDemoLoggedIn] = useState(() =>
-    isDemoMode && localStorage.getItem(DEMO_KEY) === 'true',
+    localStorage.getItem(DEMO_KEY) === 'true',
   )
-  const [isAuthLoading, setIsAuthLoading] = useState(!isDemoMode)
+  const [isAuthLoading, setIsAuthLoading] = useState(hasFirebase)
 
   useEffect(() => {
-    if (isDemoMode || !auth) return
+    if (!hasFirebase || !auth) {
+      setIsAuthLoading(false)
+      return
+    }
     return onAuthStateChanged(auth, user => {
       setFirebaseUser(user)
       setIsAuthLoading(false)
@@ -35,27 +39,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const loginWithGoogle = async () => {
-    if (isDemoMode) {
-      localStorage.setItem(DEMO_KEY, 'true')
-      setIsDemoLoggedIn(true)
+    if (!hasFirebase) {
+      loginWithDemo()
       return
     }
     if (auth) await signInWithPopup(auth, new GoogleAuthProvider())
   }
 
-  const logout = async () => {
-    if (isDemoMode) {
-      localStorage.removeItem(DEMO_KEY)
-      setIsDemoLoggedIn(false)
-      return
-    }
-    if (auth) await signOut(auth)
+  const loginWithDemo = () => {
+    localStorage.setItem(DEMO_KEY, 'true')
+    setIsDemoLoggedIn(true)
   }
 
-  const isLoggedIn = isDemoMode ? isDemoLoggedIn : firebaseUser !== null
+  const logout = async () => {
+    localStorage.removeItem(DEMO_KEY)
+    setIsDemoLoggedIn(false)
+    if (hasFirebase && auth) await signOut(auth)
+    setFirebaseUser(null)
+  }
+
+  const isLoggedIn = isDemoLoggedIn || firebaseUser !== null
 
   return (
-    <AuthContext.Provider value={{ firebaseUser, isLoggedIn, isAuthLoading, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ firebaseUser, isLoggedIn, isAuthLoading, loginWithGoogle, loginWithDemo, logout }}>
       {children}
     </AuthContext.Provider>
   )
