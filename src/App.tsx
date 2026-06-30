@@ -18,6 +18,7 @@ import { AnnualView } from './pages/AnnualView'
 import { IntegrationsPage } from './pages/Settings/IntegrationsPage'
 import { CompanyPage } from './pages/Settings/CompanyPage'
 import { Simulate } from './pages/Simulate'
+import { AIEffort } from './pages/AIEffort'
 
 const pageVariants = {
   initial: { opacity: 0, y: 16 },
@@ -52,6 +53,7 @@ function AnimatedRoutes() {
           <Route path="/roi"       element={<ROICalculator />} />
           <Route path="/roadmap"   element={<Roadmap />} />
           <Route path="/annual"    element={<AnnualView />} />
+          <Route path="/ai-effort"              element={<AIEffort />} />
           <Route path="/settings/integrations" element={<IntegrationsPage />} />
           <Route path="/settings/company"      element={<CompanyPage />} />
           <Route path="/simulate"              element={<Simulate />} />

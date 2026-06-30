@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   Zap, LayoutDashboard, TrendingUp, User, AlertTriangle,
-  Calculator, Map, Calendar, Plug, Building2,
+  Calculator, Map, Calendar, Plug, Building2, Cpu,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useUnifiedData, IS_UNIFIED_LIVE } from '../../context/UnifiedDataContext'
@@ -17,6 +17,7 @@ const navItems = [
   { path: '/roadmap',  icon: Map,             label: 'Roadmap',             shortcut: 'R' },
   { path: '/annual',   icon: Calendar,        label: 'Annual View',         shortcut: 'A' },
   { path: '/roi',      icon: Calculator,      label: 'ROI Calculator',      shortcut: undefined },
+  { path: '/ai-effort', icon: Cpu,            label: 'AI Effort',           shortcut: undefined },
 ]
 
 const settingsItems = [

@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "DevPulse Copilot Tracker",
+  "version": "1.0.0",
+  "description": "Intercepts GitHub Copilot API calls and sends token usage to the local DevPulse agent for per-task attribution.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://api.github.com/*",
+    "https://copilot-proxy.githubusercontent.com/*",
+    "http://localhost:9339/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://github.com/*",
+        "https://copilot.github.com/*",
+        "https://*.vscode.dev/*",
+        "https://vscode.dev/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "DevPulse Copilot Tracker"
+  }
+}
