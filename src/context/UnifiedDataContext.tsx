@@ -430,7 +430,17 @@ export function UnifiedDataProvider({ children }: { children: ReactNode }) {
     const allPRs      = githubPRs.status    === 'fulfilled' ? githubPRs.value    : []
     const allMembers  = hrisMembers.status  === 'fulfilled' ? hrisMembers.value  : []
     const allMessages = slackMsgs.status    === 'fulfilled' ? slackMsgs.value    : []
-    const allChannels = slackChannels.status === 'fulfilled' ? slackChannels.value : []
+    // Use API-listed channels; fall back to channels inferred from message channelIds
+    const apiChannels = slackChannels.status === 'fulfilled' ? slackChannels.value : []
+    const allMessages_tmp = slackMsgs.status === 'fulfilled' ? slackMsgs.value : []
+    const inferredChannels: typeof apiChannels = apiChannels.length === 0
+      ? [...new Map(
+          allMessages_tmp
+            .filter(m => m.channelId)
+            .map(m => [m.channelId, { id: m.channelId, name: m.channel || m.channelId, description: '' }])
+        ).values()]
+      : []
+    const allChannels = apiChannels.length > 0 ? apiChannels : inferredChannels
 
     const connections: ConnectionStatus = {
       jira:   jiraTasks.status   === 'fulfilled' && jiraTasks.value.length   > 0,
