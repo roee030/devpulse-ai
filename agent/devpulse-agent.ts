@@ -13,15 +13,20 @@
  */
 
 import http from 'node:http'
+import https from 'node:https'
 import { spawnSync } from 'node:child_process'
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 
 // ── Config ─────────────────────────────────────────────────────────────────────
 
-const PORT        = 9339
-const LOG_FILE    = join(process.cwd(), '.devpulse-ai-effort.json')
-const TASK_REGEX  = /([A-Z][A-Z0-9_]+-\d+)/   // Jira-style: PROJ-123, DEV-42
+const PORT         = 9339
+const LOG_FILE     = join(process.cwd(), '.devpulse-ai-effort.json')
+const TASK_REGEX   = /([A-Z][A-Z0-9_]+-\d+)/   // Jira-style: PROJ-123, DEV-42
+// Firebase REST API — no SDK needed in the agent
+const FB_PROJECT   = process.env.FIREBASE_PROJECT_ID ?? 'devpulse-342c9'
+const FB_API_KEY   = process.env.FIREBASE_API_KEY    ?? ''
+const WORKSPACE_ID = 'devpulse'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -69,6 +74,31 @@ function loadLog(): CopilotEvent[] {
 
 function saveLog(events: CopilotEvent[]): void {
   writeFileSync(LOG_FILE, JSON.stringify(events, null, 2), 'utf8')
+}
+
+// Push a single event to Firestore via REST (no SDK needed)
+function pushToFirebase(event: CopilotEvent): void {
+  if (!FB_API_KEY) return
+  const url  = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/ai_effort?key=${FB_API_KEY}`
+  const body = JSON.stringify({
+    fields: {
+      workspaceId:      { stringValue: WORKSPACE_ID },
+      timestamp:        { timestampValue: event.timestamp },
+      userId:           { stringValue: event.user ?? 'unknown' },
+      userName:         { stringValue: event.user ?? 'unknown' },
+      branch:           { stringValue: event.branch },
+      taskId:           event.taskId ? { stringValue: event.taskId } : { nullValue: null },
+      promptTokens:     { integerValue: String(event.promptTokens) },
+      completionTokens: { integerValue: String(event.completionTokens) },
+      totalTokens:      { integerValue: String(event.totalTokens) },
+      model:            { stringValue: event.model },
+      source:           { stringValue: event.source },
+    },
+  })
+  const req = https.request(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } })
+  req.on('error', () => { /* best-effort */ })
+  req.write(body)
+  req.end()
 }
 
 function summary(events: CopilotEvent[]) {
@@ -121,6 +151,7 @@ const server = http.createServer((req, res) => {
         const events = loadLog()
         events.push(event)
         saveLog(events)
+        pushToFirebase(event)   // async fire-and-forget to Firestore
 
         const label = event.taskId ? `[${event.taskId}]` : '[unattributed]'
         console.log(`+${event.totalTokens} tokens ${label}  (${event.source}, ${branch})`)
