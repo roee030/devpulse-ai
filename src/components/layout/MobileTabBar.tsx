@@ -1,13 +1,13 @@
 // src/components/layout/MobileTabBar.tsx
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, TrendingUp, User, AlertTriangle, Calculator } from 'lucide-react'
+import { Zap, LayoutDashboard, TrendingUp, AlertTriangle, Map } from 'lucide-react'
 
 const tabs = [
-  { path: '/',         icon: LayoutDashboard, label: 'Dashboard' },
-  { path: '/sprint',   icon: TrendingUp,      label: 'Sprint' },
-  { path: '/briefing', icon: User,            label: 'Briefing' },
-  { path: '/burnout',  icon: AlertTriangle,   label: 'Burnout' },
-  { path: '/roi',      icon: Calculator,      label: 'ROI' },
+  { path: '/today',   icon: Zap,             label: 'Today'     },
+  { path: '/',        icon: LayoutDashboard, label: 'Dashboard' },
+  { path: '/sprint',  icon: TrendingUp,      label: 'Sprint'    },
+  { path: '/burnout', icon: AlertTriangle,   label: 'Burnout'   },
+  { path: '/roadmap', icon: Map,             label: 'Roadmap'   },
 ]
 
 export function MobileTabBar() {

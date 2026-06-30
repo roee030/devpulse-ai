@@ -69,6 +69,7 @@ export function DeveloperCard({ dev, delay = 0, expanded = false, onToggle }: De
 
   return (
     <motion.div
+      data-testid="developer-card"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay }}

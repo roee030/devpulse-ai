@@ -31,7 +31,7 @@ export function SprintPrediction() {
       <div className="mb-6">
         <div className="flex items-start justify-between gap-3">
           <h1 className="text-xl md:text-2xl font-bold text-text-primary">Sprint Prediction</h1>
-          <span className="flex-shrink-0 bg-success/10 text-success border border-success/20 text-xs font-semibold px-2.5 py-1 rounded-full">
+          <span data-testid="sprint-prediction" className="flex-shrink-0 bg-success/10 text-success border border-success/20 text-xs font-semibold px-2.5 py-1 rounded-full">
             {completionPct}% predicted
           </span>
         </div>

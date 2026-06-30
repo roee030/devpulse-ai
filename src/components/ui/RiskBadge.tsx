@@ -8,10 +8,13 @@ const config: Record<RiskLevel, { label: string; dot: string; text: string }> = 
   critical: { label: 'Critical', dot: 'bg-danger',   text: 'text-danger' },
 }
 
-export function RiskBadge({ level }: { level: RiskLevel }) {
+export function RiskBadge({ level, developerName }: { level: RiskLevel; developerName?: string }) {
   const c = config[level]
+  const testId = developerName
+    ? `risk-badge-${developerName.toLowerCase().replace(/\s+/g, '-')}`
+    : undefined
   return (
-    <span className="flex items-center gap-1.5">
+    <span data-testid={testId} className="flex items-center gap-1.5">
       <span className={`w-2 h-2 rounded-full ${c.dot} ${level === 'critical' ? 'pulse-red' : ''}`} />
       <span className={`text-xs font-medium ${c.text}`}>{c.label}</span>
     </span>

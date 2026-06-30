@@ -18,7 +18,8 @@ export function CompanyPage() {
     setSaved(false)
     setError(null)
     try {
-      await setDoc(doc(db, 'companies', COMPANY_ID), { name, plan }, { merge: true })
+      if (!db) throw new Error('Database not configured — add Firebase credentials.')
+      await setDoc(doc(db!, 'companies', COMPANY_ID), { name, plan }, { merge: true })
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch (e: any) {

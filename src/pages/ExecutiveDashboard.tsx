@@ -8,6 +8,8 @@ import { HealthBreakdown } from '../components/ui/HealthBreakdown'
 import { MetricCard } from '../components/ui/MetricCard'
 import { DeveloperCard } from '../components/ui/DeveloperCard'
 import { AiInsightCard } from '../components/ui/AiInsightCard'
+import { PageSkeleton } from '../components/ui/PageSkeleton'
+import { useSimulatedLoad } from '../hooks/useSimulatedLoad'
 import { computeDashboardInsight } from '../lib/insights'
 import {
   companyHealthScore, companyStalePRs, companyAtRiskTasks,
@@ -58,6 +60,7 @@ function DivisionCard({
 
   return (
     <motion.div
+      data-testid="division-card"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay }}
@@ -151,6 +154,7 @@ interface CardConfig {
 // ── Main Component ────────────────────────────────────────────────────────────
 export function ExecutiveDashboard() {
   const { activeUser, visibleDivisions, visibleTeams, visibleDevelopers } = useUser()
+  const isLoading = useSimulatedLoad()
 
   // Drill-down state — initial level based on role
   const [drill, setDrill] = useState<DrillState>(() => {
@@ -279,6 +283,8 @@ export function ExecutiveDashboard() {
     [blockedByTeam],
   )
 
+  if (isLoading) return <PageSkeleton />
+
   return (
     <div>
       {/* Page header */}
@@ -363,6 +369,7 @@ export function ExecutiveDashboard() {
                   trend={card.trend}
                   trendLabel={card.trendLabel}
                   dragMode={true}
+                  testId={card.id === 'stale-prs' ? 'stale-prs-count' : undefined}
                 />
               </Reorder.Item>
             ))}
@@ -380,6 +387,7 @@ export function ExecutiveDashboard() {
                 trend={card.trend}
                 trendLabel={card.trendLabel}
                 delay={i * 0.05}
+                testId={card.id === 'stale-prs' ? 'stale-prs-count' : undefined}
               />
             ))}
           </div>
