@@ -1,6 +1,8 @@
 // playwright.config.ts
 import { defineConfig, devices } from '@playwright/test'
 
+const executablePath = process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined
+
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: false,
@@ -11,12 +13,15 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:4173/devpulse-ai/',
     trace: 'on-first-retry',
-    executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH ?? '/opt/pw-browsers/chromium',
+    ...(executablePath ? { executablePath } : {}),
   },
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'], executablePath: '/opt/pw-browsers/chromium' },
+      use: {
+        ...devices['Desktop Chrome'],
+        ...(executablePath ? { executablePath } : {}),
+      },
     },
   ],
   webServer: {

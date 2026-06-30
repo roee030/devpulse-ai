@@ -69,6 +69,16 @@ jobs:
         run: npx playwright test tests/e2e/scenarios.spec.ts
         env:
           CI: true
+          # Build-time Vite env vars (baked into the bundle by webServer build step)
+          VITE_UNIFIED_API_KEY: ${{ secrets.VITE_UNIFIED_API_KEY }}
+          VITE_UNIFIED_JIRA_CONNECTION_ID: ${{ secrets.VITE_UNIFIED_JIRA_CONNECTION_ID }}
+          VITE_UNIFIED_LINEAR_CONNECTION_ID: ${{ secrets.VITE_UNIFIED_LINEAR_CONNECTION_ID }}
+          VITE_UNIFIED_MONDAY_CONNECTION_ID: ${{ secrets.VITE_UNIFIED_MONDAY_CONNECTION_ID }}
+          VITE_UNIFIED_GITHUB_CONNECTION_ID: ${{ secrets.VITE_UNIFIED_GITHUB_CONNECTION_ID }}
+          VITE_UNIFIED_SLACK_CONNECTION_ID: ${{ secrets.VITE_UNIFIED_SLACK_CONNECTION_ID }}
+          VITE_UNIFIED_TEAMS_CONNECTION_ID: ${{ secrets.VITE_UNIFIED_TEAMS_CONNECTION_ID }}
+          VITE_DATA_PROVIDER: mock
+          # Runtime vars for test scripts
           UNIFIED_API_KEY: ${{ secrets.UNIFIED_API_KEY }}
           UNIFIED_JIRA_CONNECTION_ID: ${{ secrets.UNIFIED_JIRA_CONNECTION_ID }}
           UNIFIED_LINEAR_CONNECTION_ID: ${{ secrets.UNIFIED_LINEAR_CONNECTION_ID }}
