@@ -5,6 +5,7 @@ import {
 } from 'react'
 import type { User, Team, Developer, Division } from '../data/mockData'
 import { createProvider } from '../lib/providers/createProvider'
+import { useUnifiedData, IS_UNIFIED_LIVE } from './UnifiedDataContext'
 
 interface UserContextValue {
   activeUser: User
@@ -17,31 +18,50 @@ interface UserContextValue {
 }
 
 const UserContext = createContext<UserContextValue | null>(null)
+
+// Static provider for users / divisions / teams (not from Unified yet)
 const provider = createProvider()
 
 export function UserProvider({ children }: { children: ReactNode }) {
+  const unified = useUnifiedData()
+
   const [activeUser, setActiveUser] = useState<User | null>(null)
   const [users, setUsers]           = useState<User[]>([])
   const [teams, setTeams]           = useState<Team[]>([])
   const [developers, setDevelopers] = useState<Developer[]>([])
   const [divisions, setDivisions]   = useState<Division[]>([])
-  const [isLoading, setIsLoading]   = useState(true)
+  const [providerLoading, setProviderLoading] = useState(true)
 
+  // Bootstrap from provider (users, teams, divisions)
   useEffect(() => {
     Promise.all([
       provider.getUsers(),
       provider.getTeams(),
-      provider.getDevelopers(),
       provider.getDivisions(),
-    ]).then(([u, t, d, div]) => {
+    ]).then(([u, t, div]) => {
       setUsers(u)
       setTeams(t)
-      setDevelopers(d)
       setDivisions(div)
       setActiveUser(u[0])
-      setIsLoading(false)
+      setProviderLoading(false)
     })
   }, [])
+
+  // When Unified live data arrives, replace developer list
+  useEffect(() => {
+    if (IS_UNIFIED_LIVE && !unified.isLoading) {
+      setDevelopers(unified.developers)
+    }
+  }, [unified.developers, unified.isLoading])
+
+  // Seed developers from provider initially (or when not using Unified)
+  useEffect(() => {
+    if (!IS_UNIFIED_LIVE) {
+      provider.getDevelopers().then(setDevelopers)
+    }
+  }, [])
+
+  const isLoading = providerLoading || (IS_UNIFIED_LIVE && unified.isLoading)
 
   const visibleDivisions = useMemo(() => {
     if (!activeUser) return []

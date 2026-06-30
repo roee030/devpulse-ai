@@ -6,6 +6,7 @@ import {
   Calculator, Map, Calendar, Plug, Building2,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useUnifiedData, IS_UNIFIED_LIVE } from '../../context/UnifiedDataContext'
 
 const navItems = [
   { path: '/today',    icon: Zap,             label: "Today's Briefing",    shortcut: 'T' },
@@ -26,6 +27,7 @@ const settingsItems = [
 export function Sidebar() {
   const navigate = useNavigate()
   const [awaitingSecond, setAwaitingSecond] = useState(false)
+  const unified = useUnifiedData()
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>
@@ -66,7 +68,22 @@ export function Sidebar() {
           </div>
           <div>
             <p className="text-text-primary font-semibold text-sm">DevPulse AI</p>
-            <p className="text-text-secondary text-xs">NovaTech Ltd.</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              {IS_UNIFIED_LIVE ? (
+                unified.isLive ? (
+                  <span className="flex items-center gap-1 text-[10px] font-medium text-success">
+                    <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                    Live
+                  </span>
+                ) : unified.isLoading ? (
+                  <span className="text-[10px] text-text-secondary">Syncing…</span>
+                ) : (
+                  <span className="text-[10px] text-warning">Unified error</span>
+                )
+              ) : (
+                <span className="text-[10px] text-text-secondary">Demo data</span>
+              )}
+            </div>
           </div>
         </div>
       </div>

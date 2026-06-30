@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { UserProvider } from './context/UserContext'
+import { UnifiedDataProvider } from './context/UnifiedDataContext'
 import { AppShell } from './components/layout/AppShell'
 import { Login } from './pages/Login'
 import { ExecutiveDashboard } from './pages/ExecutiveDashboard'
@@ -75,9 +76,11 @@ function AppContent() {
 
   return (
     <UserProvider>
-      <AppShell>
-        <AnimatedRoutes />
-      </AppShell>
+      <UnifiedDataProvider>
+        <AppShell>
+          <AnimatedRoutes />
+        </AppShell>
+      </UnifiedDataProvider>
     </UserProvider>
   )
 }
