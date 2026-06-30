@@ -75,13 +75,13 @@ function AppContent() {
   if (!isLoggedIn) return <Login />
 
   return (
-    <UserProvider>
-      <UnifiedDataProvider>
+    <UnifiedDataProvider>
+      <UserProvider>
         <AppShell>
           <AnimatedRoutes />
         </AppShell>
-      </UnifiedDataProvider>
-    </UserProvider>
+      </UserProvider>
+    </UnifiedDataProvider>
   )
 }
 
