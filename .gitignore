@@ -1,6 +1,10 @@
 node_modules/
 dist/
-.claude/worktrees/
+.claude/
+.playwright-mcp/
 *.tsbuildinfo
 .env
 .env.local
+.devpulse-ai-effort.json
+*.png
+
