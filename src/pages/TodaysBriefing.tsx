@@ -100,7 +100,7 @@ export function TodaysBriefing() {
     // Critical burnout developers
     const criticalDevs = visibleDevelopers.filter(d => d.riskLevel === 'critical')
     if (criticalDevs.length > 0) {
-      const names = criticalDevs.map(d => d.name.split(' ')[0]).join(' & ')
+      const names = criticalDevs.map(d => (d.name ?? 'Dev').split(' ')[0]).join(' & ')
       items.push({
         id: 'burnout-critical',
         title: `${names} ${criticalDevs.length === 1 ? 'is' : 'are'} at critical burnout risk`,
@@ -160,7 +160,7 @@ export function TodaysBriefing() {
       items.push({
         id: 'at-risk-devs',
         title: `${atRiskDevs.length} developer${atRiskDevs.length > 1 ? 's' : ''} showing early warning signs`,
-        subtitle: atRiskDevs.map(d => d.name.split(' ')[0]).join(', ') + ' — monitor this week',
+        subtitle: atRiskDevs.map(d => (d.name ?? 'Dev').split(' ')[0]).join(', ') + ' — monitor this week',
         route: '/burnout',
         tag: 'Wellbeing',
       })
@@ -196,7 +196,7 @@ export function TodaysBriefing() {
       items.push({
         id: 'watch-devs',
         title: `${watchDevs.length} developer${watchDevs.length > 1 ? 's' : ''} worth monitoring`,
-        subtitle: watchDevs.map(d => `${d.name.split(' ')[0]}: ${d.riskSignal}`).slice(0, 2).join(' · '),
+        subtitle: watchDevs.map(d => `${(d.name ?? 'Dev').split(' ')[0]}: ${d.riskSignal}`).slice(0, 2).join(' · '),
         route: '/burnout',
         tag: 'Wellbeing',
       })

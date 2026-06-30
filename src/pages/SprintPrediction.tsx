@@ -87,7 +87,7 @@ export function SprintPrediction() {
                 <div className="space-y-2.5">
                   {visibleDevelopers.slice(0, 8).map(dev => (
                     <div key={dev.id} className="flex items-center gap-3">
-                      <span className="text-text-secondary text-xs w-20 truncate flex-shrink-0">{dev.name.split(' ')[0]}</span>
+                      <span className="text-text-secondary text-xs w-20 truncate flex-shrink-0">{(dev.name ?? 'Dev').split(' ')[0]}</span>
                       <div className="flex-1 h-2 bg-border rounded-full overflow-hidden">
                         <motion.div
                           className="h-full bg-accent rounded-full"

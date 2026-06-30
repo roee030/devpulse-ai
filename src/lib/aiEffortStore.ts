@@ -59,8 +59,9 @@ export function makeDemoEvents(teamMembers: string[]): AIEffortEvent[] {
   ]
 
   // Use real team members if provided, else use synthetic names
-  const people = teamMembers.length > 0
-    ? teamMembers.map((name, i) => ({
+  const validMembers = teamMembers.filter((n): n is string => typeof n === 'string' && n.trim().length > 0)
+  const people = validMembers.length > 0
+    ? validMembers.map((name, i) => ({
         userId:   `${name.toLowerCase().replace(/\s+/g, '.')}@team.dev`,
         userName: name,
         tasks:    [tasks[i % tasks.length], tasks[(i + 1) % tasks.length]],

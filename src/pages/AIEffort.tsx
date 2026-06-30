@@ -51,7 +51,7 @@ function DevRow({ dev, rank, max }: { dev: DeveloperEffortSummary; rank: number;
         {/* avatar */}
         <div className="w-8 h-8 rounded-full bg-accent/15 flex items-center justify-center shrink-0">
           <span className="text-accent text-xs font-bold">
-            {dev.userName.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase()}
+            {(dev.userName ?? '?').split(' ').map(p => p[0] ?? '').join('').slice(0, 2).toUpperCase()}
           </span>
         </div>
 

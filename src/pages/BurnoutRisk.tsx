@@ -337,7 +337,7 @@ export function BurnoutRisk() {
           if (!profile) return null
           const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
           const chartData = days.map((day, i) => ({ day, credits: profile.aiCreditsPerDay[i] }))
-          const firstName = selectedAiDev.name.split(' ')[0]
+          const firstName = (selectedAiDev.name ?? 'Dev').split(' ')[0]
           const scoreLabel = profile.aiEffortScore < 8 ? 'very efficient' : profile.aiEffortScore < 15 ? 'within normal range' : '3x above team average, indicating high task complexity'
           return (
             <>

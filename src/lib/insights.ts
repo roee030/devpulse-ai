@@ -141,7 +141,7 @@ export function computeDeveloperInsight(dev: {
   tasks: { status: string }[]
   lastActive: string
 }): string {
-  const firstName = dev.name.split(' ')[0]
+  const firstName = (dev.name ?? 'Developer').split(' ')[0]
   const blockedCount = dev.tasks.filter(t => t.status === 'blocked').length
 
   switch (dev.riskLevel) {

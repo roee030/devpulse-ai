@@ -65,8 +65,8 @@ export interface UnifiedDataState {
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-function initials(name: string): string {
-  return name.split(' ').map(p => p[0] ?? '').join('').toUpperCase().slice(0, 2)
+function initials(name: string | undefined | null): string {
+  return (name ?? '?').split(' ').map(p => p[0] ?? '').join('').toUpperCase().slice(0, 2) || '?'
 }
 
 function riskFromTasks(tasks: Task[], prStatus: PRStatus | null): RiskLevel {

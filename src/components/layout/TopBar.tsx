@@ -44,7 +44,7 @@ export function TopBar() {
           >
             <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center">
               <span className="text-accent text-xs font-semibold">
-                {activeUser.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                {(activeUser.name ?? '?').split(' ').map(n => n[0] ?? '').join('').slice(0, 2)}
               </span>
             </div>
             <div className="text-left">
@@ -79,7 +79,7 @@ export function TopBar() {
                         >
                           <div className="w-7 h-7 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0">
                             <span className="text-accent text-xs font-semibold">
-                              {user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                              {(user.name ?? '?').split(' ').map(n => n[0] ?? '').join('').slice(0, 2)}
                             </span>
                           </div>
                           <div className="flex-1 min-w-0">
