@@ -171,7 +171,22 @@ export async function getTasks(
 ): Promise<UniversalTask[]> {
   if (!connectionId) return []
   try {
-    const raw = await client.task.listTaskTasks({ connectionId })
+    let raw: Awaited<ReturnType<typeof client.task.listTaskTasks>>
+    try {
+      raw = await client.task.listTaskTasks({ connectionId })
+    } catch {
+      // Some platforms (e.g. Monday) reject an unfiltered task list and
+      // require a project_id — fan out across every project instead.
+      const projects = await client.task.listTaskProjects({ connectionId })
+      const perProject = await Promise.all(
+        projects.map(p =>
+          p.id
+            ? client.task.listTaskTasks({ connectionId, projectId: p.id }).catch(() => [])
+            : Promise.resolve([]),
+        ),
+      )
+      raw = perProject.flat()
+    }
     return raw.map((t, i) => {
       const ro    = t as unknown as Record<string, unknown>
       const title = (t.name ?? 'Untitled task').trim()
@@ -250,7 +265,22 @@ export async function getPullRequests(
 ): Promise<UniversalPR[]> {
   if (!connectionId) return []
   try {
-    const prs = await client.repo.listRepoPullrequests({ connectionId })
+    let prs: Awaited<ReturnType<typeof client.repo.listRepoPullrequests>>
+    try {
+      prs = await client.repo.listRepoPullrequests({ connectionId })
+    } catch {
+      // GitHub (and some other repo platforms) reject an unfiltered PR list
+      // and require a repo_id — fan out across every repository instead.
+      const repos = await client.repo.listRepoRepositories({ connectionId })
+      const perRepo = await Promise.all(
+        repos.map(r =>
+          r.id
+            ? client.repo.listRepoPullrequests({ connectionId, repoId: r.id }).catch(() => [])
+            : Promise.resolve([]),
+        ),
+      )
+      prs = perRepo.flat()
+    }
     return prs.map((pr, i) => {
       const ro           = pr as unknown as Record<string, unknown>
       const created      = pr.createdAt instanceof Date ? pr.createdAt

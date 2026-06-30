@@ -64,25 +64,44 @@ async function seedTaskPlatform(name: string, connectionId: string) {
   }
 }
 
-// ── Seed repo (stale PR + late-night commits) ─────────────────────────────────
-// Only Jira connection maps to a repo; Linear/Monday don't have PR data.
+// ── Seed repo (stale PRs with task-key labels for cross-linking) ──────────────
+// Uses the GitHub connection so PRs appear when the app reads via GITHUB_ID.
+// Labels include the task key (e.g. 'DP-1') so cross-linking works:
+//   getPullRequests() falls back to pr.labels[0] as sourceBranch
+//   → TASK_KEY_RE matches 'DP-1' → linkedTaskKey = 'DP-1'
+
+const GITHUB_CONNECTION_ID = process.env.UNIFIED_GITHUB_CONNECTION_ID ?? ''
 
 async function seedRepoPlatform(connectionId: string) {
-  if (!connectionId) return
-  console.log('[seed] Seeding stale PR via repo connection…')
+  if (!connectionId) {
+    console.log('[seed] Skipping PR seed — no GitHub connection ID set')
+    return
+  }
+  console.log(`[seed] Seeding PRs via GitHub connection (${connectionId})…`)
 
   const threeDaysAgo = new Date(Date.now() - 3 * 24 * 3600 * 1000)
+  const oneDayAgo    = new Date(Date.now() - 1 * 24 * 3600 * 1000)
 
-  const pr = await sdk.repo.createRepoPullrequest({
-    connectionId,
-    repoPullrequest: {
-      status: 'PENDING',
-      createdAt: threeDaysAgo,
-      userIds: ['noa.levi'],
-      labels: ['feat', 'auth-service'],
-    },
-  })
-  console.log(`[seed] Stale PR created (open 3+ days) → ${pr.id}`)
+  const prs = [
+    // Stale PR for DP-1 (auth refactor) — open 3+ days
+    { labels: ['DP-1', 'feat'], status: 'PENDING' as const, createdAt: threeDaysAgo },
+    // Rejected PR for DP-2 (payment fix) — recent
+    { labels: ['DP-2', 'fix'],  status: 'REJECTED' as const, createdAt: oneDayAgo },
+    // Open PR for DP-3 (mobile bug) — recent
+    { labels: ['DP-3', 'feat'], status: 'PENDING' as const, createdAt: oneDayAgo },
+  ]
+
+  for (const p of prs) {
+    const pr = await sdk.repo.createRepoPullrequest({
+      connectionId,
+      repoPullrequest: {
+        status:    p.status,
+        createdAt: p.createdAt,
+        labels:    p.labels,
+      },
+    })
+    console.log(`[seed] PR created [${p.labels[0]}] (${p.status}) → ${pr.id}`)
+  }
 }
 
 // ── Seed messaging platforms ──────────────────────────────────────────────────
@@ -119,9 +138,8 @@ async function main() {
     TASK_PLATFORMS.map(p => seedTaskPlatform(p.name, p.connectionId))
   )
 
-  // Seed repo data (use Jira connection as proxy for GitHub PRs)
-  const repoConnectionId = process.env.UNIFIED_JIRA_CONNECTION_ID ?? ''
-  await seedRepoPlatform(repoConnectionId)
+  // Seed repo data via GitHub connection (so app reads cross-linked PRs correctly)
+  await seedRepoPlatform(GITHUB_CONNECTION_ID)
 
   // Seed messaging platforms in parallel
   await Promise.all(

@@ -15,9 +15,9 @@ if (!UNIFIED_API_KEY && !DRY_RUN) {
 const sdk = DRY_RUN ? null : new UnifiedTo({ security: { jwt: UNIFIED_API_KEY } })
 
 // ── Connection IDs ────────────────────────────────────────────────────────────
-const JIRA_CONN   = process.env.UNIFIED_JIRA_CONNECTION_ID   ?? ''
-const GITHUB_CONN = process.env.UNIFIED_JIRA_CONNECTION_ID   ?? '' // Jira connection proxies GitHub PRs in sandbox
-const SLACK_CONN  = process.env.UNIFIED_SLACK_CONNECTION_ID  ?? ''
+const JIRA_CONN   = process.env.UNIFIED_JIRA_CONNECTION_ID    ?? ''
+const GITHUB_CONN = process.env.UNIFIED_GITHUB_CONNECTION_ID  ?? ''
+const SLACK_CONN  = process.env.UNIFIED_SLACK_CONNECTION_ID   ?? ''
 
 // ── Team definitions ──────────────────────────────────────────────────────────
 interface TeamMember {
