@@ -50,7 +50,7 @@ for (const platform of ACTIVE_PLATFORMS) {
     test('CTO sees company-wide health ring', async ({ page }) => {
       await page.goto(BASE + '/')
       await page.waitForSelector('[data-testid="health-score"]', { timeout: 10_000 })
-      const text = await page.locator('[data-testid="health-score"]').textContent()
+      const text = await page.locator('[data-testid="health-score"]').first().textContent()
       expect(Number(text?.match(/\d+/)?.[0] ?? '0')).toBeGreaterThan(0)
     })
 
@@ -136,7 +136,8 @@ for (const platform of ACTIVE_PLATFORMS) {
       await page.evaluate(() => localStorage.removeItem('devpulse-demo-auth'))
       await page.reload()
       await page.waitForLoadState('networkidle')
-      await expect(page.locator('text=Sign in with Google')).toBeVisible({ timeout: 10_000 })
+      // "Continue with Demo" is always rendered on the login page regardless of Firebase config
+      await expect(page.locator('text=Continue with Demo')).toBeVisible({ timeout: 10_000 })
     })
 
     test('Auth gate — developer sees own briefing card', async ({ page }) => {
