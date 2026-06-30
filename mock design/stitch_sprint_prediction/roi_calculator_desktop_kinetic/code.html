@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DevPulse Kinetic | ROI Calculator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-fixed-variant": "#0e009d",
+                        "surface-bright": "#1f2b49",
+                        "error": "#ff6e84",
+                        "on-secondary": "#005a3c",
+                        "on-error-container": "#ffb2b9",
+                        "tertiary-fixed": "#f8a010",
+                        "secondary-dim": "#58e7ab",
+                        "on-secondary-container": "#e1ffec",
+                        "tertiary-fixed-dim": "#e79400",
+                        "primary-fixed-dim": "#8387ff",
+                        "on-error": "#490013",
+                        "background": "#060e20",
+                        "secondary": "#69f6b8",
+                        "primary-fixed": "#9396ff",
+                        "tertiary-dim": "#e79400",
+                        "on-primary-container": "#0a0081",
+                        "on-primary-fixed": "#000000",
+                        "surface-container-highest": "#192540",
+                        "surface-container": "#0f1930",
+                        "on-background": "#dee5ff",
+                        "secondary-container": "#006c49",
+                        "tertiary-container": "#f8a010",
+                        "surface": "#060e20",
+                        "inverse-surface": "#faf8ff",
+                        "surface-dim": "#060e20",
+                        "secondary-fixed": "#69f6b8",
+                        "on-tertiary": "#573500",
+                        "on-surface-variant": "#a3aac4",
+                        "on-primary": "#0f00a4",
+                        "on-tertiary-container": "#4a2c00",
+                        "error-container": "#a70138",
+                        "secondary-fixed-dim": "#58e7ab",
+                        "tertiary": "#ffb148",
+                        "outline": "#6d758c",
+                        "on-tertiary-fixed": "#2a1700",
+                        "outline-variant": "#40485d",
+                        "on-secondary-fixed": "#00452d",
+                        "error-dim": "#d73357",
+                        "surface-tint": "#a3a6ff",
+                        "primary-dim": "#6063ee",
+                        "on-tertiary-fixed-variant": "#563400",
+                        "inverse-primary": "#494bd7",
+                        "surface-variant": "#192540",
+                        "on-secondary-fixed-variant": "#006544",
+                        "on-surface": "#dee5ff",
+                        "primary": "#a3a6ff",
+                        "primary-container": "#9396ff",
+                        "inverse-on-surface": "#4d556b",
+                        "surface-container-low": "#091328",
+                        "surface-container-high": "#141f38",
+                        "surface-container-lowest": "#000000"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: #141f38;
+            height: 6px;
+            border-radius: 3px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -6px;
+            background-color: #a3a6ff;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(163, 166, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary selection:text-on-primary">
+<!-- SideNavBar Shell -->
+<aside class="h-screen w-64 fixed left-0 top-0 flex flex-col py-6 px-4 bg-[#091328] dark:bg-[#091328] z-50">
+<div class="mb-10 px-2">
+<h1 class="text-xl font-bold tracking-tight text-[#a3a6ff] font-manrope">DevPulse Kinetic</h1>
+<p class="text-xs text-on-surface-variant font-label mt-1">Engineering Lead</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-3 text-[#a3aac4] font-medium hover:bg-[#141f38] hover:text-[#a3a6ff] transition-colors scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label">Command</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 text-[#a3aac4] font-medium hover:bg-[#141f38] hover:text-[#a3a6ff] transition-colors scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span class="font-label">Logic</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 text-[#a3a6ff] font-bold border-r-2 border-[#a3a6ff] bg-[#0f1930] transition-colors scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-label">Telemetry</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 text-[#a3aac4] font-medium hover:bg-[#141f38] hover:text-[#a3a6ff] transition-colors scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="shield">shield</span>
+<span class="font-label">Security</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 text-[#a3aac4] font-medium hover:bg-[#141f38] hover:text-[#a3a6ff] transition-colors scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label">Settings</span>
+</a>
+</nav>
+<div class="mt-auto space-y-1 border-t border-outline-variant/20 pt-4">
+<button class="w-full flex items-center gap-3 px-3 py-3 text-[#a3aac4] font-medium hover:bg-[#141f38] hover:text-[#a3a6ff] transition-colors">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="font-label">Help</span>
+</button>
+<button class="w-full flex items-center gap-3 px-3 py-3 text-[#a3aac4] font-medium hover:bg-[#141f38] hover:text-[#a3a6ff] transition-colors">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-label">Logout</span>
+</button>
+</div>
+</aside>
+<!-- TopNavBar Shell -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] z-40 bg-[#060e20]/80 backdrop-blur-xl flex justify-between items-center px-8 h-16 shadow-[0_40px_60px_-15px_rgba(15,0,164,0.05)]">
+<div class="flex items-center gap-8 flex-1">
+<div class="relative w-64 group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm" data-icon="search">search</span>
+<input class="w-full bg-surface-container-lowest border-none rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-[#a3a6ff] text-on-surface placeholder:text-on-surface-variant/50" placeholder="Search clusters..." type="text"/>
+</div>
+<nav class="flex gap-6">
+<a class="text-[#a3aac4] text-sm font-label hover:text-white transition-opacity" href="#">Cluster</a>
+<a class="text-[#a3aac4] text-sm font-label hover:text-white transition-opacity" href="#">Logs</a>
+<a class="text-[#a3aac4] text-sm font-label hover:text-white transition-opacity" href="#">Metrics</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<button class="p-2 text-[#a3aac4] hover:text-white"><span class="material-symbols-outlined" data-icon="notifications">notifications</span></button>
+<button class="p-2 text-[#a3aac4] hover:text-white"><span class="material-symbols-outlined" data-icon="history">history</span></button>
+</div>
+<button class="bg-gradient-to-br from-primary to-primary-dim text-on-primary px-5 py-1.5 rounded font-label text-sm font-bold tracking-wide hover:opacity-90 transition-all">Execute</button>
+<img alt="Lead Engineer Avatar" class="w-8 h-8 rounded-full border border-outline-variant" data-alt="professional portrait of an engineering lead with focused expression and tech-modern background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyAr_gM7GMy7B8R3JrkXll2tWZW42T8RW9rzmy8o-wa6kX-LGBtT2YjIsa1cF5DMtIsZBCNTRL8j2n8GNqshWLIwdjNwFz0YYkUeH0iRDmkUdygtcdlBiu8kzKRZkbSN4PhiDrbBEqPU5uVMZURmkeYa1y3MizNV-XyAtpIxpDvb7tLi0_ZgvT-IGOw9Gsj3ab0u88C-4bBdnJgtWAf23qg0g3zhTVq8fRD3lcIg5_KcmDaKRgAnegXpAXNR3T6uHs-gP3H7Qv9M4"/>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-24 pb-12 px-8 min-h-screen">
+<div class="max-w-6xl mx-auto">
+<!-- Header Section -->
+<div class="mb-12">
+<span class="font-label text-primary uppercase tracking-[0.2em] text-xs">Financial Engineering</span>
+<h2 class="font-headline text-5xl font-extrabold text-on-surface mt-2 tracking-tight">See what DevPulse saves you</h2>
+<p class="text-on-surface-variant mt-4 max-w-2xl font-body leading-relaxed">
+                    Calculate the efficiency gains of automated telemetry and kinetic workload management. DevPulse reduces operational overhead by offloading manual monitoring and deployment verification.
+                </p>
+</div>
+<div class="grid grid-cols-12 gap-8">
+<!-- Input Controls (Bento Side) -->
+<div class="col-span-12 lg:col-span-5 space-y-6">
+<div class="bg-surface-container p-8 rounded-xl relative overflow-hidden group border-l-4 border-primary">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors"></div>
+<div class="space-y-8 relative z-10">
+<!-- Input 1 -->
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<label class="font-label text-on-surface text-sm uppercase tracking-wider">Number of Developers</label>
+<span class="font-label text-primary text-xl font-bold">120</span>
+</div>
+<input class="w-full" max="1000" min="10" type="range" value="120"/>
+<div class="flex justify-between text-[10px] font-label text-on-surface-variant uppercase">
+<span>10 Nodes</span>
+<span>1k+ Nodes</span>
+</div>
+</div>
+<!-- Input 2 -->
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<label class="font-label text-on-surface text-sm uppercase tracking-wider">Meetings / Week (Per Dev)</label>
+<span class="font-label text-primary text-xl font-bold">8.5</span>
+</div>
+<input class="w-full" max="40" min="1" step="0.5" type="range" value="8.5"/>
+<div class="flex justify-between text-[10px] font-label text-on-surface-variant uppercase">
+<span>Low Friction</span>
+<span>Sync Heavy</span>
+</div>
+</div>
+<!-- Input 3 -->
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<label class="font-label text-on-surface text-sm uppercase tracking-wider">Blended Hourly Rate</label>
+<span class="font-label text-primary text-xl font-bold">$125</span>
+</div>
+<input class="w-full" max="300" min="50" step="5" type="range" value="125"/>
+<div class="flex justify-between text-[10px] font-label text-on-surface-variant uppercase">
+<span>$50/hr</span>
+<span>$300/hr</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom CTA Component -->
+<div class="bg-surface-container-high p-8 rounded-xl border border-outline-variant/10 shadow-2xl">
+<div class="flex items-center gap-4 mb-4">
+<div class="w-10 h-10 rounded bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<h4 class="font-headline font-bold text-lg">Ready for deployment?</h4>
+</div>
+<p class="text-on-surface-variant text-sm font-body mb-6">Get a custom architecture review from our engineering lead team to validate these numbers in your environment.</p>
+<button class="w-full bg-gradient-to-r from-primary to-primary-dim text-on-primary py-4 rounded-lg font-label font-bold text-sm tracking-widest hover:brightness-110 transition-all uppercase">Deploy New Node</button>
+</div>
+</div>
+<!-- Output Cards (Bento Main) -->
+<div class="col-span-12 lg:col-span-7 grid grid-cols-2 gap-6">
+<!-- Large Output: Annual ROI -->
+<div class="col-span-2 bg-surface-container p-8 rounded-xl border-l-4 border-secondary flex flex-col justify-between h-64 relative overflow-hidden">
+<div class="absolute -right-12 -bottom-12 w-64 h-64 bg-secondary/5 rounded-full blur-[80px]"></div>
+<div>
+<span class="font-label text-secondary text-xs uppercase tracking-widest">Efficiency Multiplier</span>
+<h3 class="font-headline text-on-surface text-lg font-bold mt-1">Projected Annual ROI</h3>
+</div>
+<div class="flex items-baseline gap-4 relative z-10">
+<span class="font-headline text-7xl font-extrabold text-on-surface tracking-tighter">842%</span>
+<span class="material-symbols-outlined text-secondary text-4xl" data-icon="trending_up">trending_up</span>
+</div>
+<div class="text-on-surface-variant font-label text-sm uppercase tracking-tighter flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                            Verified via Kinetic Engine Analytics
+                        </div>
+</div>
+<!-- Output Card: Monthly Costs -->
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/10 group hover:bg-surface-container transition-colors">
+<div class="flex justify-between items-start mb-8">
+<span class="p-2 bg-surface-container-highest rounded text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+</span>
+<span class="text-[10px] font-label text-on-surface-variant uppercase tracking-widest">Current Burn</span>
+</div>
+<div class="space-y-1">
+<p class="font-label text-on-surface-variant text-xs uppercase">Current OpEx</p>
+<h4 class="font-headline text-3xl font-bold">$42.8k</h4>
+</div>
+</div>
+<!-- Output Card: Estimated Savings -->
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/10 group hover:bg-surface-container transition-colors">
+<div class="flex justify-between items-start mb-8">
+<span class="p-2 bg-secondary/10 rounded text-secondary">
+<span class="material-symbols-outlined" data-icon="energy_savings_leaf">energy_savings_leaf</span>
+</span>
+<span class="text-[10px] font-label text-secondary uppercase tracking-widest">Efficiency Gain</span>
+</div>
+<div class="space-y-1">
+<p class="font-label text-on-surface-variant text-xs uppercase">Monthly Savings</p>
+<h4 class="font-headline text-3xl font-bold text-secondary">$14.2k</h4>
+</div>
+</div>
+<!-- Output Card: Payback Period -->
+<div class="col-span-2 bg-gradient-to-br from-surface-container to-surface-container-low p-8 rounded-xl border border-outline-variant/10 flex items-center justify-between">
+<div class="flex items-center gap-6">
+<div class="relative">
+<svg class="w-20 h-20 -rotate-90">
+<circle class="text-surface-container-highest" cx="40" cy="40" fill="transparent" r="36" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-primary" cx="40" cy="40" fill="transparent" r="36" stroke="currentColor" stroke-dasharray="226" stroke-dashoffset="60" stroke-width="4"></circle>
+</svg>
+<span class="absolute inset-0 flex items-center justify-center font-label text-lg font-bold">3.2</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-xl">Payback Period</h4>
+<p class="text-on-surface-variant text-sm font-body">Weeks until full break-even on DevPulse implementation</p>
+</div>
+</div>
+<div class="hidden md:block">
+<span class="material-symbols-outlined text-primary/30 text-5xl" data-icon="speed">speed</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Meta -->
+<div class="mt-16 border-t border-outline-variant/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex items-center gap-12">
+<div class="flex -space-x-3">
+<img class="w-10 h-10 rounded-full border-2 border-background" data-alt="avatar of a team member with tech aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0_Bvet_pP3G-mSw06AWJKQqWMH04ciRY6vt7yVMSXpRQ_ixIY-C7p8q9H35rTMyGFN_MhcbZwBUWbhdJSOGrjBEERtaWRGfSTpbxt-xEhUlBWgKpBuMcaFnP_SqSfNkZ1kVh687ABYw3Uw8rPw_mgjB8NoDbxJ0uycwnCnzCd9IKpec7csrniqRPJKqPr_RfrLkqGTKeCzGFD22jltaX6mlFQEzzNDQ2AYXllMB_HwH_DV4F0IYYexuQRUfQi6yROEYphuo9HZkI"/>
+<img class="w-10 h-10 rounded-full border-2 border-background" data-alt="avatar of a team member with tech aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvjcJkUdA1VTnf9sdin8goGkUVZtYI4DV7FibooRWQHypxLYlheR1kvJ_wIbt5D01a-EyEOr8JQJk0Llezu6S-ir0EmZi-MbPk8D0j2ps6ZHw2sqOUbPedSufPAPrf4D3KiCsElo0jt_htW9pV1pIIfoYq46WthiFhthIDsxRU2CO3BLz7-SvH2XbBVMyhXieowCiTO-kxZjqe4Zit2CZAQU0vSZlr_HVTO4pJqAY_5sGhfW28t6rBb-qrppH_T7w8M6xfzJrWdUE"/>
+<img class="w-10 h-10 rounded-full border-2 border-background" data-alt="avatar of a team member with tech aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD43K4tXL88atsn2qKO9dRdIIM4K9TdlWXEfYcNyyMQaLNf4ozkltJ8De1INoSNBL3zslMzxa5elzsy8WMxDgCpYbdn4D0fMKYm3tle3DP_XpchncGVoXWfVCiy0xvV_assP1YvaUtBQ6rGnvvPlj39YMPQpSDuAJr0ptU56jNTi9JJVXfc0biVts0trALNMr8zqA2TiVQ0oRAr5jkvQDgHpghBZ-l4WpRvb5xrK4BjYhENmDJAm2aUPUO-FPdLDeM91imNDGJKF-k"/>
+<div class="w-10 h-10 rounded-full bg-surface-container-high border-2 border-background flex items-center justify-center text-xs font-label">+14</div>
+</div>
+<p class="text-xs text-on-surface-variant font-label uppercase tracking-widest">Trusted by 240+ Engineering teams globally</p>
+</div>
+<div class="flex gap-4">
+<img alt="partner logo" class="opacity-40 grayscale" data-alt="minimal tech logo silhouette in blue gray tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDiIN-M81tz-WzcGHFeMRkiWf_ORpf-A956_b7TYCl0jn-xssCpp-jkgZjr0hSiHUPUOHOAw0vJneB8365q6MiMCUCWCPphUo4wr1bjcRzvCrzjQSnS1ak1EPSqs-E3SV0np8P9xuiQ9fX-THwW_XLrocTrqbqH55nk0ZmmP0ocHeKP3Xyfp1naiIJTf2UcH_o64irSrl3WQTfISHXzkaEtzfgsYA2YFsuYuq-wN5KBPns0NIyrBJdxTaGRzDWiAB-IFiGYDDxETI"/>
+<img alt="partner logo" class="opacity-40 grayscale" data-alt="minimal tech logo silhouette in blue gray tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0RhWAK1_PFP4dQCTJRDEYO4TKWviT2NfPQZEKKjBespmUm4exZdf-YBnzqDsntrLpNZZc62ysFIt5VegNnqQO3lOMhBEFB93gEbX4Px5hG6K__cFA_qFnM3oMUwDMSW_uCw1HVJK1AxBlBSYlFeYAISccHsM4E2yJwYYWlHg7IX4WrC2FGIsvG8Axv7M7WMPhWLHiDx4Ez_Yt8f7fKwegYhupot7Alw1U1GEB_cERqgNnwfx-slrI_i27aCQ7zyBTz_ipCrPknI4"/>
+<img alt="partner logo" class="opacity-40 grayscale" data-alt="minimal tech logo silhouette in blue gray tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCx6s4NaGX5qdBvnLAd8tTQZl3ThyFvRzPw9U9pQ2P0kBKleXSgPsWYfPnAukKAYoCUmxeZDQvQ8SRTp40NnVHXVBYkiBUXUQbC2QnP7tTsQZbdkUNVIhNPtHVF6klNEYGSfsVszY2SrYUlU8J0pNty42ztvCOMw1GsglgS_VIq1g4viN2XdWsXEM2HXCFUp6zfuskuA9BsYXZliKA4VioryQWGtVBpfDX2A3SuubAcO4yzPX88PRmvx1stxIJ5l1bk_gj07ixekC4"/>
+</div>
+</div>
+</div>
+</main>
+</body></html>

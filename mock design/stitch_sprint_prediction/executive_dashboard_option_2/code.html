@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>DevPulse Executive Dashboard</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "error-container": "#ffdad6",
+              "on-surface": "#191c1e",
+              "tertiary-fixed-dim": "#ddb8ff",
+              "surface-bright": "#f7f9fb",
+              "on-secondary-container": "#fffbff",
+              "secondary-fixed": "#e9ddff",
+              "outline": "#727785",
+              "on-primary-container": "#fefcff",
+              "outline-variant": "#c2c6d6",
+              "on-secondary": "#ffffff",
+              "primary": "#0058be",
+              "surface-container-lowest": "#ffffff",
+              "secondary": "#6b38d4",
+              "background": "#f7f9fb",
+              "surface": "#f7f9fb",
+              "on-tertiary-fixed-variant": "#62259b",
+              "secondary-fixed-dim": "#d0bcff",
+              "surface-container": "#eceef0",
+              "primary-fixed": "#d8e2ff",
+              "surface-container-high": "#e6e8ea",
+              "surface-tint": "#005ac2",
+              "on-secondary-fixed-variant": "#5516be",
+              "on-error-container": "#93000a",
+              "on-tertiary": "#ffffff",
+              "tertiary-fixed": "#f0dbff",
+              "on-tertiary-fixed": "#2c0051",
+              "error": "#ba1a1a",
+              "tertiary-container": "#9358cd",
+              "inverse-primary": "#adc6ff",
+              "primary-container": "#2170e4",
+              "on-primary": "#ffffff",
+              "tertiary": "#783eb2",
+              "on-tertiary-container": "#fffbff",
+              "primary-fixed-dim": "#adc6ff",
+              "inverse-surface": "#2d3133",
+              "surface-container-low": "#f2f4f6",
+              "inverse-on-surface": "#eff1f3",
+              "surface-variant": "#e0e3e5",
+              "surface-container-highest": "#e0e3e5",
+              "on-secondary-fixed": "#23005c",
+              "on-background": "#191c1e",
+              "secondary-container": "#8455ef",
+              "on-error": "#ffffff",
+              "on-surface-variant": "#424754",
+              "on-primary-fixed": "#001a42",
+              "surface-dim": "#d8dadc",
+              "on-primary-fixed-variant": "#004395"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .noise-bg {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface min-h-screen pb-24 overflow-x-hidden">
+<!-- Background Decor -->
+<div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+<div class="noise-bg absolute inset-0"></div>
+<div class="absolute top-[-10%] right-[-10%] w-[80%] h-[50%] bg-primary/10 blur-[120px] rounded-full"></div>
+<div class="absolute bottom-[20%] left-[-20%] w-[70%] h-[40%] bg-secondary/10 blur-[100px] rounded-full"></div>
+</div>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/10 dark:border-slate-800/50 shadow-[0_8px_32px_0_rgba(0,88,190,0.06)] flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-xl" data-icon="pulse">pulse_alert</span>
+</div>
+<h1 class="font-manrope font-bold tracking-tight text-2xl font-black bg-gradient-to-br from-blue-600 to-blue-400 bg-clip-text text-transparent">DevPulse</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity" data-icon="notifications">notifications</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border border-white/20 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="professional executive headshot with neutral background and soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxz00YiuvXHE9EC4kvKf6ZqiOPopH3YW82Im73cfqZzJ2J1ozj2r7PdTT7mvhEzizIpo9MDj3lj_USHYpfqoOxPFeQ7YVRjnPS9AqVxrgdngEYOWTga6UURlgJSVNw3XQS0-j4qlEtYe141S2JAh-ZFgkQPYu5LJLh4RM5GXbk55wsua76VsUyGRzLkYquPXOiGnhHsx7vKPxnVMhqEE8cF5iePTTcxwfWNs-ujANnnNFsCkIw4IJKcxqz_qq5bXrlbf106GCZKno"/>
+</div>
+</div>
+</header>
+<main class="pt-24 px-6 space-y-8">
+<!-- Dashboard Hero Title -->
+<section>
+<p class="label-md font-bold uppercase tracking-widest text-primary/70 mb-1">Executive Overview</p>
+<h2 class="text-3xl font-headline font-extrabold tracking-tight text-on-surface">Dashboard</h2>
+</section>
+<!-- Health Score Circle Section -->
+<section class="flex flex-col items-center justify-center py-4">
+<div class="relative w-64 h-64 flex items-center justify-center">
+<!-- SVG Circle Background -->
+<svg class="absolute inset-0 w-full h-full transform -rotate-90">
+<circle class="text-surface-container" cx="128" cy="128" fill="transparent" r="110" stroke="currentColor" stroke-width="12"></circle>
+<circle class="drop-shadow-[0_0_12px_rgba(33,112,228,0.4)]" cx="128" cy="128" fill="transparent" r="110" stroke="url(#score-grad)" stroke-dasharray="691" stroke-dashoffset="124" stroke-linecap="round" stroke-width="12"></circle>
+<defs>
+<lineargradient id="score-grad" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#0058be"></stop>
+<stop offset="100%" stop-color="#8455ef"></stop>
+</lineargradient>
+</defs>
+</svg>
+<!-- Score Content -->
+<div class="z-10 text-center glass-card w-48 h-48 rounded-full flex flex-col items-center justify-center shadow-2xl border border-white/40">
+<span class="text-6xl font-headline font-black text-on-surface tracking-tighter leading-none">82</span>
+<div class="mt-1 px-3 py-1 bg-primary/10 rounded-full">
+<span class="text-[11px] font-bold tracking-[0.1em] text-primary uppercase">Optimal</span>
+</div>
+</div>
+</div>
+<p class="mt-6 text-on-surface-variant font-medium text-center max-w-[240px]">Overall platform health is currently at its peak for Q3.</p>
+</section>
+<!-- Metrics Grid -->
+<section class="grid grid-cols-2 gap-4">
+<!-- Metric Card 1 -->
+<div class="glass-card p-4 rounded-3xl border border-white/20 shadow-sm space-y-2">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary/80" data-icon="merge">merge</span>
+<span class="text-[10px] font-bold text-error">+12%</span>
+</div>
+<div>
+<h3 class="text-2xl font-headline font-bold">14</h3>
+<p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">Stale PRs</p>
+</div>
+</div>
+<!-- Metric Card 2 -->
+<div class="glass-card p-4 rounded-3xl border border-white/20 shadow-sm space-y-2">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-secondary/80" data-icon="warning">warning</span>
+<div class="h-1 w-8 bg-surface-container rounded-full mt-2 self-start overflow-hidden">
+<div class="h-full bg-secondary w-[22%]"></div>
+</div>
+</div>
+<div>
+<h3 class="text-2xl font-headline font-bold">22%</h3>
+<p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">At-Risk Tasks</p>
+</div>
+</div>
+<!-- Metric Card 3 -->
+<div class="glass-card p-4 rounded-3xl border border-white/20 shadow-sm space-y-2">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary/80" data-icon="bolt">bolt</span>
+<span class="text-[10px] font-bold text-primary">Points</span>
+</div>
+<div>
+<h3 class="text-2xl font-headline font-bold">42/60</h3>
+<p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">Sprint Points</p>
+</div>
+</div>
+<!-- Metric Card 4 -->
+<div class="glass-card p-4 rounded-3xl border border-white/20 shadow-sm space-y-2">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-secondary/80" data-icon="show_chart">show_chart</span>
+</div>
+<div class="flex flex-col gap-1">
+<!-- Sparkline Placeholder -->
+<svg class="w-full h-8 stroke-secondary fill-none stroke-[3] stroke-round" viewbox="0 0 100 30">
+<path d="M0 25 Q 10 20, 20 22 T 40 10 T 60 18 T 80 5 T 100 12"></path>
+</svg>
+<p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">Velocity Trend</p>
+</div>
+</div>
+</section>
+<!-- Engineering Squad List -->
+<section class="space-y-4">
+<div class="flex justify-between items-end px-1">
+<h3 class="text-xl font-headline font-bold text-on-surface">Engineering Squad</h3>
+<span class="text-xs font-bold text-primary">View All</span>
+</div>
+<div class="space-y-3">
+<!-- Squad Row 1 -->
+<div class="glass-card p-4 rounded-2xl border border-white/30 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl overflow-hidden ring-2 ring-white/50">
+<img class="w-full h-full object-cover" data-alt="portrait of a male software engineer wearing glasses in a modern office environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjwTpdXWlpqaBGWiHTMhVSdy8XXfFkxvOYeFhMEOZlzpnI24N3sbpiBX7l0hoHfAXX_N03ksWT1a2gJMlSjgA-wD3XcBuRP0fTTliyDzzKUiq9etF0txZw6pa_XQedWEms2CcGnOhL8YqjcL0uzWAlhtHZlMbw2czaXFr04BDgrvPtq68-Nt6UjdZ18eHGDPd365F5-9yckC0_dcaDsdOCdH2KC_8Hu1CRVcYZLEaoQF-o-T4KSo5ebNtTcl2XM1ap48Hd3nC2FUA"/>
+</div>
+<div>
+<h4 class="font-bold text-sm">Alex Chen</h4>
+<p class="text-xs text-on-surface-variant">Lead Developer</p>
+</div>
+</div>
+<div class="bg-primary/5 px-3 py-1.5 rounded-full flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]"></div>
+<span class="text-xs font-bold text-on-surface">98% PR Rate</span>
+</div>
+</div>
+<!-- Squad Row 2 -->
+<div class="glass-card p-4 rounded-2xl border border-white/30 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl overflow-hidden ring-2 ring-white/50">
+<img class="w-full h-full object-cover" data-alt="portrait of a female engineer with a friendly expression in a brightly lit professional setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAT4LZCpcNtzK84rx8uZ9jX4t89QrE1CFV4lVty-Cr03xRzk1XdEy65mANSCaoBj1CgIom2SmDSdk4DSmPWMsk3Z3P7Sor4XGglxkUm0XI3ooaiL_O3Whtv5HB2PsKL2-2nLXpRtSom6QRuwH7OqsymSLoVbvuPaSKc3C_k-bg3z9IBnKOq-88r5q-Nkts72Jb18JfcarJIRPj55evDO9W2z9PaI7joRshOVLrSRTer2MnpMz7Xpg7pa2FEFE7XHtvd_4nUdwNJ2yQ"/>
+</div>
+<div>
+<h4 class="font-bold text-sm">Elena Voss</h4>
+<p class="text-xs text-on-surface-variant">DevOps Arch</p>
+</div>
+</div>
+<div class="bg-primary/5 px-3 py-1.5 rounded-full flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_6px_#f59e0b]"></div>
+<span class="text-xs font-bold text-on-surface">72% PR Rate</span>
+</div>
+</div>
+<!-- Squad Row 3 -->
+<div class="glass-card p-4 rounded-2xl border border-white/30 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl overflow-hidden ring-2 ring-white/50">
+<img class="w-full h-full object-cover" data-alt="portrait of a man with short hair and professional casual attire in a creative studio space" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYWpbNfC5vNmw0A8oZ4VtcKtePcwWvHmpQZzRvkGK3Ug39SiG9Wy9EzgGRAfLF6EwbAyom_ThplJF16DQvkT5aT0qc6aBjlJ8rdM8T6iU3yIYbgyESKc26f33VsjmbhDAZBzLaysDsb4Rog5lOUqCbLSCZh7uyMEejxImuesncXyaavPTeXSb00wxa7iD_2OPsFIHtaxsToFNOodqXlxMF7PEJr21OAfnY8JzIOh4n-0rfy18fpBa_7bJKVDUyQxefk6DZR2Lfj1o"/>
+</div>
+<div>
+<h4 class="font-bold text-sm">Marcus Thorne</h4>
+<p class="text-xs text-on-surface-variant">Fullstack Engineer</p>
+</div>
+</div>
+<div class="bg-primary/5 px-3 py-1.5 rounded-full flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_6px_#f43f5e]"></div>
+<span class="text-xs font-bold text-on-surface">41% PR Rate</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-3xl bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-t border-white/20 dark:border-slate-800/50 shadow-[0_-8px_32px_0_rgba(0,88,190,0.06)] flex justify-around items-center h-20 px-4 pb-safe">
+<div class="flex flex-col items-center justify-center text-blue-700 dark:text-blue-300 bg-blue-50/50 dark:bg-blue-900/30 rounded-2xl px-3 py-1">
+<span class="material-symbols-outlined" data-icon="dashboard" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider">Dashboard</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-200 transition-colors">
+<span class="material-symbols-outlined" data-icon="timeline">timeline</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider">Sprint</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-200 transition-colors">
+<span class="material-symbols-outlined" data-icon="lightbulb">lightbulb</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider">Briefing</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-200 transition-colors">
+<span class="material-symbols-outlined" data-icon="warning">warning</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider">Risk</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-200 transition-colors">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider">ROI</span>
+</div>
+</nav>
+</body></html>

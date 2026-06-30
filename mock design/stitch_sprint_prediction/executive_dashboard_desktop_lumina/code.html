@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lumina Pulse | Executive Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-bright": "#f7f9fb",
+              "error": "#ba1a1a",
+              "secondary-fixed": "#e9ddff",
+              "surface-dim": "#d8dadc",
+              "on-primary-fixed-variant": "#004395",
+              "error-container": "#ffdad6",
+              "on-error-container": "#93000a",
+              "on-secondary": "#ffffff",
+              "on-tertiary": "#ffffff",
+              "on-surface-variant": "#424754",
+              "on-primary": "#ffffff",
+              "on-tertiary-container": "#fffbff",
+              "tertiary-fixed": "#f0dbff",
+              "secondary-fixed-dim": "#d0bcff",
+              "on-secondary-container": "#fffbff",
+              "tertiary": "#783eb2",
+              "outline": "#727785",
+              "tertiary-fixed-dim": "#ddb8ff",
+              "primary-fixed-dim": "#adc6ff",
+              "secondary": "#6b38d4",
+              "primary-fixed": "#d8e2ff",
+              "on-secondary-fixed": "#23005c",
+              "on-error": "#ffffff",
+              "background": "#f7f9fb",
+              "on-tertiary-fixed": "#2c0051",
+              "outline-variant": "#c2c6d6",
+              "surface-tint": "#005ac2",
+              "on-tertiary-fixed-variant": "#62259b",
+              "on-primary-fixed": "#001a42",
+              "surface-variant": "#e0e3e5",
+              "on-secondary-fixed-variant": "#5516be",
+              "surface-container-highest": "#e0e3e5",
+              "on-primary-container": "#fefcff",
+              "inverse-primary": "#adc6ff",
+              "secondary-container": "#8455ef",
+              "primary": "#0058be",
+              "primary-container": "#2170e4",
+              "surface-container": "#eceef0",
+              "on-surface": "#191c1e",
+              "on-background": "#191c1e",
+              "surface-container-lowest": "#ffffff",
+              "surface": "#f7f9fb",
+              "inverse-surface": "#2d3133",
+              "inverse-on-surface": "#eff1f3",
+              "tertiary-container": "#9358cd",
+              "surface-container-low": "#f2f4f6",
+              "surface-container-high": "#e6e8ea"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary-fixed">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-white/10 shadow-[0_8px_32px_0_rgba(0,88,190,0.06)] flex justify-between items-center px-12 h-20 w-full">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-black tracking-tighter text-blue-700">Lumina Pulse</span>
+<nav class="hidden md:flex gap-8">
+<a class="font-manrope tracking-tight font-bold text-slate-500 hover:text-blue-500 transition-colors" href="#">Explore</a>
+<a class="font-manrope tracking-tight font-bold text-slate-500 hover:text-blue-500 transition-colors" href="#">Network</a>
+<a class="font-manrope tracking-tight font-bold text-blue-600 border-b-2 border-blue-600 pb-1" href="#">Insights</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden lg:flex items-center bg-surface-container-high px-4 py-2 rounded-full">
+<span class="material-symbols-outlined text-outline text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48 font-label" placeholder="Global Search..." type="text"/>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-blue-50/50 p-2 rounded-full transition-all active:scale-95">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-blue-50/50 p-2 rounded-full transition-all active:scale-95">settings</button>
+<div class="h-10 w-10 rounded-full overflow-hidden border-2 border-primary-fixed shadow-sm">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="close-up portrait of a professional executive with a confident smile in a modern bright office environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFh_3yJTfjv0968_l7hSDF_0uVO-CTTRe6JxZMKS8MErWDlmg3DILgC-RVwiwaLTz_qVGA0Y0mjB-Bcfvs83W0FXBvhiC3D0mdWcUyFD3_7hB4Co7LUnTT89F6GIE_iVlj6JCl_SPnG-fBnXFRaxbQZxW7ZfwWwDb5pZUyt7U-3jJhz6QGkFH5-wGgVTeteL6P_0AHFyVgtPs2A_DEtrK1HnYH9V66LpT95m-6YUl1JIRUFeEEG0LWzKvA6EKPbLkS6TZ-Kj_9PGo"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="h-screen w-72 fixed left-0 top-0 border-r bg-slate-50/50 backdrop-blur-md pt-24 flex flex-col p-6 gap-8 z-40">
+<div class="flex items-center gap-3 px-2 mb-4">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center text-white font-bold text-xl">L</div>
+<div>
+<h2 class="text-sm font-bold font-manrope bg-gradient-to-br from-blue-600 to-blue-400 bg-clip-text text-transparent">Lumina Pulse</h2>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-label">Editorial Excellence</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-4 p-3 text-blue-700 font-bold bg-white rounded-xl shadow-sm transition-transform active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-manrope text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-4 p-3 text-slate-500 hover:text-blue-600 hover:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined">insights</span>
+<span class="font-manrope text-sm font-medium">Analytics</span>
+</a>
+<a class="flex items-center gap-4 p-3 text-slate-500 hover:text-blue-600 hover:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined">rocket_launch</span>
+<span class="font-manrope text-sm font-medium">Campaigns</span>
+</a>
+<a class="flex items-center gap-4 p-3 text-slate-500 hover:text-blue-600 hover:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-manrope text-sm font-medium">Audience</span>
+</a>
+<a class="flex items-center gap-4 p-3 text-slate-500 hover:text-blue-600 hover:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="font-manrope text-sm font-medium">Reports</span>
+</a>
+</nav>
+<button class="mt-4 bg-gradient-to-br from-primary to-primary-container text-white rounded-full py-4 px-6 font-manrope font-bold text-sm shadow-[0_4px_14px_rgba(0,88,190,0.3)] hover:scale-105 transition-all active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">add</span>
+            Create New
+        </button>
+<div class="mt-auto flex flex-col gap-2">
+<a class="flex items-center gap-4 p-3 text-slate-500 hover:text-blue-600 transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-manrope text-sm font-medium">Help Center</span>
+</a>
+<a class="flex items-center gap-4 p-3 text-slate-500 hover:text-blue-600 transition-all" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-manrope text-sm font-medium">Log Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-72 pt-32 pb-24 px-12 min-h-screen">
+<div class="max-w-7xl mx-auto">
+<!-- Header Section -->
+<header class="mb-12 flex justify-between items-end">
+<div>
+<span class="label-md uppercase tracking-[0.15em] text-primary font-bold text-xs mb-3 block">Perspective Overview</span>
+<h1 class="font-headline text-5xl font-extrabold text-on-surface tracking-tighter leading-none">Executive Insights</h1>
+</div>
+<div class="flex gap-4">
+<div class="bg-surface-container-low p-1 rounded-full flex gap-1">
+<button class="px-6 py-2 rounded-full bg-white shadow-sm text-sm font-bold text-primary">Daily</button>
+<button class="px-6 py-2 rounded-full text-sm font-bold text-on-surface-variant hover:text-primary transition-colors">Weekly</button>
+<button class="px-6 py-2 rounded-full text-sm font-bold text-on-surface-variant hover:text-primary transition-colors">Monthly</button>
+</div>
+</div>
+</header>
+<!-- Top Row: Health Score & Key Metrics -->
+<div class="grid grid-cols-12 gap-8 mb-12">
+<!-- Team Health Score - Glassmorphic Bento -->
+<div class="col-span-12 lg:col-span-7 glass-card rounded-[2.5rem] p-10 flex flex-col relative overflow-hidden group border border-white/20 shadow-[0_20px_50px_rgba(0,88,190,0.05)]">
+<div class="absolute -right-20 -top-20 w-80 h-80 bg-primary/10 blur-[100px] rounded-full group-hover:bg-primary/20 transition-all duration-700"></div>
+<div class="absolute -left-20 -bottom-20 w-64 h-64 bg-secondary-container/10 blur-[100px] rounded-full group-hover:bg-secondary-container/20 transition-all duration-700"></div>
+<div class="flex justify-between items-start mb-12 relative z-10">
+<div>
+<h2 class="font-headline text-2xl font-bold mb-2">Team Health Score</h2>
+<p class="text-on-surface-variant text-sm max-w-xs">Aggregate sentiment and performance pulse across all editorial departments.</p>
+</div>
+<span class="bg-primary/10 text-primary px-4 py-2 rounded-full font-bold text-xs flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+                            +4.2% Growth
+                        </span>
+</div>
+<div class="flex items-center gap-12 relative z-10">
+<div class="relative w-48 h-48 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90">
+<circle class="text-surface-container-high" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-width="12"></circle>
+<circle class="text-primary transition-all duration-1000" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-dasharray="553" stroke-dashoffset="110" stroke-width="12"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="text-6xl font-black font-manrope tracking-tighter">82</span>
+<span class="text-[10px] uppercase font-bold tracking-[0.2em] text-outline">Luminous</span>
+</div>
+</div>
+<div class="flex-1 grid grid-cols-2 gap-6">
+<div class="p-4 bg-white/40 rounded-2xl border border-white/40">
+<span class="block text-xs text-outline font-bold mb-1">Collaboration</span>
+<div class="flex items-center gap-3">
+<div class="h-1.5 flex-1 bg-surface-container-high rounded-full overflow-hidden">
+<div class="w-4/5 h-full bg-primary"></div>
+</div>
+<span class="text-sm font-bold">88%</span>
+</div>
+</div>
+<div class="p-4 bg-white/40 rounded-2xl border border-white/40">
+<span class="block text-xs text-outline font-bold mb-1">Sentiment</span>
+<div class="flex items-center gap-3">
+<div class="h-1.5 flex-1 bg-surface-container-high rounded-full overflow-hidden">
+<div class="w-[72%] h-full bg-secondary"></div>
+</div>
+<span class="text-sm font-bold">72%</span>
+</div>
+</div>
+<div class="p-4 bg-white/40 rounded-2xl border border-white/40">
+<span class="block text-xs text-outline font-bold mb-1">Retention</span>
+<div class="flex items-center gap-3">
+<div class="h-1.5 flex-1 bg-surface-container-high rounded-full overflow-hidden">
+<div class="w-[94%] h-full bg-tertiary"></div>
+</div>
+<span class="text-sm font-bold">94%</span>
+</div>
+</div>
+<div class="p-4 bg-white/40 rounded-2xl border border-white/40">
+<span class="block text-xs text-outline font-bold mb-1">Burnout risk</span>
+<div class="flex items-center gap-3">
+<div class="h-1.5 flex-1 bg-surface-container-high rounded-full overflow-hidden">
+<div class="w-1/4 h-full bg-error"></div>
+</div>
+<span class="text-sm font-bold">12%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary Metric Cards -->
+<div class="col-span-12 lg:col-span-5 grid grid-rows-2 gap-8">
+<!-- Productivity Card -->
+<div class="surface-container-low rounded-[2rem] p-8 flex items-center justify-between border border-transparent hover:border-primary/20 transition-all">
+<div class="flex items-center gap-6">
+<div class="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">speed</span>
+</div>
+<div>
+<h3 class="font-bold text-lg">Workforce Velocity</h3>
+<p class="text-on-surface-variant text-sm italic">High throughput this sprint</p>
+</div>
+</div>
+<div class="text-right">
+<span class="text-3xl font-black font-manrope">1.4x</span>
+<span class="block text-[10px] text-primary font-bold uppercase tracking-widest">Efficiency</span>
+</div>
+</div>
+<!-- Cost Per Impression Card -->
+<div class="surface-container-low rounded-[2rem] p-8 flex items-center justify-between border border-transparent hover:border-secondary/20 transition-all">
+<div class="flex items-center gap-6">
+<div class="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-3xl">payments</span>
+</div>
+<div>
+<h3 class="font-bold text-lg">Cost Efficiency</h3>
+<p class="text-on-surface-variant text-sm italic">Lower CPA across board</p>
+</div>
+</div>
+<div class="text-right">
+<span class="text-3xl font-black font-manrope">-$0.12</span>
+<span class="block text-[10px] text-secondary font-bold uppercase tracking-widest">Per unit</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Row: Asymmetric Layout -->
+<div class="grid grid-cols-12 gap-8">
+<!-- Live Activity Feed (Narrower) -->
+<div class="col-span-12 md:col-span-4 flex flex-col gap-6">
+<h3 class="font-headline text-xl font-bold px-2">Operational Pulse</h3>
+<div class="space-y-4">
+<div class="bg-white rounded-2xl p-4 flex gap-4 items-center border border-surface-container hover:shadow-md transition-shadow">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-lg">check_circle</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold">Campaign 'Azure' Finalized</p>
+<p class="text-xs text-on-surface-variant">Marketing • 2m ago</p>
+</div>
+</div>
+<div class="bg-white rounded-2xl p-4 flex gap-4 items-center border border-surface-container hover:shadow-md transition-shadow">
+<div class="w-10 h-10 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-lg">groups</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold">Sync: Leadership Review</p>
+<p class="text-xs text-on-surface-variant">Admin • 14m ago</p>
+</div>
+</div>
+<div class="bg-white rounded-2xl p-4 flex gap-4 items-center border border-surface-container hover:shadow-md transition-shadow opacity-60">
+<div class="w-10 h-10 rounded-full bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-lg">flag</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold">New Milestone Reached</p>
+<p class="text-xs text-on-surface-variant">Tech • 1h ago</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Editorial Performance Card (Wider) -->
+<div class="col-span-12 md:col-span-8 bg-surface-container-high rounded-[2.5rem] overflow-hidden flex flex-col">
+<div class="p-8 flex justify-between items-center">
+<div>
+<h3 class="font-headline text-2xl font-bold">Audience Resonance</h3>
+<p class="text-on-surface-variant text-sm">Real-time content performance by category</p>
+</div>
+<button class="material-symbols-outlined p-2 hover:bg-white/50 rounded-full transition-colors">more_horiz</button>
+</div>
+<div class="flex-1 p-8 grid grid-cols-4 items-end gap-6 h-64">
+<div class="flex flex-col items-center gap-4 group">
+<div class="w-full bg-primary-container/20 rounded-full flex flex-col justify-end h-48 group-hover:bg-primary-container/30 transition-all">
+<div class="w-full bg-primary rounded-full h-[85%] group-hover:h-[88%] transition-all duration-500"></div>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-outline">Tech</span>
+</div>
+<div class="flex flex-col items-center gap-4 group">
+<div class="w-full bg-secondary-container/20 rounded-full flex flex-col justify-end h-48 group-hover:bg-secondary-container/30 transition-all">
+<div class="w-full bg-secondary rounded-full h-[60%] group-hover:h-[65%] transition-all duration-500"></div>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-outline">Lifestyle</span>
+</div>
+<div class="flex flex-col items-center gap-4 group">
+<div class="w-full bg-tertiary-container/20 rounded-full flex flex-col justify-end h-48 group-hover:bg-tertiary-container/30 transition-all">
+<div class="w-full bg-tertiary rounded-full h-[40%] group-hover:h-[45%] transition-all duration-500"></div>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-outline">Culture</span>
+</div>
+<div class="flex flex-col items-center gap-4 group">
+<div class="w-full bg-primary-container/20 rounded-full flex flex-col justify-end h-48 group-hover:bg-primary-container/30 transition-all">
+<div class="w-full bg-primary-container rounded-full h-[75%] group-hover:h-[80%] transition-all duration-500"></div>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-outline">Business</span>
+</div>
+</div>
+<div class="bg-white/30 backdrop-blur p-6 border-t border-white/20">
+<div class="flex items-center justify-between">
+<div class="flex -space-x-3">
+<img alt="Analyst 1" class="w-10 h-10 rounded-full border-2 border-white" data-alt="portrait of a creative professional woman in a stylish office" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAv7szwHWNNV7Sk6v2YkoZR7ssJz56lp6iVNnhrCfHWXeIgSeNm2PTLDHKPd3jsimfY5DPvdbzljl1rjLMAFm2X7ezNipH3HNiETofCemh1VaCVwnfeKc9Pmefqptv0t8Ij--Oa15JXGBYAS3j6Z9otzlG1To-AlCLYItrM_LjJyDi7VOsLqUyaJm6q25DkIo4z0uJcEyp229yTjEghXKakBvyWs1HjAN_5QldBDMhwHC4bUVGyjODJRBHVUZJwQ8cmohgRd5SuL_E"/>
+<img alt="Analyst 2" class="w-10 h-10 rounded-full border-2 border-white" data-alt="close-up headshot of a happy smiling woman professional" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-2LthXl9oXsW5mP-S1pm7TczivMxvlniOPmxYQxTpMfkvlkrTx9qRXnUT0LQQ8OeQtIHZ5hG96TjcOzw0v5I31jeS1FRCHpgfUshOKBZ-BMMficl_uZpl75PWVRrhggvhTos-5D3KfZgekSngVGk4KOV1JEkDL7IIuIBRfgGoQlhbDQE0_V4nv-2K53sn-PNdLhb2ija_AJbQB4gSdK3ECYmza9DSy39iYL4JeUteFNx3OZvhGG9456M5khLwNKGrrpAn5CHX5tI"/>
+<img alt="Analyst 3" class="w-10 h-10 rounded-full border-2 border-white" data-alt="professional portrait of a young man with glasses in a tech environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAe4A8H36tlPaRsstR_dKDVJaJISRpXQIf4Uwgeg6_GyChwaKMlwvVrC5joiJ_JetF_GR0umBuB90deGgqAzGz_vylFh5A09TzkmPLWPTxZFeNY6M9xJFXCQ052RDMHzsMXiKBgz-LAtlOgUyQGVr7vL1p9MLt4AvkUiy7fsuUcqiv23C139lKBd7gKAcmHPiGCsuJEf5WCoD_A_hqukdYUZqnC6dhIabtE3WWlAJHfIcWO9thje9WzbbyOiwmYvKUTGKtK2W9T7UQ"/>
+<div class="w-10 h-10 rounded-full border-2 border-white bg-surface-container-high flex items-center justify-center text-[10px] font-bold">+12</div>
+</div>
+<p class="text-sm font-manrope text-on-surface-variant">Active Analysts currently monitoring this stream</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-12 px-12 border-t bg-slate-50 flex justify-between items-center w-full mt-auto">
+<p class="font-manrope text-xs tracking-widest uppercase text-slate-400">© 2024 Lumina Pulse Tech. All rights reserved.</p>
+<div class="flex gap-8">
+<a class="font-manrope text-xs tracking-widest uppercase text-slate-400 hover:text-blue-500 transition-colors" href="#">Privacy Policy</a>
+<a class="font-manrope text-xs tracking-widest uppercase text-slate-400 hover:text-blue-500 transition-colors" href="#">Terms of Service</a>
+<a class="font-manrope text-xs tracking-widest uppercase text-slate-400 hover:text-blue-500 transition-colors" href="#">Cookie Settings</a>
+</div>
+</footer>
+</body></html>

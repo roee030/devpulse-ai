@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DevPulse - Sprint Prediction</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "error-container": "#ffdad6",
+              "on-surface": "#191c1e",
+              "tertiary-fixed-dim": "#ddb8ff",
+              "surface-bright": "#f7f9fb",
+              "on-secondary-container": "#fffbff",
+              "secondary-fixed": "#e9ddff",
+              "outline": "#727785",
+              "on-primary-container": "#fefcff",
+              "outline-variant": "#c2c6d6",
+              "on-secondary": "#ffffff",
+              "primary": "#0058be",
+              "surface-container-lowest": "#ffffff",
+              "secondary": "#6b38d4",
+              "background": "#f7f9fb",
+              "surface": "#f7f9fb",
+              "on-tertiary-fixed-variant": "#62259b",
+              "secondary-fixed-dim": "#d0bcff",
+              "surface-container": "#eceef0",
+              "primary-fixed": "#d8e2ff",
+              "surface-container-high": "#e6e8ea",
+              "surface-tint": "#005ac2",
+              "on-secondary-fixed-variant": "#5516be",
+              "on-error-container": "#93000a",
+              "on-tertiary": "#ffffff",
+              "tertiary-fixed": "#f0dbff",
+              "on-tertiary-fixed": "#2c0051",
+              "error": "#ba1a1a",
+              "tertiary-container": "#9358cd",
+              "inverse-primary": "#adc6ff",
+              "primary-container": "#2170e4",
+              "on-primary": "#ffffff",
+              "tertiary": "#783eb2",
+              "on-tertiary-container": "#fffbff",
+              "primary-fixed-dim": "#adc6ff",
+              "inverse-surface": "#2d3133",
+              "surface-container-low": "#f2f4f6",
+              "inverse-on-surface": "#eff1f3",
+              "surface-variant": "#e0e3e5",
+              "surface-container-highest": "#e0e3e5",
+              "on-secondary-fixed": "#23005c",
+              "on-background": "#191c1e",
+              "secondary-container": "#8455ef",
+              "on-error": "#ffffff",
+              "on-surface-variant": "#424754",
+              "on-primary-fixed": "#001a42",
+              "surface-dim": "#d8dadc",
+              "on-primary-fixed-variant": "#004395"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      body {
+        background-color: #f7f9fb;
+        font-family: 'Inter', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      .chart-container {
+        aspect-ratio: 16/9;
+        position: relative;
+        overflow: hidden;
+      }
+      .line-ideal { stroke-dasharray: 4 4; stroke: #0058be; opacity: 0.3; }
+      .line-actual { stroke: #0058be; stroke-width: 3; }
+      .line-prediction { stroke-dasharray: 6 3; stroke: #6b38d4; stroke-width: 2; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="pb-24">
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 w-full z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/10 dark:border-slate-800/50 shadow-[0_8px_32px_0_rgba(0,88,190,0.06)] flex justify-between items-center px-6 h-16 w-full">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-blue-700 dark:text-blue-400" style="font-variation-settings: 'FILL' 1;">pulse_alert</span>
+<span class="text-2xl font-black bg-gradient-to-br from-blue-600 to-blue-400 bg-clip-text text-transparent font-manrope tracking-tight">DevPulse</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-slate-500">notifications</span>
+<div class="w-8 h-8 rounded-full bg-primary-fixed overflow-hidden">
+<img alt="User" data-alt="minimalist 3d avatar of a young professional with glasses and a friendly smile on a solid blue background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdZajIWLD13UxYnBb6zucHECeR3SN6wlQLiRk9QCx8RHc79k4sL7tv26KDAGXnGXSsBTkMeIeBiLvbTPUICxZUMwWiARyxMoZEcY8c5MgUGxdewb_2s1NvxqXcO248GdwQ9oEaJ-vNPKRduQOCfS0wPHOygoXHHkXmr6NKe6Lh9qXc68XEQD8osFq4KOJEQopVMzazbQdrU7UQDO4bulTDQvycx39Ip44YmLFfUuMr0SsRci0nDjN60DO3gEyo_kgUOCBrKxb4fI8"/>
+</div>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-lg mx-auto space-y-8">
+<!-- Hero Header -->
+<section class="space-y-1">
+<div class="flex items-center justify-between">
+<h1 class="font-headline font-extrabold text-3xl tracking-tight text-on-surface">Sprint: Quantum Velocity</h1>
+<div class="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">Active</div>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant font-medium text-sm">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">calendar_today</span> Oct 12-26</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">bolt</span> 142 Points</span>
+</div>
+</section>
+<!-- Main Chart Section -->
+<section class="glass-card rounded-3xl p-6 shadow-[0_8px_32px_0_rgba(0,88,190,0.04)]">
+<div class="flex justify-between items-end mb-6">
+<div>
+<h2 class="font-headline text-lg font-bold text-on-surface">Burndown Velocity</h2>
+<p class="text-xs text-on-surface-variant">Real-time vs AI Projection</p>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-2xl font-black text-primary">82<span class="text-sm font-normal text-on-surface-variant ml-1">pts left</span></span>
+</div>
+</div>
+<!-- SVG Chart Mockup -->
+<div class="chart-container w-full">
+<svg class="w-full h-full" viewbox="0 0 300 150">
+<!-- Grid Lines -->
+<line stroke="#eceef0" stroke-width="1" x1="0" x2="300" y1="140" y2="140"></line>
+<line stroke="#eceef0" stroke-width="1" x1="0" x2="300" y1="100" y2="100"></line>
+<line stroke="#eceef0" stroke-width="1" x1="0" x2="300" y1="60" y2="60"></line>
+<line stroke="#eceef0" stroke-width="1" x1="0" x2="300" y1="20" y2="20"></line>
+<!-- Ideal Path -->
+<path class="line-ideal" d="M 10 20 L 290 140" fill="none"></path>
+<!-- Actual Path (Current Day: Day 7 of 14) -->
+<path class="line-actual" d="M 10 20 L 50 35 L 90 60 L 130 65 L 150 78" fill="none"></path>
+<!-- AI Prediction -->
+<path class="line-prediction" d="M 150 78 L 190 95 L 230 115 L 290 135" fill="none"></path>
+<!-- Points -->
+<circle cx="150" cy="78" fill="#0058be" r="4"></circle>
+<circle cx="290" cy="135" fill="#6b38d4" r="4"></circle>
+</svg>
+</div>
+<div class="mt-4 flex justify-between gap-2">
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-0.5 bg-primary/30 rounded-full border-t-2 border-dashed border-primary"></span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Ideal</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-1 bg-primary rounded-full"></span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Actual</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-0.5 bg-secondary rounded-full border-t-2 border-dashed border-secondary"></span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">AI Predict</span>
+</div>
+</div>
+</section>
+<!-- Insight Banner -->
+<section class="bg-[#e8f5e9]/60 backdrop-blur-md rounded-2xl p-5 flex items-start gap-4 border border-white/40">
+<div class="bg-[#2e7d32] rounded-full p-2 mt-1">
+<span class="material-symbols-outlined text-white text-[20px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div>
+<p class="font-bold text-[#1b5e20] text-lg leading-tight">68% completion predicted.</p>
+<p class="text-[#2e7d32] text-sm font-medium mt-1">Confidence: 84%. Velocity is stabilizing after early blockers.</p>
+</div>
+</section>
+<!-- Deep Dive: Blockers -->
+<section class="space-y-4">
+<div class="flex items-center justify-between">
+<h3 class="font-headline font-bold text-xl text-on-surface">Blocker Deep Dive</h3>
+<button class="text-primary font-bold text-sm">View All</button>
+</div>
+<div class="space-y-3">
+<!-- Blocker 1 -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 flex items-center justify-between shadow-[0_4px_12px_rgba(0,0,0,0.02)]">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-error-container/40 flex items-center justify-center text-error">
+<span class="material-symbols-outlined">api</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Legacy API</p>
+<p class="text-xs text-on-surface-variant">Core integration delay</p>
+</div>
+</div>
+<span class="px-3 py-1 bg-error/10 text-error text-[10px] font-black uppercase tracking-widest rounded-full">High</span>
+</div>
+<!-- Blocker 2 -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 flex items-center justify-between shadow-[0_4px_12px_rgba(0,0,0,0.02)]">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">security</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Auth Refactor</p>
+<p class="text-xs text-on-surface-variant">Security review pending</p>
+</div>
+</div>
+<span class="px-3 py-1 bg-secondary-container/20 text-secondary text-[10px] font-black uppercase tracking-widest rounded-full">Med</span>
+</div>
+<!-- Blocker 3 -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 flex items-center justify-between shadow-[0_4px_12px_rgba(0,0,0,0.02)]">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">design_services</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Figma Assets</p>
+<p class="text-xs text-on-surface-variant">Missing icon sprites</p>
+</div>
+</div>
+<span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full">Low</span>
+</div>
+</div>
+</section>
+<!-- Developer Velocity Output -->
+<section class="space-y-4">
+<h3 class="font-headline font-bold text-xl text-on-surface">Engineer Pulse</h3>
+<div class="glass-card rounded-3xl p-6 space-y-6">
+<!-- Dev 1 -->
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="font-bold text-on-surface">Alex Rivera</span>
+<span class="text-sm font-medium text-on-surface-variant">24 pts/wk</span>
+</div>
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full w-[90%]"></div>
+</div>
+</div>
+<!-- Dev 2 -->
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="font-bold text-on-surface">Sarah Chen</span>
+<span class="text-sm font-medium text-on-surface-variant">18 pts/wk</span>
+</div>
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full w-[72%]"></div>
+</div>
+</div>
+<!-- Dev 3 -->
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="font-bold text-on-surface">Jordan Smyth</span>
+<span class="text-sm font-medium text-on-surface-variant">21 pts/wk</span>
+</div>
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full w-[84%]"></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar Shell -->
+<nav class="fixed bottom-0 w-full z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-t-3xl border-t border-white/20 dark:border-slate-800/50 shadow-[0_-8px_32px_0_rgba(0,88,190,0.06)] flex justify-around items-center h-20 px-4 pb-safe">
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-blue-600" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-blue-700 dark:text-blue-300 bg-blue-50/50 dark:bg-blue-900/30 rounded-2xl px-3 py-1" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">timeline</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider mt-1">Sprint</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-blue-600" href="#">
+<span class="material-symbols-outlined">lightbulb</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider mt-1">Briefing</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-blue-600" href="#">
+<span class="material-symbols-outlined">warning</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider mt-1">Risk</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-blue-600" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider mt-1">ROI</span>
+</a>
+</nav>
+</body></html>

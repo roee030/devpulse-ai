@@ -19,6 +19,7 @@ import { IntegrationsPage } from './pages/Settings/IntegrationsPage'
 import { CompanyPage } from './pages/Settings/CompanyPage'
 import { Simulate } from './pages/Simulate'
 import { AIEffort } from './pages/AIEffort'
+import { TasksIntel } from './pages/TasksIntel'
 
 const pageVariants = {
   initial: { opacity: 0, y: 16 },
@@ -54,6 +55,7 @@ function AnimatedRoutes() {
           <Route path="/roadmap"   element={<Roadmap />} />
           <Route path="/annual"    element={<AnnualView />} />
           <Route path="/ai-effort"              element={<AIEffort />} />
+          <Route path="/tasks"                 element={<TasksIntel />} />
           <Route path="/settings/integrations" element={<IntegrationsPage />} />
           <Route path="/settings/company"      element={<CompanyPage />} />
           <Route path="/simulate"              element={<Simulate />} />

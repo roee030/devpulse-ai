@@ -1,6 +1,10 @@
 // src/context/UnifiedDataContext.tsx
-// Aggregates data from all Unified.to connections and maps it to DevPulse's
-// internal data model. Falls back to mockData when no API key is configured.
+// Aggregates data from all Unified.to connections and cross-links them:
+//   Tasks  ↔  PRs   (branch contains task key: feature/PROJ-42-...)
+//   Tasks  ↔  Devs  (assignee name ≈ HRIS employee name)
+//   Tasks  ↔  Msgs  (Slack message mentions "PROJ-42")
+//
+// Falls back to mockData when no API key is configured.
 import {
   createContext, useContext, useEffect, useState, ReactNode,
 } from 'react'
@@ -9,10 +13,14 @@ import {
   getTasks,
   getPullRequests,
   getTeamMembers,
+  getRecentMessages,
+  getChannels,
   detectRole,
   type UniversalTask,
   type UniversalPR,
   type UniversalMember,
+  type UniversalMessage,
+  type UniversalChannel,
 } from '../lib/unified'
 import {
   developers as mockDevelopers,
@@ -26,19 +34,66 @@ import {
   type RiskLevel,
 } from '../data/mockData'
 
-// ── Env ────────────────────────────────────────────────────────────────────────
+// ── Env ───────────────────────────────────────────────────────────────────────
 
-const JIRA_ID   = import.meta.env.VITE_UNIFIED_JIRA_CONNECTION_ID   ?? ''
-const LINEAR_ID = import.meta.env.VITE_UNIFIED_LINEAR_CONNECTION_ID ?? ''
-const MONDAY_ID = import.meta.env.VITE_UNIFIED_MONDAY_CONNECTION_ID ?? ''
-const GITHUB_ID = import.meta.env.VITE_UNIFIED_GITHUB_CONNECTION_ID ?? ''
-// HRIS members come from the same workspace — default to Jira connection ID
-const HRIS_ID   = import.meta.env.VITE_UNIFIED_HRIS_CONNECTION_ID ?? JIRA_ID
-const API_KEY   = import.meta.env.VITE_UNIFIED_API_KEY            ?? ''
+const JIRA_ID    = import.meta.env.VITE_UNIFIED_JIRA_CONNECTION_ID   ?? ''
+const LINEAR_ID  = import.meta.env.VITE_UNIFIED_LINEAR_CONNECTION_ID ?? ''
+const MONDAY_ID  = import.meta.env.VITE_UNIFIED_MONDAY_CONNECTION_ID ?? ''
+const GITHUB_ID  = import.meta.env.VITE_UNIFIED_GITHUB_CONNECTION_ID ?? ''
+const SLACK_ID   = import.meta.env.VITE_UNIFIED_SLACK_CONNECTION_ID  ?? ''
+const TEAMS_ID   = import.meta.env.VITE_UNIFIED_TEAMS_CONNECTION_ID  ?? ''
+const HRIS_ID    = import.meta.env.VITE_UNIFIED_HRIS_CONNECTION_ID   ?? JIRA_ID
+const API_KEY    = import.meta.env.VITE_UNIFIED_API_KEY               ?? ''
 
 export const IS_UNIFIED_LIVE = !!API_KEY
 
 // ── Types ──────────────────────────────────────────────────────────────────────
+
+export interface LinkedPR {
+  id:           string
+  number:       number
+  title:        string
+  sourceBranch: string
+  status:       UniversalPR['status']
+  authorLogin:  string
+  waitingHours: number
+  mergedAt:     Date | null
+  url:          string
+}
+
+export interface LinkedMessage {
+  id:        string
+  text:      string
+  channel:   string
+  authorId:  string
+  createdAt: Date
+}
+
+// A task fully enriched with cross-linked PRs, messages, and assignee
+export interface EnrichedTask {
+  id:           string
+  key:          string
+  title:        string
+  description:  string
+  status:       UniversalTask['status']
+  priority:     UniversalTask['priority']
+  points:       number
+  source:       UniversalTask['source']
+  daysOpen:     number
+  createdAt:    Date
+  dueAt:        Date | null
+  epicId:       string | null
+
+  assigneeName:    string | null   // raw from task platform
+  assigneeDev:     Developer | null  // matched HRIS developer
+  prs:             LinkedPR[]
+  messages:        LinkedMessage[]
+
+  // computed
+  isBlocked:         boolean
+  hasOpenPR:         boolean
+  longestPRWaitHours:number
+}
 
 export interface ConnectionStatus {
   jira:   boolean
@@ -50,20 +105,30 @@ export interface ConnectionStatus {
 }
 
 export interface UnifiedDataState {
-  developers:  Developer[]
-  teams:       Team[]
-  divisions:   Division[]
-  allTasks:    UniversalTask[]
-  allPRs:      UniversalPR[]
-  allMembers:  UniversalMember[]
-  connections: ConnectionStatus
-  isLoading:   boolean
-  error:       string | null
-  isLive:      boolean
-  lastFetched: Date | null
+  developers:    Developer[]
+  teams:         Team[]
+  divisions:     Division[]
+  allTasks:      UniversalTask[]
+  allPRs:        UniversalPR[]
+  allMembers:    UniversalMember[]
+  allMessages:   UniversalMessage[]
+  allChannels:   UniversalChannel[]
+  enrichedTasks: EnrichedTask[]
+  connections:   ConnectionStatus
+  isLoading:     boolean
+  error:         string | null
+  isLive:        boolean
+  lastFetched:   Date | null
+  // messaging send helpers
+  slackConnectionId: string
+  teamsConnectionId: string
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function normalizeName(n: string): string {
+  return n.toLowerCase().replace(/[^a-z]/g, '')
+}
 
 function initials(name: string | undefined | null): string {
   return (name ?? '?').split(' ').map(p => p[0] ?? '').join('').toUpperCase().slice(0, 2) || '?'
@@ -102,30 +167,167 @@ function roleTitleLabel(role: string): string {
   return 'Software Engineer'
 }
 
-// Build Developer[] from Unified member + task + PR data
+// ── Cross-linking ─────────────────────────────────────────────────────────────
+
+// Build a name-normalised lookup from HRIS members
+function buildMemberByName(members: UniversalMember[]): Map<string, UniversalMember> {
+  const m = new Map<string, UniversalMember>()
+  for (const mem of members) {
+    m.set(normalizeName(mem.name), mem)
+    // also index by first name alone for partial matches
+    const first = (mem.name ?? '').split(' ')[0]
+    if (first && first.length > 2) m.set(normalizeName(first), mem)
+  }
+  return m
+}
+
+// Build taskKey → UniversalPR[] map
+function buildPRsByKey(prs: UniversalPR[]): Map<string, UniversalPR[]> {
+  const m = new Map<string, UniversalPR[]>()
+  for (const pr of prs) {
+    if (!pr.linkedTaskKey) continue
+    const key = pr.linkedTaskKey
+    if (!m.has(key)) m.set(key, [])
+    m.get(key)!.push(pr)
+  }
+  return m
+}
+
+// Build taskKey → UniversalMessage[] map (from message mentions)
+function buildMessagesByKey(messages: UniversalMessage[]): Map<string, UniversalMessage[]> {
+  const m = new Map<string, UniversalMessage[]>()
+  for (const msg of messages) {
+    for (const key of msg.mentionedTaskKeys) {
+      if (!m.has(key)) m.set(key, [])
+      m.get(key)!.push(msg)
+    }
+  }
+  return m
+}
+
+// ── Build enriched tasks ───────────────────────────────────────────────────────
+
+function buildEnrichedTasks(
+  tasks:      UniversalTask[],
+  prs:        UniversalPR[],
+  messages:   UniversalMessage[],
+  members:    UniversalMember[],
+  developers: Developer[],
+): EnrichedTask[] {
+  const prsByKey  = buildPRsByKey(prs)
+  const msgsByKey = buildMessagesByKey(messages)
+  const memberByName = buildMemberByName(members)
+
+  return tasks.map(t => {
+    // Match assignee: try name from task, then fall back to member id lookup
+    let assigneeDev: Developer | null = null
+    if (t.assigneeName) {
+      const mem = memberByName.get(normalizeName(t.assigneeName))
+      if (mem) {
+        assigneeDev = developers.find(d => d.id === mem.id) ?? null
+      }
+    }
+
+    const taskPRs   = prsByKey.get(t.key)  ?? []
+    const taskMsgs  = msgsByKey.get(t.key) ?? []
+
+    const linkedPRs: LinkedPR[] = taskPRs.map(pr => ({
+      id:           pr.id,
+      number:       pr.number,
+      title:        pr.title,
+      sourceBranch: pr.sourceBranch,
+      status:       pr.status,
+      authorLogin:  pr.authorLogin,
+      waitingHours: pr.waitingHours,
+      mergedAt:     pr.mergedAt,
+      url:          pr.url,
+    }))
+
+    const linkedMsgs: LinkedMessage[] = taskMsgs.slice(0, 5).map(m => ({
+      id:        m.id,
+      text:      m.text.slice(0, 200),
+      channel:   m.channel || m.channelId,
+      authorId:  m.authorId,
+      createdAt: m.createdAt,
+    }))
+
+    const openPRs    = linkedPRs.filter(p => p.status === 'open' || p.status === 'approved' || p.status === 'changes-requested')
+    const longestPR  = openPRs.reduce((max, p) => Math.max(max, p.waitingHours), 0)
+
+    return {
+      id:          t.id,
+      key:         t.key,
+      title:       t.title,
+      description: t.description,
+      status:      t.status,
+      priority:    t.priority,
+      points:      t.points,
+      source:      t.source,
+      daysOpen:    t.daysOpen,
+      createdAt:   t.createdAt,
+      dueAt:       t.dueAt,
+      epicId:      t.epicId,
+
+      assigneeName:    t.assigneeName,
+      assigneeDev,
+      prs:             linkedPRs,
+      messages:        linkedMsgs,
+
+      isBlocked:          t.status === 'blocked',
+      hasOpenPR:          openPRs.length > 0,
+      longestPRWaitHours: longestPR,
+    }
+  })
+}
+
+// ── Build Developer[] ──────────────────────────────────────────────────────────
+
 function buildDevelopers(
-  members:  UniversalMember[],
-  tasks:    UniversalTask[],
-  prs:      UniversalPR[],
+  members:   UniversalMember[],
+  tasks:     UniversalTask[],
+  prs:       UniversalPR[],
   baseTeams: Team[],
 ): Developer[] {
-  return members.map((m, idx) => {
-    const myTasks: Task[] = tasks
-      .filter(t => t.assigneeId === m.id)
-      .map(t => ({ id: t.id, title: t.title, points: t.points, status: t.status }))
+  // Name-normalised task lookup for assigning tasks to members
+  // Task assignee name ↔ member name fuzzy match
+  const tasksByMemberName = new Map<string, UniversalTask[]>()
+  for (const t of tasks) {
+    const norm = normalizeName(t.assigneeName ?? '')
+    if (!norm) continue
+    if (!tasksByMemberName.has(norm)) tasksByMemberName.set(norm, [])
+    tasksByMemberName.get(norm)!.push(t)
+  }
 
-    const myPR   = prs.find(p => p.authorId === m.id)
+  // PR author login ↔ member email/name match (best-effort)
+  const prsByMemberId = new Map<string, UniversalPR[]>()
+  for (const pr of prs) {
+    if (!pr.authorId) continue
+    if (!prsByMemberId.has(pr.authorId)) prsByMemberId.set(pr.authorId, [])
+    prsByMemberId.get(pr.authorId)!.push(pr)
+  }
+
+  return members.map((m, idx) => {
+    const nameNorm = normalizeName(m.name)
+    const myRawTasks = tasksByMemberName.get(nameNorm) ?? []
+    const myTasks: Task[] = myRawTasks.map(t => ({
+      id: t.id, title: t.title, points: t.points, status: t.status,
+    }))
+
+    // Also try matching by member id for PRs
+    const myRawPRs = prsByMemberId.get(m.id) ?? prsByMemberId.get(m.email) ?? []
+    const myPR     = myRawPRs[0] ?? null
+
     const prStatus: PRStatus | null = myPR
       ? {
-          number:       parseInt(myPR.id.replace(/\D/g, '').slice(0, 6)) || 100 + idx,
+          number:       myPR.number || 100 + idx,
           title:        myPR.title,
           waitingHours: myPR.waitingHours,
           reviewer:     '',
-          status:       myPR.status,
+          status:       myPR.status === 'merged' || myPR.status === 'closed' ? 'approved' : myPR.status,
         }
       : null
 
-    const rl         = riskFromTasks(myTasks, prStatus)
+    const rl = riskFromTasks(myTasks, prStatus)
     const teamFallback = baseTeams[idx % Math.max(baseTeams.length, 1)]
 
     return {
@@ -133,7 +335,7 @@ function buildDevelopers(
       name:           m.name,
       initials:       initials(m.name),
       role:           m.jobTitle || roleTitleLabel(m.role),
-      teamId:         teamFallback?.id      ?? 'team-unknown',
+      teamId:         teamFallback?.id       ?? 'team-unknown',
       divisionId:     teamFallback?.divisionId ?? 'div-unknown',
       tasks:          myTasks,
       prStatus,
@@ -150,17 +352,15 @@ function buildDevelopers(
   })
 }
 
-// Sort by role tier: CTO → Division Head → Team Lead → Developer
 function sortByRole(devs: Developer[]): Developer[] {
   const order: Record<string, number> = { cto: 0, divisionHead: 1, teamLead: 2, developer: 3 }
   return [...devs].sort((a, b) => {
     const ra = order[detectRole(a.role)] ?? 3
     const rb = order[detectRole(b.role)] ?? 3
-    return ra !== rb ? ra - rb : a.name.localeCompare(b.name)
+    return ra !== rb ? ra - rb : (a.name ?? '').localeCompare(b.name ?? '')
   })
 }
 
-// When members aren't available, enrich mock devs with live task/PR data
 function enrichMock(devs: Developer[], tasks: UniversalTask[], prs: UniversalPR[]): Developer[] {
   if (tasks.length === 0 && prs.length === 0) return devs
   return devs.map((dev, i) => {
@@ -169,7 +369,7 @@ function enrichMock(devs: Developer[], tasks: UniversalTask[], prs: UniversalPR[
       .map(t => ({ id: t.id, title: t.title, points: t.points, status: t.status }))
     const myRawPR = prs.length > 0 ? prs[i % prs.length] : null
     const prStatus: PRStatus | null = myRawPR
-      ? { number: 200 + i, title: myRawPR.title, waitingHours: myRawPR.waitingHours, reviewer: '', status: myRawPR.status }
+      ? { number: 200 + i, title: myRawPR.title, waitingHours: myRawPR.waitingHours, reviewer: '', status: myRawPR.status === 'merged' || myRawPR.status === 'closed' ? 'approved' : myRawPR.status }
       : dev.prStatus
     if (!myTasks.length && !myRawPR) return dev
     const rl = riskFromTasks(myTasks.length ? myTasks : dev.tasks, prStatus)
@@ -181,20 +381,27 @@ function enrichMock(devs: Developer[], tasks: UniversalTask[], prs: UniversalPR[
 
 const Ctx = createContext<UnifiedDataState | null>(null)
 
+const INITIAL: UnifiedDataState = {
+  developers:    mockDevelopers,
+  teams:         mockTeams,
+  divisions:     mockDivisions,
+  allTasks:      [],
+  allPRs:        [],
+  allMembers:    [],
+  allMessages:   [],
+  allChannels:   [],
+  enrichedTasks: [],
+  connections:   { jira: false, linear: false, monday: false, github: false, slack: false, teams: false },
+  isLoading:     IS_UNIFIED_LIVE,
+  error:         null,
+  isLive:        false,
+  lastFetched:   null,
+  slackConnectionId: SLACK_ID,
+  teamsConnectionId: TEAMS_ID,
+}
+
 export function UnifiedDataProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<UnifiedDataState>({
-    developers:  mockDevelopers,
-    teams:       mockTeams,
-    divisions:   mockDivisions,
-    allTasks:    [],
-    allPRs:      [],
-    allMembers:  [],
-    connections: { jira: false, linear: false, monday: false, github: false, slack: false, teams: false },
-    isLoading:   IS_UNIFIED_LIVE,
-    error:       null,
-    isLive:      false,
-    lastFetched: null,
-  })
+  const [state, setState] = useState<UnifiedDataState>(INITIAL)
 
   useEffect(() => {
     if (!IS_UNIFIED_LIVE) return
@@ -204,14 +411,15 @@ export function UnifiedDataProvider({ children }: { children: ReactNode }) {
   async function fetchAll() {
     const client = getUnifiedClient()
 
-    // Fetch tasks from task platforms + PRs from GitHub + HRIS members in parallel
-    const [jiraTasks, linearTasks, mondayTasks, githubPRs, hrisMembers] =
+    const [jiraTasks, linearTasks, mondayTasks, githubPRs, hrisMembers, slackMsgs, slackChannels] =
       await Promise.allSettled([
         getTasks(JIRA_ID,   client, 'jira'),
         getTasks(LINEAR_ID, client, 'linear'),
         getTasks(MONDAY_ID, client, 'monday'),
         getPullRequests(GITHUB_ID, client),
         getTeamMembers(HRIS_ID, client),
+        getRecentMessages(SLACK_ID || TEAMS_ID, 200, client),
+        getChannels(SLACK_ID || TEAMS_ID, client),
       ])
 
     const allTasks = [
@@ -219,35 +427,53 @@ export function UnifiedDataProvider({ children }: { children: ReactNode }) {
       ...(linearTasks.status === 'fulfilled' ? linearTasks.value : []),
       ...(mondayTasks.status === 'fulfilled' ? mondayTasks.value : []),
     ]
-    const allPRs     = githubPRs.status   === 'fulfilled' ? githubPRs.value   : []
-    const allMembers = hrisMembers.status  === 'fulfilled' ? hrisMembers.value : []
+    const allPRs      = githubPRs.status    === 'fulfilled' ? githubPRs.value    : []
+    const allMembers  = hrisMembers.status  === 'fulfilled' ? hrisMembers.value  : []
+    const allMessages = slackMsgs.status    === 'fulfilled' ? slackMsgs.value    : []
+    const allChannels = slackChannels.status === 'fulfilled' ? slackChannels.value : []
 
     const connections: ConnectionStatus = {
       jira:   jiraTasks.status   === 'fulfilled' && jiraTasks.value.length   > 0,
       linear: linearTasks.status === 'fulfilled' && linearTasks.value.length > 0,
       monday: mondayTasks.status === 'fulfilled' && mondayTasks.value.length > 0,
       github: githubPRs.status   === 'fulfilled' && githubPRs.value.length   > 0,
-      slack:  false,
-      teams:  false,
+      slack:  slackMsgs.status   === 'fulfilled',
+      teams:  !!(TEAMS_ID && slackMsgs.status === 'fulfilled'),
     }
 
-    // Build developer list: prefer HRIS members, fall back to enriched mock
+    // Build developer list
     const developers = allMembers.length > 0
       ? sortByRole(buildDevelopers(allMembers, allTasks, allPRs, mockTeams))
       : sortByRole(enrichMock(mockDevelopers, allTasks, allPRs))
 
+    // Build enriched tasks (cross-linked)
+    const enrichedTasks = buildEnrichedTasks(allTasks, allPRs, allMessages, allMembers, developers)
+
+    // Log cross-linking stats for debugging
+    const linked = enrichedTasks.filter(t => t.prs.length > 0).length
+    console.log(
+      `[DevPulse] Loaded: ${allTasks.length} tasks, ${allPRs.length} PRs, ` +
+      `${allMembers.length} members, ${allMessages.length} messages. ` +
+      `Cross-linked: ${linked}/${allTasks.length} tasks have PRs.`
+    )
+
     setState({
       developers,
-      teams:       mockTeams,
-      divisions:   mockDivisions,
+      teams:         mockTeams,
+      divisions:     mockDivisions,
       allTasks,
       allPRs,
       allMembers,
+      allMessages,
+      allChannels,
+      enrichedTasks,
       connections,
-      isLoading:   false,
-      error:       null,
-      isLive:      allTasks.length > 0 || allPRs.length > 0,
-      lastFetched: new Date(),
+      isLoading:     false,
+      error:         null,
+      isLive:        allTasks.length > 0 || allPRs.length > 0,
+      lastFetched:   new Date(),
+      slackConnectionId: SLACK_ID,
+      teamsConnectionId: TEAMS_ID,
     })
   }
 

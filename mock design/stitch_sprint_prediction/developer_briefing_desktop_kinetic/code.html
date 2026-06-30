@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DevPulse Kinetic | Developer Daily Briefing</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-fixed-variant": "#0e009d",
+                        "surface-bright": "#1f2b49",
+                        "error": "#ff6e84",
+                        "on-secondary": "#005a3c",
+                        "on-error-container": "#ffb2b9",
+                        "tertiary-fixed": "#f8a010",
+                        "secondary-dim": "#58e7ab",
+                        "on-secondary-container": "#e1ffec",
+                        "tertiary-fixed-dim": "#e79400",
+                        "primary-fixed-dim": "#8387ff",
+                        "on-error": "#490013",
+                        "background": "#060e20",
+                        "secondary": "#69f6b8",
+                        "primary-fixed": "#9396ff",
+                        "tertiary-dim": "#e79400",
+                        "on-primary-container": "#0a0081",
+                        "on-primary-fixed": "#000000",
+                        "surface-container-highest": "#192540",
+                        "surface-container": "#0f1930",
+                        "on-background": "#dee5ff",
+                        "secondary-container": "#006c49",
+                        "tertiary-container": "#f8a010",
+                        "surface": "#060e20",
+                        "inverse-surface": "#faf8ff",
+                        "surface-dim": "#060e20",
+                        "secondary-fixed": "#69f6b8",
+                        "on-tertiary": "#573500",
+                        "on-surface-variant": "#a3aac4",
+                        "on-primary": "#0f00a4",
+                        "on-tertiary-container": "#4a2c00",
+                        "error-container": "#a70138",
+                        "secondary-fixed-dim": "#58e7ab",
+                        "tertiary": "#ffb148",
+                        "outline": "#6d758c",
+                        "on-tertiary-fixed": "#2a1700",
+                        "outline-variant": "#40485d",
+                        "on-secondary-fixed": "#00452d",
+                        "error-dim": "#d73357",
+                        "surface-tint": "#a3a6ff",
+                        "primary-dim": "#6063ee",
+                        "on-tertiary-fixed-variant": "#563400",
+                        "inverse-primary": "#494bd7",
+                        "surface-variant": "#192540",
+                        "on-secondary-fixed-variant": "#006544",
+                        "on-surface": "#dee5ff",
+                        "primary": "#a3a6ff",
+                        "primary-container": "#9396ff",
+                        "inverse-on-surface": "#4d556b",
+                        "surface-container-low": "#091328",
+                        "surface-container-high": "#141f38",
+                        "surface-container-lowest": "#000000"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #060e20; color: #dee5ff; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { backdrop-filter: blur(20px); background: rgba(25, 37, 64, 0.8); }
+        .hero-gradient { background: linear-gradient(135deg, #a3a6ff 0%, #6063ee 100%); }
+        .glow-hover:hover { box-shadow: 0 0 15px rgba(163, 166, 255, 0.2); transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="bg-background text-on-background">
+<!-- SideNavBar Component -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-[#091328] dark:bg-[#091328] flex flex-col py-6 px-4 z-50">
+<div class="mb-10 px-2">
+<h1 class="text-xl font-bold tracking-tight text-[#a3a6ff] font-manrope">DevPulse Kinetic</h1>
+<p class="text-xs text-on-surface-variant font-label mt-1">Engineering Lead</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-3 text-[#a3a6ff] font-bold border-r-2 border-[#a3a6ff] bg-[#0f1930] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label">Command</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 text-[#a3aac4] font-medium hover:bg-[#141f38] hover:text-[#a3a6ff] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span class="font-label">Logic</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 text-[#a3aac4] font-medium hover:bg-[#141f38] hover:text-[#a3a6ff] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-label">Telemetry</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 text-[#a3aac4] font-medium hover:bg-[#141f38] hover:text-[#a3a6ff] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="shield">shield</span>
+<span class="font-label">Security</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 text-[#a3aac4] font-medium hover:bg-[#141f38] hover:text-[#a3a6ff] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label">Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-outline-variant/10 space-y-1">
+<button class="w-full bg-gradient-to-br from-primary to-primary-dim text-on-primary font-bold py-3 rounded-xl mb-4 text-sm font-label scale-95 hover:scale-100 duration-150 ease-in-out">
+                Deploy New Node
+            </button>
+<a class="flex items-center gap-3 px-3 py-3 text-[#a3aac4] font-medium hover:text-[#a3a6ff] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="font-label">Help</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 text-[#a3aac4] font-medium hover:text-[#a3a6ff] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-label">Logout</span>
+</a>
+</div>
+</aside>
+<!-- TopNavBar Component -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] z-40 bg-[#060e20]/80 backdrop-blur-xl flex justify-between items-center px-8 h-16">
+<div class="flex items-center gap-6">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="bg-surface-container-lowest border-none rounded-lg pl-10 pr-4 py-1.5 text-sm w-64 focus:ring-1 focus:ring-[#a3a6ff] font-label" placeholder="Search systems..." type="text"/>
+</div>
+<nav class="hidden md:flex gap-6 items-center">
+<a class="text-[#a3aac4] hover:text-white transition-opacity font-label text-sm uppercase tracking-wider" href="#">Cluster</a>
+<a class="text-[#a3aac4] hover:text-white transition-opacity font-label text-sm uppercase tracking-wider" href="#">Logs</a>
+<a class="text-[#a3aac4] hover:text-white transition-opacity font-label text-sm uppercase tracking-wider" href="#">Metrics</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-[#a3aac4] hover:text-white transition-colors">notifications</button>
+<button class="material-symbols-outlined text-[#a3aac4] hover:text-white transition-colors">history</button>
+<button class="bg-primary/10 border border-primary/20 text-primary px-4 py-1.5 rounded-lg text-xs font-bold font-label uppercase tracking-widest hover:bg-primary/20 transition-all">Execute</button>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-outline-variant/30">
+<img alt="Lead Engineer" data-alt="close-up portrait of a professional man with a confident expression in a tech office environment with soft blue accent lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCj-VGSB54bagx5I4QxoaKwR6F9VUNLxbAQdHwgoaEeLQPbOwJ6B38XBinyvEOuXSQDpqtBJPNfEjAKiRTJOzV_Isc0fYaWrLgAI4lHxPblNRvvKdadmJbM0wy7r0cvJwPcdltJGMqNkXH9b8m0_NpJdXl1jhESDBDQaxtYZpTnLqv3qA6U7OfsGWdvCC3ShGdLfyU-plWeRXduUPIwySHRtAyR3Lo1sMgmblY73sm4tJhbwOg4_A3eaBQ_IQtuPT8NZQY3QqTzOqo"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-16 min-h-screen p-8 bg-surface">
+<!-- Welcome Header -->
+<header class="mb-12">
+<h2 class="text-4xl font-extrabold font-headline text-on-surface tracking-tight">Your AI-powered focus for today</h2>
+<p class="text-on-surface-variant font-body mt-2 text-lg">Good morning, Alex. Systems are nominal and the team is aligned.</p>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Primary Summary Card -->
+<section class="col-span-12 lg:col-span-8 bg-surface-container rounded-xl overflow-hidden relative flex flex-col md:flex-row shadow-[0_40px_60px_-15px_rgba(15,0,164,0.05)]">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+<!-- Avatar & Intro Section -->
+<div class="p-8 border-r border-outline-variant/10 flex flex-col items-center justify-center md:w-1/3 bg-surface-container-low/50">
+<div class="relative w-24 h-24 mb-4">
+<img alt="Avatar" class="rounded-full w-full h-full object-cover border-2 border-primary/50 p-1" data-alt="close-up headshot of a developer looking focused with soft cool background lights and professional bokeh" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAc8gWW0cbcvLjIvvororkh5d7ybO3e6lHty3soQOBysFCCeGz1CKa7ETzMOgNBLkN0b2AV2DVQDGYA-Chk13YUpIfl12-dAsKADW-DsCvTyxPQmn6_dbH-sBFqT8U-O8zNHqSX3Y9Q4HwLB72lM5iJCq9B87JrSBP2nVMLNBID_LD08I0OMPr_TzBjH9VWQRLlvLdq6w7L0rAkLgiSpLk3283X1Jm3bhtpyQBsL4Whtlg98wvypom7wuGBF_uIFtzAdTHYalAn-Mk"/>
+<div class="absolute bottom-1 right-1 w-5 h-5 bg-secondary rounded-full border-4 border-surface-container-low"></div>
+</div>
+<h3 class="font-headline font-bold text-xl text-on-surface">Alex Rivera</h3>
+<p class="font-label text-xs text-on-surface-variant uppercase tracking-widest mt-1">L6 Senior Engineer</p>
+<div class="mt-6 flex flex-col items-center">
+<span class="text-3xl font-headline font-extrabold text-primary">8.5</span>
+<span class="font-label text-[10px] text-on-surface-variant uppercase">Points committed</span>
+</div>
+</div>
+<!-- Today's Focus & Tasks -->
+<div class="p-8 flex-1">
+<div class="flex justify-between items-center mb-6">
+<h4 class="font-headline font-bold text-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">bolt</span>
+                            Today's Focus
+                        </h4>
+<span class="text-[10px] font-label bg-surface-container-high px-2 py-1 rounded text-on-surface-variant uppercase tracking-widest">Priority: High</span>
+</div>
+<ul class="space-y-4">
+<li class="flex items-start gap-4 p-4 rounded-lg bg-surface-container-low border-l-2 border-secondary group hover:bg-surface-container-high transition-all">
+<div class="mt-1">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex-1">
+<p class="font-body text-sm font-semibold text-on-surface">Refactor Telemetry Middleware</p>
+<p class="font-body text-xs text-on-surface-variant mt-0.5">Optimization for V3 cluster nodes. Goal: Reduce latency by 12%.</p>
+</div>
+<span class="font-label text-xs font-bold text-secondary">3 pts</span>
+</li>
+<li class="flex items-start gap-4 p-4 rounded-lg bg-surface-container-low border-l-2 border-primary-dim group hover:bg-surface-container-high transition-all">
+<div class="mt-1">
+<span class="material-symbols-outlined text-primary-dim">radio_button_unchecked</span>
+</div>
+<div class="flex-1">
+<p class="font-body text-sm font-semibold text-on-surface">Security Audit - Node AUTH-92</p>
+<p class="font-body text-xs text-on-surface-variant mt-0.5">Review credentials leakage reported by Sentinel-X.</p>
+</div>
+<span class="font-label text-xs font-bold text-primary-dim">5 pts</span>
+</li>
+<li class="flex items-start gap-4 p-4 rounded-lg bg-surface-container-low border-l-2 border-outline-variant/30 group hover:bg-surface-container-high transition-all">
+<div class="mt-1">
+<span class="material-symbols-outlined text-outline-variant">radio_button_unchecked</span>
+</div>
+<div class="flex-1">
+<p class="font-body text-sm font-semibold text-on-surface">Team Stand-up Scripting</p>
+<p class="font-body text-xs text-on-surface-variant mt-0.5">Finalize KPIs for the weekly sync.</p>
+</div>
+<span class="font-label text-xs font-bold text-on-surface-variant">0.5 pts</span>
+</li>
+</ul>
+</div>
+</section>
+<!-- PR Status & Nudge Card -->
+<section class="col-span-12 lg:col-span-4 flex flex-col gap-6">
+<!-- PR Status -->
+<div class="bg-surface-container p-6 rounded-xl border-t border-outline-variant/10 relative overflow-hidden group">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h4 class="font-headline font-bold text-on-surface">PR Status</h4>
+<p class="text-xs text-on-surface-variant font-label mt-1">3 Pending Reviews</p>
+</div>
+<span class="material-symbols-outlined text-secondary text-3xl">rebase</span>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded-lg border border-transparent hover:border-primary/20 transition-all">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="font-body text-xs font-medium">feat/kinetic-ui-v2</span>
+</div>
+<button class="text-[10px] font-label text-primary hover:underline uppercase">Approve</button>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded-lg border border-transparent hover:border-primary/20 transition-all">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-tertiary"></div>
+<span class="font-body text-xs font-medium">fix/auth-leak-92</span>
+</div>
+<button class="text-[10px] font-label text-primary hover:underline uppercase">Review</button>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/10">
+<p class="text-xs text-on-surface-variant mb-3 font-body">Jordan nudged you about <span class="text-primary font-bold">docs/api-spec</span>.</p>
+<button class="w-full bg-surface-container-high py-2 rounded-lg text-xs font-bold font-label text-on-surface hover:bg-surface-container-highest transition-colors">
+                            Confirm Nudge
+                        </button>
+</div>
+</div>
+<!-- Blockers Section -->
+<div class="bg-surface-container-low p-6 rounded-xl border-l-4 border-error relative">
+<h4 class="font-headline font-bold text-error flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined">warning</span>
+                        Active Blockers
+                    </h4>
+<p class="text-sm font-body text-on-surface leading-relaxed">
+                        API Deployment in <span class="font-bold text-primary">us-east-1</span> is failing due to IAM permission drift.
+                    </p>
+<div class="mt-4 flex gap-2">
+<button class="text-[10px] font-label uppercase font-bold text-error bg-error/10 px-3 py-1 rounded hover:bg-error/20 transition-all">Escalate</button>
+<button class="text-[10px] font-label uppercase font-bold text-on-surface-variant bg-surface-container-high px-3 py-1 rounded">Mute</button>
+</div>
+</div>
+</section>
+<!-- Metrics Bento Section -->
+<section class="col-span-12 md:col-span-6 lg:col-span-3 bg-surface-container-low p-6 rounded-xl border border-outline-variant/5">
+<span class="text-[10px] font-label text-on-surface-variant uppercase tracking-widest block mb-1">Weekly Velocity</span>
+<div class="flex items-end gap-2">
+<span class="text-4xl font-extrabold font-headline text-on-surface">42.8</span>
+<span class="text-xs font-label text-secondary pb-1">+12%</span>
+</div>
+<div class="mt-4 h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[85%] rounded-full"></div>
+</div>
+</section>
+<section class="col-span-12 md:col-span-6 lg:col-span-3 bg-surface-container-low p-6 rounded-xl border border-outline-variant/5">
+<span class="text-[10px] font-label text-on-surface-variant uppercase tracking-widest block mb-1">Code Health</span>
+<div class="flex items-end gap-2">
+<span class="text-4xl font-extrabold font-headline text-on-surface">94.2</span>
+<span class="text-xs font-label text-on-surface-variant pb-1">/100</span>
+</div>
+<div class="mt-4 flex gap-1 items-end h-8">
+<div class="bg-primary/20 w-full h-[40%] rounded-t-sm"></div>
+<div class="bg-primary/40 w-full h-[60%] rounded-t-sm"></div>
+<div class="bg-primary/60 w-full h-[80%] rounded-t-sm"></div>
+<div class="bg-primary w-full h-[95%] rounded-t-sm"></div>
+<div class="bg-primary/70 w-full h-[70%] rounded-t-sm"></div>
+</div>
+</section>
+<!-- Dynamic System Message -->
+<section class="col-span-12 lg:col-span-6 glass-panel rounded-xl p-6 border border-primary/10 relative overflow-hidden flex items-center gap-6">
+<div class="hero-gradient p-4 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-3xl">psychology</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-on-surface text-lg">AI Assistant Insight</h4>
+<p class="font-body text-sm text-on-surface-variant leading-relaxed mt-1">
+                        Based on your recent commits, I recommend reviewing the <span class="text-primary font-semibold">auth-controller.ts</span> pattern before starting the security audit. It might save you ~45 minutes of context switching.
+                    </p>
+</div>
+<!-- Decorative background light -->
+<div class="absolute -right-10 -bottom-10 w-32 h-32 bg-primary/20 blur-3xl rounded-full"></div>
+</section>
+</div>
+</main>
+<!-- Floating Action Button for Daily Briefing Context -->
+<button class="fixed bottom-8 right-8 w-14 h-14 hero-gradient rounded-full shadow-lg shadow-primary/30 flex items-center justify-center hover:scale-105 transition-transform z-50">
+<span class="material-symbols-outlined text-on-primary text-3xl" style="font-variation-settings: 'FILL' 1;">add</span>
+</button>
+</body></html>

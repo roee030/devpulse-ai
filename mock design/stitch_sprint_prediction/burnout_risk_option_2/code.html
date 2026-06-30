@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "error-container": "#ffdad6",
+              "on-surface": "#191c1e",
+              "tertiary-fixed-dim": "#ddb8ff",
+              "surface-bright": "#f7f9fb",
+              "on-secondary-container": "#fffbff",
+              "secondary-fixed": "#e9ddff",
+              "outline": "#727785",
+              "on-primary-container": "#fefcff",
+              "outline-variant": "#c2c6d6",
+              "on-secondary": "#ffffff",
+              "primary": "#0058be",
+              "surface-container-lowest": "#ffffff",
+              "secondary": "#6b38d4",
+              "background": "#f7f9fb",
+              "surface": "#f7f9fb",
+              "on-tertiary-fixed-variant": "#62259b",
+              "secondary-fixed-dim": "#d0bcff",
+              "surface-container": "#eceef0",
+              "primary-fixed": "#d8e2ff",
+              "surface-container-high": "#e6e8ea",
+              "surface-tint": "#005ac2",
+              "on-secondary-fixed-variant": "#5516be",
+              "on-error-container": "#93000a",
+              "on-tertiary": "#ffffff",
+              "tertiary-fixed": "#f0dbff",
+              "on-tertiary-fixed": "#2c0051",
+              "error": "#ba1a1a",
+              "tertiary-container": "#9358cd",
+              "inverse-primary": "#adc6ff",
+              "primary-container": "#2170e4",
+              "on-primary": "#ffffff",
+              "tertiary": "#783eb2",
+              "on-tertiary-container": "#fffbff",
+              "primary-fixed-dim": "#adc6ff",
+              "inverse-surface": "#2d3133",
+              "surface-container-low": "#f2f4f6",
+              "inverse-on-surface": "#eff1f3",
+              "surface-variant": "#e0e3e5",
+              "surface-container-highest": "#e0e3e5",
+              "on-secondary-fixed": "#23005c",
+              "on-background": "#191c1e",
+              "secondary-container": "#8455ef",
+              "on-error": "#ffffff",
+              "on-surface-variant": "#424754",
+              "on-primary-fixed": "#001a42",
+              "surface-dim": "#d8dadc",
+              "on-primary-fixed-variant": "#004395"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .glass-card {
+        background: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+      }
+      .shimmer-edge {
+        box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
+      }
+      .active-panel-border {
+        box-shadow: 0 0 0 2px #0058be, 0 12px 24px -8px rgba(0, 88, 190, 0.2);
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface min-h-screen pb-24">
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/10 dark:border-slate-800/50 shadow-[0_8px_32px_0_rgba(0,88,190,0.06)] flex justify-between items-center px-6 h-16 w-full">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-blue-700 dark:text-blue-400" style="font-variation-settings: 'FILL' 1;">pulse_alert</span>
+<span class="text-2xl font-black bg-gradient-to-br from-blue-600 to-blue-400 bg-clip-text text-transparent font-manrope tracking-tight">DevPulse</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-slate-500">notifications</span>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-primary/20">
+<img class="w-full h-full object-cover" data-alt="professional portrait of a tech manager in a bright office setting with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5Pwm4s1_APK6EAFQLgc68I-U1XoqtRv0KuUC_myYPyT_s0ywIFzXZoj5qVGnlYNEgCVIqdJucZ-OTstvNEceE4gJvZ-_ok7Yx13fMgDIOzEfWT2cK6rH5lNut8nDYoBC5qVO-mfQPxfvPWxdn_YB1WISx-CvD8GuUC4axC3RGublF6tCYYXt_MG6vvQ4XvFX1bV686BcmLPau1Bq_tNmvBr9h8FFLlAyYcP-NEkjMTQSnx_B75QVwSD0sZ_fI_0wP72cliUxPddo"/>
+</div>
+</div>
+</header>
+<!-- Content Canvas -->
+<main class="pt-24 px-5 space-y-8 max-w-md mx-auto">
+<!-- Hero Header Section -->
+<section class="space-y-1">
+<h1 class="font-headline text-3xl font-extrabold tracking-tight text-on-surface">Team Wellbeing Radar</h1>
+<p class="text-on-surface-variant text-sm font-medium opacity-70">Predictive Burnout Analysis • LIVE</p>
+</section>
+<!-- Stats Bento -->
+<section class="grid grid-cols-2 gap-4">
+<div class="glass-card shimmer-edge p-5 rounded-3xl space-y-2 border border-white/40">
+<span class="text-xs font-label font-bold uppercase tracking-widest text-error opacity-80">At Risk Now</span>
+<div class="flex items-end justify-between">
+<span class="text-4xl font-headline font-black text-error">04</span>
+<span class="material-symbols-outlined text-error/40 mb-1">warning</span>
+</div>
+<div class="h-1 w-full bg-error-container rounded-full overflow-hidden">
+<div class="h-full bg-error w-1/4"></div>
+</div>
+</div>
+<div class="glass-card shimmer-edge p-5 rounded-3xl space-y-2 border border-white/40">
+<span class="text-xs font-label font-bold uppercase tracking-widest text-primary opacity-80">Healthy</span>
+<div class="flex items-end justify-between">
+<span class="text-4xl font-headline font-black text-primary">28</span>
+<span class="material-symbols-outlined text-primary/40 mb-1">check_circle</span>
+</div>
+<div class="h-1 w-full bg-primary-fixed rounded-full overflow-hidden">
+<div class="h-full bg-primary w-4/5"></div>
+</div>
+</div>
+</section>
+<!-- Organization Pulse Chart -->
+<section class="glass-card shimmer-edge p-6 rounded-3xl border border-white/40 space-y-4">
+<div class="flex justify-between items-center">
+<h3 class="font-headline font-bold text-lg">Organization Pulse <span class="text-xs text-on-surface-variant font-normal opacity-60">(24h)</span></h3>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">more_horiz</span>
+</div>
+<div class="flex items-end justify-between h-24 gap-1.5 px-2">
+<div class="w-full bg-surface-container-highest rounded-t-lg h-[40%]"></div>
+<div class="w-full bg-surface-container-highest rounded-t-lg h-[60%]"></div>
+<div class="w-full bg-primary/40 rounded-t-lg h-[85%]"></div>
+<div class="w-full bg-primary rounded-t-lg h-[100%]"></div>
+<div class="w-full bg-primary/40 rounded-t-lg h-[75%]"></div>
+<div class="w-full bg-surface-container-highest rounded-t-lg h-[50%]"></div>
+<div class="w-full bg-surface-container-highest rounded-t-lg h-[30%]"></div>
+<div class="w-full bg-surface-container-highest rounded-t-lg h-[45%]"></div>
+<div class="w-full bg-error/60 rounded-t-lg h-[90%]"></div>
+<div class="w-full bg-error rounded-t-lg h-[70%]"></div>
+<div class="w-full bg-surface-container-highest rounded-t-lg h-[40%]"></div>
+<div class="w-full bg-surface-container-highest rounded-t-lg h-[20%]"></div>
+</div>
+<div class="flex justify-between text-[10px] font-label font-bold text-on-surface-variant/40 px-1">
+<span>00:00</span>
+<span>08:00</span>
+<span>16:00</span>
+<span>23:59</span>
+</div>
+</section>
+<!-- Risk List -->
+<section class="space-y-4">
+<div class="flex justify-between items-center px-1">
+<h3 class="font-headline font-bold text-lg text-on-surface">Personnel Risk Index</h3>
+<button class="text-primary text-xs font-bold font-label uppercase tracking-wider">Export Report</button>
+</div>
+<!-- Sarah Chen (Active/Highlighted) -->
+<div class="glass-card active-panel-border p-5 rounded-3xl border border-white/60 relative overflow-hidden transition-all duration-300">
+<div class="absolute top-0 right-0 w-24 h-24 bg-error/5 blur-3xl rounded-full -mr-10 -mt-10"></div>
+<div class="flex items-center gap-4 relative z-10">
+<div class="relative">
+<img class="w-14 h-14 rounded-2xl object-cover ring-2 ring-error/20" data-alt="portrait of a professional woman with a serious and focused expression in a modern creative studio" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWwRyMmz2NeYacL2c_4Vaa6uDHdb5oa5njn5vSQrflBKEOEgNz1yD_-2v9Wj8e28bAhLPeOIIFlPWR7PirhFL35VoJs19m9ma0gwI0GcTE-h1TmJ1u7p8fPdWc2iReTejTp3J0AYiYRE78SD2tXeuE5fKFJh3UfpIagPzDOedoQ5QQ0Ab31X7aAk6CN8NZYawhBpPiAgNMXU0M7wOyJxpPa8bljax5eT4sbF2vTgxtA0pR9O1TuSPUCA03jmA-bOYj3MfIpbKzsFg"/>
+<div class="absolute -bottom-1 -right-1 w-5 h-5 bg-error rounded-full flex items-center justify-center border-2 border-white">
+<span class="material-symbols-outlined text-[10px] text-white" style="font-variation-settings: 'FILL' 1;">priority_high</span>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-headline font-bold text-on-surface">Sarah Chen</h4>
+<p class="text-xs text-on-surface-variant font-medium">Lead Developer • Sprint 42</p>
+</div>
+<span class="bg-error/10 text-error px-2.5 py-1 rounded-full text-[10px] font-bold font-label uppercase tracking-tighter">Critical</span>
+</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-error">history_toggle_off</span>
+<span class="text-xs font-medium text-error/80">Signal: Late night commits (3am)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- James Miller -->
+<div class="glass-card shimmer-edge p-5 rounded-3xl border border-white/40 opacity-80">
+<div class="flex items-center gap-4">
+<img class="w-14 h-14 rounded-2xl object-cover grayscale-[30%]" data-alt="headshot of a smiling young man in tech apparel against a soft blue gradient background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4rOvOSDG73Ti7j9Z-qFF8FMJEHV7nMgZXmUJ9gQp5nxM0aZqbdHp-3sZSzCRjqs8OVb3Lh6JbGWq9RLlCoIqyCFDQuWtCxeE0-NKj3z_m4LAxxcsuGAfYYIkFecSuo5ZhoO5idrdb8UMUVC0CG2grL-FjX1wh3I7PHPrNofFjQS-i9Tp4-Rt3WI1umHeM1e074DimEM9JuIdPIsrgGnXLVaeM1pEwhlNPsPv9xQa7p6LP5X7wVcPIrN86c-FkcGO1y_dn38-fr9o"/>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-headline font-bold text-on-surface">James Miller</h4>
+<p class="text-xs text-on-surface-variant">Senior Engineer</p>
+</div>
+<span class="bg-secondary-fixed text-on-secondary-fixed-variant px-2.5 py-1 rounded-full text-[10px] font-bold font-label uppercase tracking-tighter">At Risk</span>
+</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-surface-variant/40">forum</span>
+<span class="text-xs font-medium text-on-surface-variant/60">Signal: Low engagement in Slack</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Amara Kaur -->
+<div class="glass-card shimmer-edge p-5 rounded-3xl border border-white/40 opacity-80">
+<div class="flex items-center gap-4">
+<img class="w-14 h-14 rounded-2xl object-cover grayscale-[30%]" data-alt="portrait of a young woman with glasses looking confident in a minimal tech workspace" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB71nWuGt6ZYdzOx4I57Dc-uSDY8mBd9oR89d_zMh96wpplDZcXGSUqTJf_7P29jymW9mb9cJToPyHB0U2Isqwd0mWJg3ZBqPahEu_vsP3fOcgO59x7e9Sy2zhusBHu7uJWpbF9fUSlIHYBE_PVv2B2bJqqZ2LW3JbiEZomZoAuznCujehZuk_l9GShF5N58tFDcNg1aqwLCtWQPP8qn5P7svPIbsRTkGX8p5E0Oaa0QOcw9Y5jmP5t-8fzHKNxPj8_4onFgGh4A5c"/>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-headline font-bold text-on-surface">Amara Kaur</h4>
+<p class="text-xs text-on-surface-variant">UI/UX Designer</p>
+</div>
+<span class="bg-surface-container-highest text-on-surface-variant px-2.5 py-1 rounded-full text-[10px] font-bold font-label uppercase tracking-tighter">Watch</span>
+</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-surface-variant/40">event_busy</span>
+<span class="text-xs font-medium text-on-surface-variant/60">Signal: Consecutive overtime</span>
+</div>
+</div>
+</div>
+</div>
+<!-- David Rossi -->
+<div class="glass-card shimmer-edge p-5 rounded-3xl border border-white/40 opacity-60">
+<div class="flex items-center gap-4">
+<img class="w-14 h-14 rounded-2xl object-cover grayscale" data-alt="professional man in his 40s with a kind expression in a bright modern office" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCH4pRM_Eb661KBzNmuNDn272twL3a9n3kNrn996oZRS8Vrd4d0oSC29mb8Qd2fUV5z4soNrK6NQLiMNW3W0bnE5YF0OsEevmEABNbOZ74D4M6c-LFOtfYJYrG1PfBZ_jxKRd4DxzFs20QVorJlgoCRwquMS8e99_X6yITY02-BTTvXHFHzHBI2SPyLuC3-09IQqZiPlfkGo5gS7H5QR7Dw8T-mMWL7S55HpzHYzrpAjA5K2TvuJ6o-ienp89SDVsSa1ndbHDq1cBo"/>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-headline font-bold text-on-surface">David Rossi</h4>
+<p class="text-xs text-on-surface-variant">DevOps Lead</p>
+</div>
+<span class="bg-primary/10 text-primary px-2.5 py-1 rounded-full text-[10px] font-bold font-label uppercase tracking-tighter">Healthy</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-3xl bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-t border-white/20 dark:border-slate-800/50 shadow-[0_-8px_32px_0_rgba(0,88,190,0.06)] flex justify-around items-center h-20 px-4 pb-safe">
+<div class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-opacity">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider">Dashboard</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-opacity">
+<span class="material-symbols-outlined">timeline</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider">Sprint</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-opacity">
+<span class="material-symbols-outlined">lightbulb</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider">Briefing</span>
+</div>
+<div class="flex flex-col items-center justify-center text-blue-700 dark:text-blue-300 bg-blue-50/50 dark:bg-blue-900/30 rounded-2xl px-3 py-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider">Risk</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-opacity">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider">ROI</span>
+</div>
+</nav>
+<!-- Decorative Background Elements -->
+<div class="fixed top-0 left-0 w-full h-full -z-10 overflow-hidden pointer-events-none">
+<div class="absolute top-[10%] -left-[10%] w-[50%] h-[40%] bg-primary/5 blur-[120px] rounded-full"></div>
+<div class="absolute bottom-[20%] -right-[10%] w-[60%] h-[50%] bg-secondary/5 blur-[120px] rounded-full"></div>
+<div class="absolute top-[40%] left-[20%] w-[30%] h-[30%] bg-error/3 blur-[100px] rounded-full"></div>
+</div>
+</body></html>

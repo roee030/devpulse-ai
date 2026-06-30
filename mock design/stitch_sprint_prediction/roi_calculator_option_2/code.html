@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>DevPulse ROI Calculator</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "error-container": "#ffdad6",
+              "on-surface": "#191c1e",
+              "tertiary-fixed-dim": "#ddb8ff",
+              "surface-bright": "#f7f9fb",
+              "on-secondary-container": "#fffbff",
+              "secondary-fixed": "#e9ddff",
+              "outline": "#727785",
+              "on-primary-container": "#fefcff",
+              "outline-variant": "#c2c6d6",
+              "on-secondary": "#ffffff",
+              "primary": "#0058be",
+              "surface-container-lowest": "#ffffff",
+              "secondary": "#6b38d4",
+              "background": "#f7f9fb",
+              "surface": "#f7f9fb",
+              "on-tertiary-fixed-variant": "#62259b",
+              "secondary-fixed-dim": "#d0bcff",
+              "surface-container": "#eceef0",
+              "primary-fixed": "#d8e2ff",
+              "surface-container-high": "#e6e8ea",
+              "surface-tint": "#005ac2",
+              "on-secondary-fixed-variant": "#5516be",
+              "on-error-container": "#93000a",
+              "on-tertiary": "#ffffff",
+              "tertiary-fixed": "#f0dbff",
+              "on-tertiary-fixed": "#2c0051",
+              "error": "#ba1a1a",
+              "tertiary-container": "#9358cd",
+              "inverse-primary": "#adc6ff",
+              "primary-container": "#2170e4",
+              "on-primary": "#ffffff",
+              "tertiary": "#783eb2",
+              "on-tertiary-container": "#fffbff",
+              "primary-fixed-dim": "#adc6ff",
+              "inverse-surface": "#2d3133",
+              "surface-container-low": "#f2f4f6",
+              "inverse-on-surface": "#eff1f3",
+              "surface-variant": "#e0e3e5",
+              "surface-container-highest": "#e0e3e5",
+              "on-secondary-fixed": "#23005c",
+              "on-background": "#191c1e",
+              "secondary-container": "#8455ef",
+              "on-error": "#ffffff",
+              "on-surface-variant": "#424754",
+              "on-primary-fixed": "#001a42",
+              "surface-dim": "#d8dadc",
+              "on-primary-fixed-variant": "#004395"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .glass-card-dark {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+        }
+        .shimmer-edge {
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            background: #eceef0;
+            border-radius: 3px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #0058be;
+            cursor: pointer;
+            margin-top: -9px;
+            box-shadow: 0 4px 12px rgba(0, 88, 190, 0.2);
+            border: 3px solid white;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface antialiased overflow-x-hidden">
+<!-- Top Navigation Anchor (from JSON) -->
+<header class="fixed top-0 w-full z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/10 dark:border-slate-800/50 shadow-[0_8px_32px_0_rgba(0,88,190,0.06)] flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-blue-700 dark:text-blue-400" style="font-variation-settings: 'FILL' 1;">pulse_alert</span>
+<h1 class="font-manrope font-bold tracking-tight text-2xl font-black bg-gradient-to-br from-blue-600 to-blue-400 bg-clip-text text-transparent">DevPulse</h1>
+</div>
+<div class="flex items-center">
+<span class="material-symbols-outlined text-slate-500">account_circle</span>
+</div>
+</header>
+<main class="pt-24 pb-32 px-5 min-h-screen">
+<!-- Hero Section -->
+<section class="mb-10 text-center relative">
+<div class="absolute -top-10 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/10 rounded-full blur-[80px] -z-10"></div>
+<h2 class="font-headline text-[2.5rem] leading-[1.1] font-extrabold tracking-tight text-on-surface mb-3">
+                See what <span class="text-primary">DevPulse</span> saves you
+            </h2>
+<p class="text-on-surface-variant font-medium opacity-80 max-w-[280px] mx-auto">Calculate your engineering efficiency and return on investment in seconds.</p>
+</section>
+<!-- Inputs Card (Bento Grid Style for Mobile) -->
+<div class="space-y-6 mb-8">
+<div class="glass-card shimmer-edge rounded-3xl p-6 border border-white/40 shadow-[0_20px_40px_rgba(0,0,0,0.03)]">
+<div class="flex items-center justify-between mb-8">
+<span class="text-sm font-label font-bold uppercase tracking-widest text-on-surface-variant">Inputs</span>
+<span class="material-symbols-outlined text-primary/40">tune</span>
+</div>
+<!-- Input: Developers -->
+<div class="mb-10">
+<div class="flex justify-between items-end mb-4">
+<label class="font-headline font-bold text-lg">Developers</label>
+<span class="text-2xl font-black text-primary">24</span>
+</div>
+<input class="accent-primary" max="100" min="1" type="range" value="24"/>
+<div class="flex justify-between mt-2 text-[10px] font-label font-semibold text-outline tracking-wider uppercase">
+<span>1 Dev</span>
+<span>100 Devs</span>
+</div>
+</div>
+<!-- Input: Meetings -->
+<div class="mb-10">
+<div class="flex justify-between items-end mb-4">
+<label class="font-headline font-bold text-lg">Meetings / Week</label>
+<span class="text-2xl font-black text-primary">5</span>
+</div>
+<input class="accent-primary" max="20" min="1" type="range" value="5"/>
+<div class="flex justify-between mt-2 text-[10px] font-label font-semibold text-outline tracking-wider uppercase">
+<span>Low</span>
+<span>Intense</span>
+</div>
+</div>
+<!-- Input: Hourly Rate -->
+<div>
+<label class="font-headline font-bold text-lg block mb-4">Hourly Rate</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="text-xl font-bold text-on-surface-variant">₪</span>
+</div>
+<input class="w-full bg-surface-container-high border-none rounded-2xl py-4 pl-10 pr-4 text-xl font-black text-primary focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all" type="number" value="250"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Outputs Card -->
+<div class="grid grid-cols-2 gap-4 mb-10">
+<!-- Large Stats -->
+<div class="col-span-2 glass-card-dark shimmer-edge rounded-3xl p-6 bg-gradient-to-br from-primary/5 to-transparent border border-primary/10">
+<p class="text-[10px] font-label font-black uppercase tracking-widest text-primary mb-1">Monthly Savings</p>
+<h3 class="font-headline font-black text-4xl text-on-surface">₪23,220</h3>
+<div class="mt-4 flex items-center gap-2 text-primary-container font-bold text-sm">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>60% optimization</span>
+</div>
+</div>
+<!-- ROI Card -->
+<div class="glass-card shimmer-edge rounded-2xl p-5 border border-white/40">
+<p class="text-[10px] font-label font-bold uppercase tracking-widest text-on-surface-variant mb-2">Annual ROI</p>
+<div class="flex items-end gap-1">
+<span class="font-headline font-black text-2xl text-secondary">420</span>
+<span class="text-secondary/60 font-bold mb-1">%</span>
+</div>
+</div>
+<!-- Payback Card -->
+<div class="glass-card shimmer-edge rounded-2xl p-5 border border-white/40">
+<p class="text-[10px] font-label font-bold uppercase tracking-widest text-on-surface-variant mb-2">Payback</p>
+<div class="flex items-end gap-1">
+<span class="font-headline font-black text-2xl text-on-surface">1.2</span>
+<span class="text-on-surface-variant font-bold mb-1">Wks</span>
+</div>
+</div>
+<!-- Cost Card -->
+<div class="col-span-2 glass-card shimmer-edge rounded-2xl p-5 border border-white/40 flex justify-between items-center">
+<div>
+<p class="text-[10px] font-label font-bold uppercase tracking-widest text-on-surface-variant mb-1">Current Meeting Cost</p>
+<span class="font-headline font-bold text-xl text-on-surface">₪38,700/mo</span>
+</div>
+<div class="h-10 w-10 bg-error-container rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-on-error-container text-xl">warning</span>
+</div>
+</div>
+</div>
+<!-- Featured Resource -->
+<div class="relative overflow-hidden rounded-3xl h-48 mb-8 group">
+<img alt="Efficiency visualization" class="w-full h-full object-cover grayscale transition-transform duration-700 group-hover:scale-105" data-alt="high-tech office space with large glowing screens showing complex data visualizations and coding structures in soft cool lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCC7GyeguoX7PiVhUCrJ3I-AMHUKXJY4NEeN1eVoRvxVzGW0ihEEdKuUX-2nrV0xuYhWtnxATYDTE3MK5OL0HMW7MxStynUUEqGUxo_MXl3JYQAs5sgGBCTCHZIKoG10aQShq0yaRfetBf6N5BSILP594XQc2k0_E_p7sfMViXoVs48BTafxbfVjX-2B6GxDqV0ySMQ-dZzhe79OwI7fJ6sfRP13THn4EZWAxboylA3OmYUdVJC5V--Icq4gD3PjoXoqhmYYrrxrHM"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent flex flex-col justify-end p-6">
+<p class="text-white/60 text-[10px] font-label font-black uppercase tracking-widest mb-1">Exclusive Case Study</p>
+<h4 class="text-white font-headline font-extrabold text-xl leading-tight">How Spotify optimized their sync meetings by 40%</h4>
+</div>
+</div>
+<!-- CTA Section -->
+<div class="glass-card shimmer-edge rounded-3xl p-6 bg-gradient-to-br from-on-surface to-inverse-surface border border-white/10 shadow-xl text-center">
+<h4 class="text-white font-headline font-bold text-xl mb-2">Ready to unlock these savings?</h4>
+<p class="text-white/60 text-sm mb-6">Join 2,000+ teams automating their dev briefing.</p>
+<button class="w-full bg-gradient-to-br from-primary to-primary-container py-5 rounded-full text-white font-headline font-black tracking-wide shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+                Start Free Trial
+            </button>
+</div>
+</main>
+<!-- Bottom Navigation Shell (from JSON) -->
+<nav class="fixed bottom-0 w-full z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-t border-white/20 dark:border-slate-800/50 shadow-[0_-8px_32px_0_rgba(0,88,190,0.06)] flex justify-around items-center h-20 px-4 pb-safe rounded-t-3xl">
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-blue-600" href="#">
+<span class="material-symbols-outlined mb-1">dashboard</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-blue-600" href="#">
+<span class="material-symbols-outlined mb-1">timeline</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider">Sprint</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-blue-600" href="#">
+<span class="material-symbols-outlined mb-1">lightbulb</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider">Briefing</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-blue-600" href="#">
+<span class="material-symbols-outlined mb-1">warning</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider">Risk</span>
+</a>
+<a class="flex flex-col items-center justify-center text-blue-700 dark:text-blue-300 bg-blue-50/50 dark:bg-blue-900/30 rounded-2xl px-3 py-1 scale-95 transition-all" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">payments</span>
+<span class="text-[10px] font-manrope font-semibold uppercase tracking-wider">ROI</span>
+</a>
+</nav>
+<!-- Background Decoration -->
+<div class="fixed top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-20 -mr-64 -mt-32"></div>
+<div class="fixed bottom-0 left-0 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-[100px] -z-20 -ml-48 -mb-24"></div>
+</body></html>
