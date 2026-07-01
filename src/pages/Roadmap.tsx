@@ -91,8 +91,6 @@ export function Roadmap() {
     return s === 'at-risk' || s === 'delayed'
   }).map(e => ({ title: e.title, status: getEpicStatus(e) })), [liveStatusMap])
 
-  const atRiskCount = atRiskEpics.length
-
   const roadmapInsightText = useMemo(
     () => computeRoadmapInsight(atRiskEpics),
     [atRiskEpics],
