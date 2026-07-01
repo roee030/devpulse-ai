@@ -4,6 +4,7 @@ import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
 import { MobileHeader } from './MobileHeader'
 import { MobileTabBar } from './MobileTabBar'
+import { DemoPanel } from './DemoPanel'
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -26,6 +27,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           {children}
         </div>
       </main>
+
+      {/* Floating demo persona switcher */}
+      <DemoPanel />
     </div>
   )
 }

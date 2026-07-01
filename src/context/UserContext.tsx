@@ -25,7 +25,11 @@ const provider = createProvider()
 export function UserProvider({ children }: { children: ReactNode }) {
   const unified = useUnifiedData()
 
-  const [activeUser, setActiveUser] = useState<User | null>(null)
+  const [activeUser, _setActiveUser] = useState<User | null>(null)
+  const setActiveUser = (u: User) => {
+    localStorage.setItem('devpulse-demo-persona-id', u.id)
+    _setActiveUser(u)
+  }
   const [users, setUsers]           = useState<User[]>([])
   const [teams, setTeams]           = useState<Team[]>([])
   const [developers, setDevelopers] = useState<Developer[]>([])
@@ -42,7 +46,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
       setUsers(u)
       setTeams(t)
       setDivisions(div)
-      setActiveUser(u[0])
+      // Restore demo persona chosen on the Login screen (or default to first user)
+      const savedId = localStorage.getItem('devpulse-demo-persona-id')
+      const initial = (savedId ? u.find(usr => usr.id === savedId) : null) ?? u[0]
+      setActiveUser(initial)
       setProviderLoading(false)
     })
   }, [])
