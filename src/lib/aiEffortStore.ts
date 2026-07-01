@@ -43,19 +43,21 @@ export interface DeveloperEffortSummary {
 
 // ── Synthetic demo data ────────────────────────────────────────────────────────
 
-export function makeDemoEvents(teamMembers: string[]): AIEffortEvent[] {
-  const tasks   = ['PROJ-42', 'PROJ-38', 'PROJ-51', 'PROJ-29', 'PROJ-61', 'PROJ-33']
+export function makeDemoEvents(teamMembers: string[], taskKeys?: string[]): AIEffortEvent[] {
+  // Use real task keys when provided (from Jira/Linear via Unified.to), else fall back to generic ones
+  const defaultTasks = ['PROJ-42', 'PROJ-38', 'PROJ-51', 'PROJ-29', 'PROJ-61', 'PROJ-33']
+  const tasks   = (taskKeys && taskKeys.length >= 2) ? taskKeys.slice(0, 10) : defaultTasks
   const models  = ['gpt-4o', 'copilot', 'claude-3-5-sonnet']
   const sources  = ['browser-extension', 'vscode-extension', 'manual'] as const
   const now     = Date.now()
   const events: AIEffortEvent[] = []
 
   const devData = [
-    { userId: 'alice@team.dev',   userName: 'Alice Chen',      tasks: ['PROJ-42', 'PROJ-51'], tokBase: 4200 },
-    { userId: 'bob@team.dev',     userName: 'Bob Martinez',    tasks: ['PROJ-38', 'PROJ-29'], tokBase: 2800 },
-    { userId: 'carol@team.dev',   userName: 'Carol Liu',       tasks: ['PROJ-61', 'PROJ-42'], tokBase: 6100 },
-    { userId: 'david@team.dev',   userName: 'David Singh',     tasks: ['PROJ-33', 'PROJ-38'], tokBase: 1900 },
-    { userId: 'emma@team.dev',    userName: 'Emma Kowalski',   tasks: ['PROJ-51', 'PROJ-29'], tokBase: 3400 },
+    { userId: 'alice@team.dev',   userName: 'Alice Chen',      tasks: [tasks[0], tasks[2] ?? tasks[0]], tokBase: 4200 },
+    { userId: 'bob@team.dev',     userName: 'Bob Martinez',    tasks: [tasks[1], tasks[3] ?? tasks[1]], tokBase: 2800 },
+    { userId: 'carol@team.dev',   userName: 'Carol Liu',       tasks: [tasks[4] ?? tasks[0], tasks[0]], tokBase: 6100 },
+    { userId: 'david@team.dev',   userName: 'David Singh',     tasks: [tasks[5] ?? tasks[1], tasks[1]], tokBase: 1900 },
+    { userId: 'emma@team.dev',    userName: 'Emma Kowalski',   tasks: [tasks[2] ?? tasks[0], tasks[3] ?? tasks[1]], tokBase: 3400 },
   ]
 
   // Use real team members if provided, else use synthetic names

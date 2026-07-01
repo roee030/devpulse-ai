@@ -2,15 +2,18 @@
 // Team-level AI effort dashboard.
 // Team leads see all developers under them; CTO sees the whole org.
 // Data flows: agent/browser-extension → Firebase → here.
-// Falls back to synthetic demo data when Firebase has no events yet.
+// Falls back to synthetic demo data (using real task keys when available).
 import { useEffect, useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Cpu, GitBranch, Zap, TrendingUp, AlertCircle, RefreshCw, Users, ChevronDown, ChevronUp } from 'lucide-react'
 import { useUser } from '../context/UserContext'
+import { useUnifiedData } from '../context/UnifiedDataContext'
 import {
   makeDemoEvents, aggregateByTask, aggregateByDeveloper, fetchTeamEvents,
   type AIEffortEvent, type TaskEffortSummary, type DeveloperEffortSummary,
 } from '../lib/aiEffortStore'
+import { AiInsightCard } from '../components/ui/AiInsightCard'
+import { computeAIEffortInsight } from '../lib/insights'
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -134,6 +137,7 @@ function TaskRow({ task, rank, max }: { task: TaskEffortSummary; rank: number; m
 
 export function AIEffort() {
   const { visibleDevelopers, activeUser } = useUser()
+  const { enrichedTasks } = useUnifiedData()
 
   const [events,   setEvents]   = useState<AIEffortEvent[]>([])
   const [isLive,   setIsLive]   = useState(false)
@@ -144,6 +148,11 @@ export function AIEffort() {
   const [lastSync, setLastSync] = useState<Date | null>(null)
 
   const teamNames = visibleDevelopers.map(d => d.name)
+  // Use real task keys from Jira/Linear when available
+  const realTaskKeys = useMemo(
+    () => enrichedTasks.map(t => t.key).filter(Boolean),
+    [enrichedTasks],
+  )
 
   async function loadData() {
     // 1. Try Firebase (real shared data)
@@ -175,15 +184,15 @@ export function AIEffort() {
       }
     } catch { /* agent offline */ }
 
-    // 3. Synthetic demo data
-    setEvents(makeDemoEvents(teamNames))
+    // 3. Synthetic demo data — inject real task keys when Unified.to has them
+    setEvents(makeDemoEvents(teamNames, realTaskKeys))
     setLastSync(new Date())
   }
 
   useEffect(() => {
     setLoading(true)
     loadData().finally(() => setLoading(false))
-  }, [period, visibleDevelopers.length])
+  }, [period, visibleDevelopers.length, realTaskKeys.length])
 
   useEffect(() => {
     const id = setInterval(loadData, 15_000)
@@ -192,6 +201,11 @@ export function AIEffort() {
 
   const byDeveloper: DeveloperEffortSummary[] = useMemo(() => aggregateByDeveloper(events), [events])
   const byTask:      TaskEffortSummary[]      = useMemo(() => aggregateByTask(events),      [events])
+
+  const aiInsightText = useMemo(
+    () => computeAIEffortInsight(byDeveloper, byTask),
+    [byDeveloper, byTask],
+  )
 
   const totalTokens = events.reduce((s, e) => s + e.totalTokens, 0)
   const taskCount   = byTask.filter(t => t.taskId !== '(unattributed)').length
@@ -276,6 +290,9 @@ export function AIEffort() {
           </motion.div>
         ))}
       </div>
+
+      {/* AI Insight */}
+      <AiInsightCard text={aiInsightText} />
 
       {/* View toggle */}
       <div className="flex gap-2">

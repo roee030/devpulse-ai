@@ -1,5 +1,5 @@
 // src/pages/Roadmap.tsx
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Map, AlertTriangle, ArrowDown, X } from 'lucide-react'
 import { epics, Epic, RippleCard as RippleCardType } from '../data/mockData'
@@ -7,6 +7,7 @@ import type { EpicStatus } from '../data/mockData'
 import { AiInsightCard } from '../components/ui/AiInsightCard'
 import { useUnifiedData } from '../context/UnifiedDataContext'
 import { computeEpicStatusMap } from '../lib/metrics'
+import { computeRoadmapInsight } from '../lib/insights'
 
 const TOTAL_WEEKS = 52
 const CURRENT_WEEK = 26
@@ -85,10 +86,17 @@ export function Roadmap() {
   const getEpicStatus = (epic: Epic): EpicStatus =>
     (liveStatusMap?.get(epic.id) as EpicStatus | undefined) ?? epic.status
 
-  const atRiskCount = epics.filter(e => {
+  const atRiskEpics = useMemo(() => epics.filter(e => {
     const s = getEpicStatus(e)
     return s === 'at-risk' || s === 'delayed'
-  }).length
+  }).map(e => ({ title: e.title, status: getEpicStatus(e) })), [liveStatusMap])
+
+  const atRiskCount = atRiskEpics.length
+
+  const roadmapInsightText = useMemo(
+    () => computeRoadmapInsight(atRiskEpics),
+    [atRiskEpics],
+  )
 
   return (
     <div className="relative">
@@ -119,11 +127,7 @@ export function Roadmap() {
         </div>
       </motion.div>
 
-      <AiInsightCard
-        text={atRiskCount > 0
-          ? `${atRiskCount} epic${atRiskCount > 1 ? 's are' : ' is'} at risk — Payment Gateway and Mobile Auth delays may cascade into Q3 Enterprise launch.`
-          : 'All epics on track for 2026 — no cascading risks detected.'}
-      />
+      <AiInsightCard text={roadmapInsightText} />
 
       {/* Gantt */}
       <motion.div

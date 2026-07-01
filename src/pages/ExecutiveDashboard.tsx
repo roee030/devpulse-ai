@@ -254,16 +254,16 @@ export function ExecutiveDashboard() {
 
   const insightText = useMemo(() => {
     if (drill.level === 'team' && currentTeam) {
-      const scopedCritical = devsForTeam.filter(d => d.riskLevel === 'critical').length
-      return computeDashboardInsight('team', currentTeam.name, currentTeam.healthScore, [currentTeam], scopedCritical)
+      const critDevs = devsForTeam.filter(d => d.riskLevel === 'critical')
+      return computeDashboardInsight('team', currentTeam.name, currentTeam.healthScore, [currentTeam], critDevs.length, critDevs.map(d => d.name))
     }
     if (drill.level === 'division' && currentDivision) {
       const divDevs = visibleDevelopers.filter(d => d.divisionId === drill.divisionId)
-      const scopedCritical = divDevs.filter(d => d.riskLevel === 'critical').length
-      return computeDashboardInsight('division', currentDivision.name, currentDivision.healthScore, teamsForDivision, scopedCritical)
+      const critDevs = divDevs.filter(d => d.riskLevel === 'critical')
+      return computeDashboardInsight('division', currentDivision.name, currentDivision.healthScore, teamsForDivision, critDevs.length, critDevs.map(d => d.name))
     }
-    const scopedCritical = visibleDevelopers.filter(d => d.riskLevel === 'critical').length
-    return computeDashboardInsight('top', 'Company', companyHealthScore, allTeams, scopedCritical)
+    const critDevs = visibleDevelopers.filter(d => d.riskLevel === 'critical')
+    return computeDashboardInsight('top', 'Company', companyHealthScore, allTeams, critDevs.length, critDevs.map(d => d.name))
   }, [drill, visibleDevelopers, currentTeam, currentDivision, teamsForDivision, devsForTeam, allTeams, companyHealthScore])
 
   const cardConfigs = useMemo((): CardConfig[] => [

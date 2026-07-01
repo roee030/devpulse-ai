@@ -8,7 +8,7 @@ import {
 import { useUser } from '../context/UserContext'
 import { Developer, getTeamById, getDeveloperAiProfile, DeveloperAiProfile } from '../data/mockData'
 import { AiInsightCard } from '../components/ui/AiInsightCard'
-import { computeBurnoutInsight, computeDeveloperInsight } from '../lib/insights'
+import { computeBurnoutInsight, computeDeveloperInsight, computeAIBurnoutInsight } from '../lib/insights'
 import { RiskBadge } from '../components/ui/RiskBadge'
 import { ActivityHeatmap } from '../components/ui/ActivityHeatmap'
 import { PageSkeleton } from '../components/ui/PageSkeleton'
@@ -58,6 +58,22 @@ export function BurnoutRisk() {
     () => computeBurnoutInsight(visibleDevelopers, teamRefs),
     [visibleDevelopers, teamRefs],
   )
+
+  const aiEffortInsightText = useMemo(() => {
+    const profiles = visibleDevelopers
+      .map(dev => {
+        const p = getDeveloperAiProfile(dev.id)
+        return p ? { name: dev.name, aiEffortScore: p.aiEffortScore } : null
+      })
+      .filter((x): x is { name: string; aiEffortScore: number } => x !== null)
+      .sort((a, b) => b.aiEffortScore - a.aiEffortScore)
+
+    const topDev  = profiles[0] ?? null
+    const teamAvg = profiles.length > 0
+      ? Math.round(profiles.reduce((s, p) => s + p.aiEffortScore, 0) / profiles.length)
+      : 0
+    return computeAIBurnoutInsight(topDev, teamAvg)
+  }, [visibleDevelopers])
 
   if (isLoading) return <PageSkeleton />
 
@@ -176,7 +192,7 @@ export function BurnoutRisk() {
       {/* ── AI Effort tab ──────────────────────────────────────────── */}
       {tab === 'ai-effort' && (
         <>
-          <AiInsightCard text="Payment module requires 3x AI effort vs team average — dev-3 consuming 24 credits/pt. Consider adding sprint points or pairing with a senior engineer." />
+          <AiInsightCard text={aiEffortInsightText} />
 
           <motion.div
             initial={{ opacity: 0 }}

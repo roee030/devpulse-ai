@@ -1,11 +1,12 @@
 // src/pages/SprintPrediction.tsx
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { ChevronDown, AlertTriangle } from 'lucide-react'
 import { AiInsightCard } from '../components/ui/AiInsightCard'
 import { useUser } from '../context/UserContext'
 import { useUnifiedData } from '../context/UnifiedDataContext'
+import { computeSprintInsight } from '../lib/insights'
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null
@@ -26,6 +27,13 @@ export function SprintPrediction() {
 
   const completionPct = Math.round((sprint.projectedPoints / sprint.totalPoints) * 100)
 
+  const sprintInsightText = useMemo(() => {
+    const criticalNames = visibleDevelopers
+      .filter(d => d.riskLevel === 'critical')
+      .map(d => d.name)
+    return computeSprintInsight(completionPct, sprint.endDate, sprint.topBlockers, criticalNames)
+  }, [completionPct, sprint, visibleDevelopers])
+
   return (
     <div>
       {/* Page header */}
@@ -42,7 +50,7 @@ export function SprintPrediction() {
       </div>
 
       {/* AI Insight banner */}
-      <AiInsightCard text={`At current velocity, the team will complete ${completionPct}% of Sprint commitments by end of day ${sprint.endDate}. Confidence: 84%`} />
+      <AiInsightCard text={sprintInsightText} />
 
       {/* Deep Dive toggle */}
       <motion.button
