@@ -500,14 +500,25 @@ export function UnifiedDataProvider({ children }: { children: ReactNode }) {
     const { quarterSummaries: liveQS, monthlyVelocity: liveMV } =
       computeAnnualMetrics(enrichedTasks, mockQS, mockMV as MonthlyVelocityPoint[])
 
-    // Log cross-linking stats for debugging
+    // Log detailed diagnostics for debugging live data quality
     const linked = enrichedTasks.filter(t => t.prs.length > 0).length
+    const statusBreakdown = allTasks.reduce((acc, t) => {
+      acc[t.status] = (acc[t.status] ?? 0) + 1
+      return acc
+    }, {} as Record<string, number>)
     console.log(
       `[DevPulse] Loaded: ${allTasks.length} tasks, ${allPRs.length} PRs, ` +
       `${allMembers.length} members, ${allMessages.length} messages. ` +
       `Cross-linked: ${linked}/${allTasks.length} tasks have PRs. ` +
       `Health: ${liveHealthScore} Stale PRs: ${liveStalePRs} At-risk: ${liveAtRisk}`
     )
+    console.log('[DevPulse] Task status breakdown:', JSON.stringify(statusBreakdown))
+    console.log('[DevPulse] PR details:', allPRs.map(p =>
+      `#${p.number} branch="${p.sourceBranch}" linkedKey=${p.linkedTaskKey ?? 'none'} title="${p.title.slice(0,40)}"`
+    ).join(' | '))
+    console.log('[DevPulse] Sample task keys:', allTasks.slice(0, 10).map(t =>
+      `${t.key}(${t.source})`
+    ).join(', '))
 
     setState({
       developers,

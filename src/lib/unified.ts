@@ -108,10 +108,14 @@ export function getUnifiedClient(): UnifiedTo {
 
 function mapTaskStatus(s?: string): UniversalTask['status'] {
   if (!s) return 'todo'
-  const u = s.toUpperCase()
-  if (u === 'COMPLETED' || u === 'DONE' || u === 'CLOSED' || u === 'FINISHED') return 'done'
-  if (u === 'IN_PROGRESS' || u === 'STARTED' || u === 'INPROGRESS' || u === 'IN PROGRESS') return 'in-progress'
-  if (u === 'BLOCKED' || u === 'ON_HOLD' || u === 'STUCK') return 'blocked'
+  // Normalize: uppercase then strip all whitespace/underscores/dashes so
+  // "In Progress", "IN_PROGRESS", "in-progress" all collapse to "INPROGRESS"
+  const u = s.toUpperCase().replace(/[\s_-]/g, '')
+  if (['COMPLETED','DONE','CLOSED','FINISHED','RESOLVED','ACCEPTED','CANCELLED','CANCELED'].includes(u)) return 'done'
+  if (['INPROGRESS','STARTED','ACTIVE','INREVIEW','REVIEW','CODEREVIEW','UNDERREVIEW',
+       'TESTING','QA','STAGING','INQA','INTEST'].includes(u)) return 'in-progress'
+  if (['BLOCKED','ONHOLD','STUCK','IMPEDIMENT','WAITINGFOR','WAITING',
+       'PENDING','HOLD'].includes(u)) return 'blocked'
   return 'todo'
 }
 
@@ -186,6 +190,11 @@ export async function getTasks(
         ),
       )
       raw = perProject.flat()
+    }
+    // Debug: surface raw status values so we can tune mapTaskStatus
+    if (import.meta.env.DEV) {
+      const rawStatuses = [...new Set(raw.map(t => t.status).filter(Boolean))]
+      console.log(`[unified] ${source} raw statuses:`, rawStatuses)
     }
     return raw.map((t, i) => {
       const ro    = t as unknown as Record<string, unknown>
@@ -292,12 +301,18 @@ export async function getPullRequests(
       const sourceBranch  = String(ro['sourceBranch'] ?? ro['branchName'] ?? ro['branch'] ?? pr.labels?.[0] ?? '')
       // PR title — not in TS types but usually present at runtime
       const prTitle       = String(ro['title'] ?? ro['name'] ?? (sourceBranch ? `PR: ${sourceBranch}` : 'Pull request'))
+      // PR body/description — often contains task keys even when branch doesn't
+      const prBody        = String(ro['body'] ?? ro['description'] ?? ro['bodyText'] ?? ro['content'] ?? '')
       // Author login / handle
       const authorLogin   = String(ro['authorLogin'] ?? ro['login'] ?? ro['author'] ?? '')
       // PR number
       const prNumber      = Number(ro['number'] ?? ro['iid'] ?? i + 1)
-      // Extract task key from branch or title
-      const linkedTaskKey = (sourceBranch.match(TASK_KEY_RE) ?? prTitle.match(TASK_KEY_RE))?.[1] ?? null
+      // Extract task key from branch, title, or body (in priority order)
+      const linkedTaskKey = (
+        sourceBranch.match(TASK_KEY_RE) ??
+        prTitle.match(TASK_KEY_RE) ??
+        prBody.match(TASK_KEY_RE)
+      )?.[1] ?? null
       // URL
       const url           = String(ro['htmlUrl'] ?? ro['url'] ?? ro['webUrl'] ?? '')
 

@@ -271,7 +271,7 @@ export function ExecutiveDashboard() {
     { id: 'at-risk',      label: 'At-Risk Tasks',  value: displayAtRisk,          color: 'danger',  icon: <AlertTriangle  size={16} />, trend: 'up',     trendLabel: `${Math.round((displayAtRisk / sprint.totalPoints) * 100)}% of sprint` },
     { id: 'sprint-pts',   label: 'Sprint Points',  value: sprint.completedPoints, color: 'default', icon: <Target         size={16} />, trend: 'stable', trendLabel: 'points done', unit: `/${sprint.totalPoints}` },
     { id: 'avg-velocity', label: 'Avg Velocity',   value: avgVelocity,            color: 'success', icon: <Zap            size={16} />, trend: 'stable', trendLabel: 'across team',  unit: ' pts/day' },
-  ], [displayStalePRs, displayAtRisk, avgVelocity])
+  ], [displayStalePRs, displayAtRisk, avgVelocity, sprint])
 
   const sortedCards = useMemo(
     () => cardOrder.map(id => cardConfigs.find(c => c.id === id)!).filter(Boolean),
