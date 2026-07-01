@@ -26,13 +26,29 @@ import {
   developers as mockDevelopers,
   teams as mockTeams,
   divisions as mockDivisions,
+  sprint as mockSprint,
+  quarterSummaries as mockQS,
+  monthlyVelocity as mockMV,
+  companyHealthScore as mockCompanyHealth,
+  companyStalePRs as mockStalePRs,
+  companyAtRiskTasks as mockAtRisk,
   type Developer,
   type Team,
   type Division,
   type Task,
   type PRStatus,
   type RiskLevel,
+  type QuarterSummary,
 } from '../data/mockData'
+import {
+  computeSprint,
+  computeHealthScore,
+  computeTeams,
+  computeDivisions,
+  computeAnnualMetrics,
+  type SprintSummary,
+  type MonthlyVelocityPoint,
+} from '../lib/metrics'
 
 // ── Env ───────────────────────────────────────────────────────────────────────
 
@@ -119,6 +135,13 @@ export interface UnifiedDataState {
   error:         string | null
   isLive:        boolean
   lastFetched:   Date | null
+  // derived metrics (initialized from mock, overridden with live after fetchAll)
+  companyHealthScore: number
+  companyStalePRs:    number
+  companyAtRiskTasks: number
+  sprint:             SprintSummary
+  quarterSummaries:   QuarterSummary[]
+  monthlyVelocity:    MonthlyVelocityPoint[]
   // messaging send helpers
   slackConnectionId: string
   teamsConnectionId: string
@@ -396,8 +419,14 @@ const INITIAL: UnifiedDataState = {
   error:         null,
   isLive:        false,
   lastFetched:   null,
-  slackConnectionId: SLACK_ID,
-  teamsConnectionId: TEAMS_ID,
+  companyHealthScore: mockCompanyHealth,
+  companyStalePRs:    mockStalePRs,
+  companyAtRiskTasks: mockAtRisk,
+  sprint:             mockSprint as SprintSummary,
+  quarterSummaries:   mockQS,
+  monthlyVelocity:    mockMV as MonthlyVelocityPoint[],
+  slackConnectionId:  SLACK_ID,
+  teamsConnectionId:  TEAMS_ID,
 }
 
 export function UnifiedDataProvider({ children }: { children: ReactNode }) {
@@ -459,18 +488,31 @@ export function UnifiedDataProvider({ children }: { children: ReactNode }) {
     // Build enriched tasks (cross-linked)
     const enrichedTasks = buildEnrichedTasks(allTasks, allPRs, allMessages, allMembers, developers)
 
+    // Derive company-wide and per-team metrics from live data
+    const computedTeams     = computeTeams(mockTeams, enrichedTasks, allPRs)
+    const computedDivisions = computeDivisions(mockDivisions, computedTeams)
+    const liveHealthScore   = computeHealthScore(enrichedTasks, allPRs)
+    const liveStalePRs      = allPRs.filter(
+      p => (p.status === 'open' || p.status === 'changes-requested') && p.waitingHours > 24,
+    ).length
+    const liveAtRisk        = enrichedTasks.filter(t => t.isBlocked).length
+    const liveSprint        = computeSprint(enrichedTasks, mockSprint as SprintSummary)
+    const { quarterSummaries: liveQS, monthlyVelocity: liveMV } =
+      computeAnnualMetrics(enrichedTasks, mockQS, mockMV as MonthlyVelocityPoint[])
+
     // Log cross-linking stats for debugging
     const linked = enrichedTasks.filter(t => t.prs.length > 0).length
     console.log(
       `[DevPulse] Loaded: ${allTasks.length} tasks, ${allPRs.length} PRs, ` +
       `${allMembers.length} members, ${allMessages.length} messages. ` +
-      `Cross-linked: ${linked}/${allTasks.length} tasks have PRs.`
+      `Cross-linked: ${linked}/${allTasks.length} tasks have PRs. ` +
+      `Health: ${liveHealthScore} Stale PRs: ${liveStalePRs} At-risk: ${liveAtRisk}`
     )
 
     setState({
       developers,
-      teams:         mockTeams,
-      divisions:     mockDivisions,
+      teams:              computedTeams,
+      divisions:          computedDivisions,
       allTasks,
       allPRs,
       allMembers,
@@ -478,12 +520,18 @@ export function UnifiedDataProvider({ children }: { children: ReactNode }) {
       allChannels,
       enrichedTasks,
       connections,
-      isLoading:     false,
-      error:         null,
-      isLive:        allTasks.length > 0 || allPRs.length > 0,
-      lastFetched:   new Date(),
-      slackConnectionId: SLACK_ID,
-      teamsConnectionId: TEAMS_ID,
+      isLoading:          false,
+      error:              null,
+      isLive:             allTasks.length > 0 || allPRs.length > 0,
+      lastFetched:        new Date(),
+      companyHealthScore: liveHealthScore,
+      companyStalePRs:    liveStalePRs,
+      companyAtRiskTasks: liveAtRisk,
+      sprint:             liveSprint,
+      quarterSummaries:   liveQS,
+      monthlyVelocity:    liveMV,
+      slackConnectionId:  SLACK_ID,
+      teamsConnectionId:  TEAMS_ID,
     })
   }
 

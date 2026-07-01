@@ -4,8 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { ChevronDown, AlertTriangle } from 'lucide-react'
 import { AiInsightCard } from '../components/ui/AiInsightCard'
-import { sprint } from '../data/mockData'
 import { useUser } from '../context/UserContext'
+import { useUnifiedData } from '../context/UnifiedDataContext'
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null
@@ -21,6 +21,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export function SprintPrediction() {
   const { visibleDevelopers } = useUser()
+  const { sprint } = useUnifiedData()
   const [deepDiveOpen, setDeepDiveOpen] = useState(true)
 
   const completionPct = Math.round((sprint.projectedPoints / sprint.totalPoints) * 100)

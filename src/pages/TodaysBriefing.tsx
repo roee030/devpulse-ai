@@ -5,9 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { AlertTriangle, Eye, CheckCircle, ChevronRight, Zap } from 'lucide-react'
 import { useUser } from '../context/UserContext'
 import { AiInsightCard } from '../components/ui/AiInsightCard'
-import {
-  sprint, companyHealthScore, getTeamById,
-} from '../data/mockData'
+import { useUnifiedData } from '../context/UnifiedDataContext'
 
 // ── Types ───────────────────────────────────────────────────────────────────
 interface BriefingItem {
@@ -86,6 +84,7 @@ function Section({
 // ── Main ──────────────────────────────────────────────────────────────────────
 export function TodaysBriefing() {
   const { visibleDevelopers, visibleTeams, activeUser } = useUser()
+  const { sprint, companyHealthScore } = useUnifiedData()
 
   const today = new Date()
   const dateLabel = today.toLocaleDateString('en-US', {
@@ -216,10 +215,7 @@ export function TodaysBriefing() {
       items.push({
         id: 'healthy-teams',
         title: `${healthyTeams.length} team${healthyTeams.length > 1 ? 's' : ''} performing above 75 health score`,
-        subtitle: healthyTeams.map(t => {
-          const team = getTeamById(t.id)
-          return team ? `${team.name} (${t.healthScore}/100)` : ''
-        }).filter(Boolean).join(' · '),
+        subtitle: healthyTeams.map(t => `${t.name} (${t.healthScore}/100)`).join(' · '),
         route: '/',
         tag: 'Health',
       })

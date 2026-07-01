@@ -6,7 +6,8 @@ import {
   ResponsiveContainer, ComposedChart, Bar, Line,
   XAxis, YAxis, CartesianGrid, Tooltip,
 } from 'recharts'
-import { quarterSummaries, monthlyVelocity, QuarterSummary } from '../data/mockData'
+import type { QuarterSummary } from '../data/mockData'
+import { useUnifiedData } from '../context/UnifiedDataContext'
 import { AiInsightCard } from '../components/ui/AiInsightCard'
 
 const QUARTER_CONFIG = {
@@ -127,6 +128,7 @@ function QuarterCard({ quarter, delay }: { quarter: QuarterSummary; delay: numbe
 }
 
 export function AnnualView() {
+  const { quarterSummaries, monthlyVelocity } = useUnifiedData()
   const insightText = useMemo(() => {
     const q1 = quarterSummaries[0]
     const q2 = quarterSummaries[1]

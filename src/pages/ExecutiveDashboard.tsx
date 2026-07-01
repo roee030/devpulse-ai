@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence, Reorder } from 'framer-motion'
 import { GitPullRequest, AlertTriangle, Target, Zap, ChevronRight, ChevronDown, Pencil, Check, Bug } from 'lucide-react'
 import { useUser } from '../context/UserContext'
+import { useUnifiedData } from '../context/UnifiedDataContext'
 import { HealthRing } from '../components/ui/HealthRing'
 import { HealthBreakdown } from '../components/ui/HealthBreakdown'
 import { MetricCard } from '../components/ui/MetricCard'
@@ -11,12 +12,8 @@ import { AiInsightCard } from '../components/ui/AiInsightCard'
 import { PageSkeleton } from '../components/ui/PageSkeleton'
 import { useSimulatedLoad } from '../hooks/useSimulatedLoad'
 import { computeDashboardInsight } from '../lib/insights'
-import {
-  companyHealthScore, companyStalePRs, companyAtRiskTasks,
-  teams, sprint, getDevelopersByTeam, getTeamsByDivision, getDivisionById, getTeamById,
-  getHealthBreakdown, getAvgVelocityForTeam, getAvgVelocityForDivision,
-} from '../data/mockData'
-import type { Division, Team } from '../data/mockData'
+import { getHealthBreakdown } from '../data/mockData'
+import type { Division, Team, Developer } from '../data/mockData'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type DrillLevel = 'top' | 'division' | 'team'
@@ -46,17 +43,27 @@ const gridVariants = {
   exit:   (dir: 'forward' | 'back') => ({ opacity: 0, x: dir === 'forward' ? -24 :  24 }),
 }
 
+// ── Inline velocity helpers ────────────────────────────────────────────────────
+function avgVelocityForGroup(devs: Developer[]): number {
+  if (!devs.length) return 0
+  return Math.round((devs.reduce((s, d) => s + d.velocity, 0) / devs.length) * 10) / 10
+}
+
 // ── DivisionCard ──────────────────────────────────────────────────────────────
 function DivisionCard({
-  div, delay, showBreakdown, onToggleBreakdown, onClick,
+  div, allTeams, allDevelopers, delay, showBreakdown, onToggleBreakdown, onClick,
 }: {
-  div: Division; delay: number
+  div: Division
+  allTeams: Team[]
+  allDevelopers: Developer[]
+  delay: number
   showBreakdown: boolean
   onToggleBreakdown: (e: React.MouseEvent) => void
   onClick: () => void
 }) {
-  const divTeams  = getTeamsByDivision(div.id)
-  const breakdown = getHealthBreakdown(div, getAvgVelocityForDivision(div.id))
+  const divTeams  = allTeams.filter(t => t.divisionId === div.id)
+  const divDevs   = allDevelopers.filter(d => d.divisionId === div.id)
+  const breakdown = getHealthBreakdown(div, avgVelocityForGroup(divDevs))
 
   return (
     <motion.div
@@ -94,15 +101,17 @@ function DivisionCard({
 
 // ── TeamCard ──────────────────────────────────────────────────────────────────
 function TeamCard({
-  team, delay, showBreakdown, onToggleBreakdown, onClick,
+  team, allDevelopers, delay, showBreakdown, onToggleBreakdown, onClick,
 }: {
-  team: Team; delay: number
+  team: Team
+  allDevelopers: Developer[]
+  delay: number
   showBreakdown: boolean
   onToggleBreakdown: (e: React.MouseEvent) => void
   onClick: () => void
 }) {
-  const devs      = getDevelopersByTeam(team.id)
-  const breakdown = getHealthBreakdown(team, getAvgVelocityForTeam(team.id))
+  const devs      = allDevelopers.filter(d => d.teamId === team.id)
+  const breakdown = getHealthBreakdown(team, avgVelocityForGroup(devs))
 
   return (
     <motion.div
@@ -154,6 +163,7 @@ interface CardConfig {
 // ── Main Component ────────────────────────────────────────────────────────────
 export function ExecutiveDashboard() {
   const { activeUser, visibleDivisions, visibleTeams, visibleDevelopers } = useUser()
+  const { companyHealthScore, companyStalePRs, companyAtRiskTasks, sprint, teams: allTeams, divisions: allDivisions } = useUnifiedData()
   const isLoading = useSimulatedLoad()
 
   // Drill-down state — initial level based on role
@@ -198,12 +208,12 @@ export function ExecutiveDashboard() {
   }
 
   // Derived display values
-  const currentDivision = drill.divisionId ? getDivisionById(drill.divisionId) : null
-  const currentTeam     = drill.teamId     ? getTeamById(drill.teamId)         : null
+  const currentDivision = drill.divisionId ? (allDivisions.find(d => d.id === drill.divisionId) ?? null) : null
+  const currentTeam     = drill.teamId     ? (allTeams.find(t => t.id === drill.teamId) ?? null)         : null
 
   const displayHealthScore =
-    drill.level === 'team'     && drill.teamId     ? (getTeamById(drill.teamId)?.healthScore     ?? 0)
-    : drill.level === 'division' && drill.divisionId ? (getDivisionById(drill.divisionId)?.healthScore ?? 0)
+    drill.level === 'team'     && drill.teamId     ? (allTeams.find(t => t.id === drill.teamId)?.healthScore     ?? 0)
+    : drill.level === 'division' && drill.divisionId ? (allDivisions.find(d => d.id === drill.divisionId)?.healthScore ?? 0)
     : activeUser.role === 'cto'         ? companyHealthScore
     : activeUser.role === 'divisionHead'? (visibleDivisions[0]?.healthScore ?? 0)
     : activeUser.role === 'teamLead'    ? (visibleTeams[0]?.healthScore     ?? 0)
@@ -223,21 +233,23 @@ export function ExecutiveDashboard() {
 
   // Main ring breakdown entity
   const mainEntity =
-    drill.level === 'team'     && drill.teamId     ? getTeamById(drill.teamId)
-    : drill.level === 'division' && drill.divisionId ? getDivisionById(drill.divisionId)
+    drill.level === 'team'     && drill.teamId     ? (allTeams.find(t => t.id === drill.teamId) ?? null)
+    : drill.level === 'division' && drill.divisionId ? (allDivisions.find(d => d.id === drill.divisionId) ?? null)
     : null
 
   const mainBreakdownAvgVel =
-    drill.level === 'team'     && drill.teamId     ? getAvgVelocityForTeam(drill.teamId)
-    : drill.level === 'division' && drill.divisionId ? getAvgVelocityForDivision(drill.divisionId)
+    drill.level === 'team'     && drill.teamId
+      ? avgVelocityForGroup(visibleDevelopers.filter(d => d.teamId === drill.teamId))
+    : drill.level === 'division' && drill.divisionId
+      ? avgVelocityForGroup(visibleDevelopers.filter(d => d.divisionId === drill.divisionId))
     : avgVelocity
 
   const mainBreakdownData = mainEntity ? getHealthBreakdown(mainEntity, mainBreakdownAvgVel) : null
 
   const { label: statusLabel, color: statusColor } = healthStatusLabel(displayHealthScore)
 
-  const teamsForDivision = drill.divisionId ? getTeamsByDivision(drill.divisionId) : []
-  const devsForTeam      = drill.teamId     ? getDevelopersByTeam(drill.teamId)    : visibleDevelopers
+  const teamsForDivision = drill.divisionId ? allTeams.filter(t => t.divisionId === drill.divisionId) : []
+  const devsForTeam      = drill.teamId     ? visibleDevelopers.filter(d => d.teamId === drill.teamId) : visibleDevelopers
   const gridKey = `${drill.level}-${drill.divisionId ?? ''}-${drill.teamId ?? ''}`
 
   const insightText = useMemo(() => {
@@ -251,8 +263,8 @@ export function ExecutiveDashboard() {
       return computeDashboardInsight('division', currentDivision.name, currentDivision.healthScore, teamsForDivision, scopedCritical)
     }
     const scopedCritical = visibleDevelopers.filter(d => d.riskLevel === 'critical').length
-    return computeDashboardInsight('top', 'Company', companyHealthScore, teams, scopedCritical)
-  }, [drill, visibleDevelopers, currentTeam, currentDivision, teamsForDivision, devsForTeam])
+    return computeDashboardInsight('top', 'Company', companyHealthScore, allTeams, scopedCritical)
+  }, [drill, visibleDevelopers, currentTeam, currentDivision, teamsForDivision, devsForTeam, allTeams, companyHealthScore])
 
   const cardConfigs = useMemo((): CardConfig[] => [
     { id: 'stale-prs',    label: 'Stale PRs',     value: displayStalePRs,        color: 'warning', icon: <GitPullRequest size={16} />, trend: 'up',     trendLabel: 'vs last sprint' },
@@ -271,12 +283,12 @@ export function ExecutiveDashboard() {
     for (const dev of visibleDevelopers) {
       const blocked = dev.tasks.filter(t => t.status === 'blocked').length
       if (blocked === 0) continue
-      const team = getTeamById(dev.teamId)
+      const team = allTeams.find(t => t.id === dev.teamId)
       if (!map[dev.teamId]) map[dev.teamId] = { teamId: dev.teamId, teamName: team?.name ?? dev.teamId, count: 0 }
       map[dev.teamId].count += blocked
     }
     return Object.values(map).sort((a, b) => b.count - a.count)
-  }, [visibleDevelopers])
+  }, [visibleDevelopers, allTeams])
 
   const totalBlocked = useMemo(
     () => blockedByTeam.reduce((s, e) => s + e.count, 0),
@@ -557,7 +569,7 @@ export function ExecutiveDashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                   {visibleDivisions.map((div, i) => (
                     <DivisionCard
-                      key={div.id} div={div} delay={i * 0.05}
+                      key={div.id} div={div} allTeams={allTeams} allDevelopers={visibleDevelopers} delay={i * 0.05}
                       showBreakdown={cardBreakdownId === div.id}
                       onToggleBreakdown={e => toggleCardBreakdown(e, div.id)}
                       onClick={() => drillIntoDiv(div.id)}
@@ -571,7 +583,7 @@ export function ExecutiveDashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                   {teamsForDivision.map((team, i) => (
                     <TeamCard
-                      key={team.id} team={team} delay={i * 0.05}
+                      key={team.id} team={team} allDevelopers={visibleDevelopers} delay={i * 0.05}
                       showBreakdown={cardBreakdownId === team.id}
                       onToggleBreakdown={e => toggleCardBreakdown(e, team.id)}
                       onClick={() => drillIntoTeam(drill.divisionId!, team.id)}

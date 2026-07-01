@@ -47,12 +47,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
-  // When Unified live data arrives, replace developer list
+  // When Unified live data arrives, replace developers, teams, and divisions
   useEffect(() => {
     if (IS_UNIFIED_LIVE && !unified.isLoading) {
       setDevelopers(unified.developers)
+      setTeams(unified.teams)
+      setDivisions(unified.divisions)
     }
-  }, [unified.developers, unified.isLoading])
+  }, [unified.developers, unified.teams, unified.divisions, unified.isLoading])
 
   // Seed developers from provider initially (or when not using Unified)
   useEffect(() => {

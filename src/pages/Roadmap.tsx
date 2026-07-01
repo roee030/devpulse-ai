@@ -3,7 +3,10 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Map, AlertTriangle, ArrowDown, X } from 'lucide-react'
 import { epics, Epic, RippleCard as RippleCardType } from '../data/mockData'
+import type { EpicStatus } from '../data/mockData'
 import { AiInsightCard } from '../components/ui/AiInsightCard'
+import { useUnifiedData } from '../context/UnifiedDataContext'
+import { computeEpicStatusMap } from '../lib/metrics'
 
 const TOTAL_WEEKS = 52
 const CURRENT_WEEK = 26
@@ -74,8 +77,18 @@ function RippleChainPanel({ chain }: { chain: RippleCardType[] }) {
 }
 
 export function Roadmap() {
+  const { enrichedTasks, isLive } = useUnifiedData()
   const [selected, setSelected] = useState<Epic | null>(null)
-  const atRiskCount = epics.filter(e => e.status === 'at-risk' || e.status === 'delayed').length
+
+  // Overlay live epic statuses from real tasks when connected
+  const liveStatusMap = isLive ? computeEpicStatusMap(enrichedTasks) : null
+  const getEpicStatus = (epic: Epic): EpicStatus =>
+    (liveStatusMap?.get(epic.id) as EpicStatus | undefined) ?? epic.status
+
+  const atRiskCount = epics.filter(e => {
+    const s = getEpicStatus(e)
+    return s === 'at-risk' || s === 'delayed'
+  }).length
 
   return (
     <div className="relative">
@@ -154,7 +167,8 @@ export function Roadmap() {
               {epics.map((epic, i) => {
                 const leftPct = weekPct(epic.startWeek)
                 const widthPct = ((epic.endWeek - epic.startWeek + 1) / TOTAL_WEEKS) * 100
-                const styles = STATUS_STYLES[epic.status]
+                const epicStatus = getEpicStatus(epic)
+                const styles = STATUS_STYLES[epicStatus as keyof typeof STATUS_STYLES]
                 const hasRipple = !!(epic.rippleChain?.length)
                 return (
                   <motion.div
@@ -237,8 +251,8 @@ export function Roadmap() {
                 {/* Panel header */}
                 <div className="flex items-start justify-between mb-5">
                   <div className="flex-1 pr-4">
-                    <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider mb-2 ${STATUS_STYLES[selected.status].badge}`}>
-                      {STATUS_STYLES[selected.status].label} · {selected.category}
+                    <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider mb-2 ${STATUS_STYLES[getEpicStatus(selected) as keyof typeof STATUS_STYLES].badge}`}>
+                      {STATUS_STYLES[getEpicStatus(selected) as keyof typeof STATUS_STYLES].label} · {selected.category}
                     </span>
                     <h2 className="text-text-primary font-bold text-lg leading-tight">{selected.title}</h2>
                     <p className="text-text-secondary text-sm mt-1">{selected.description}</p>
