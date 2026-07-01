@@ -4,6 +4,7 @@ import { motion, AnimatePresence, Reorder } from 'framer-motion'
 import { GitPullRequest, AlertTriangle, Target, Zap, ChevronRight, ChevronDown, Pencil, Check, Bug } from 'lucide-react'
 import { useUser } from '../context/UserContext'
 import { useUnifiedData } from '../context/UnifiedDataContext'
+import { useCompanyName } from '../context/CompanyContext'
 import { HealthRing } from '../components/ui/HealthRing'
 import { HealthBreakdown } from '../components/ui/HealthBreakdown'
 import { MetricCard } from '../components/ui/MetricCard'
@@ -164,6 +165,7 @@ interface CardConfig {
 export function ExecutiveDashboard() {
   const { activeUser, visibleDivisions, visibleTeams, visibleDevelopers } = useUser()
   const { companyHealthScore, companyStalePRs, companyAtRiskTasks, sprint, teams: allTeams, divisions: allDivisions } = useUnifiedData()
+  const { companyName } = useCompanyName()
   const isLoading = useSimulatedLoad()
 
   // Drill-down state — initial level based on role
@@ -523,7 +525,7 @@ export function ExecutiveDashboard() {
               className="flex items-center gap-1 text-sm mb-4 flex-wrap"
             >
               <button onClick={() => drillBackTo('top')} className="text-text-secondary hover:text-text-primary transition-colors">
-                NovaTech
+                {companyName || 'Company'}
               </button>
               {currentDivision && (
                 <>

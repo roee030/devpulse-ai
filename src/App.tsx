@@ -1,12 +1,14 @@
 // src/App.tsx
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { UserProvider } from './context/UserContext'
 import { UnifiedDataProvider } from './context/UnifiedDataContext'
+import { CompanyProvider } from './context/CompanyContext'
 import { AppShell } from './components/layout/AppShell'
 import { Login } from './pages/Login'
+import { Onboarding } from './pages/Onboarding'
 import { ExecutiveDashboard } from './pages/ExecutiveDashboard'
 import { TodaysBriefing } from './pages/TodaysBriefing'
 import { SprintPrediction } from './pages/SprintPrediction'
@@ -65,8 +67,13 @@ function AnimatedRoutes() {
   )
 }
 
+const LS_ONBOARDED = 'devpulse-onboarded'
+
 function AppContent() {
   const { isLoggedIn, isAuthLoading } = useAuth()
+  const [isOnboarded, setIsOnboarded] = useState<boolean>(() =>
+    !!localStorage.getItem(LS_ONBOARDED)
+  )
 
   if (isAuthLoading) {
     return (
@@ -78,10 +85,20 @@ function AppContent() {
 
   if (!isLoggedIn) return <Login />
 
+  if (!isOnboarded) {
+    return (
+      <Onboarding onComplete={() => {
+        localStorage.setItem(LS_ONBOARDED, 'true')
+        setIsOnboarded(true)
+      }} />
+    )
+  }
+
   return (
     <UnifiedDataProvider>
       <UserProvider>
         <AppShell>
+          <PendingRouteHandler />
           <AnimatedRoutes />
         </AppShell>
       </UserProvider>
@@ -89,12 +106,26 @@ function AppContent() {
   )
 }
 
+function PendingRouteHandler() {
+  const navigate = useNavigate()
+  useEffect(() => {
+    const pending = localStorage.getItem('devpulse-pending-route')
+    if (pending) {
+      localStorage.removeItem('devpulse-pending-route')
+      navigate(pending, { replace: true })
+    }
+  }, [navigate])
+  return null
+}
+
 export default function App() {
   return (
     <BrowserRouter basename="/devpulse-ai">
       <ScrollToTop />
       <AuthProvider>
-        <AppContent />
+        <CompanyProvider>
+          <AppContent />
+        </CompanyProvider>
       </AuthProvider>
     </BrowserRouter>
   )

@@ -1,5 +1,5 @@
 // src/components/layout/Sidebar.tsx
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   Zap, LayoutDashboard, TrendingUp, User, AlertTriangle,
@@ -30,6 +30,22 @@ export function Sidebar() {
   const navigate = useNavigate()
   const [awaitingSecond, setAwaitingSecond] = useState(false)
   const unified = useUnifiedData()
+
+  const sprintLabel = useMemo(() => {
+    const match = unified.sprint.name.match(/Sprint\s+\d+/i)
+    return match ? match[0] : unified.sprint.name.split(/[–—-]/)[0].trim()
+  }, [unified.sprint.name])
+
+  const daysLeft = useMemo(() => {
+    const end = new Date(unified.sprint.endDate)
+    const diff = Math.ceil((end.getTime() - Date.now()) / 86_400_000)
+    return Math.max(0, diff)
+  }, [unified.sprint.endDate])
+
+  const progressPct = useMemo(() => {
+    if (!unified.sprint.totalPoints) return 0
+    return Math.round(unified.sprint.completedPoints / unified.sprint.totalPoints * 100)
+  }, [unified.sprint.completedPoints, unified.sprint.totalPoints])
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>
@@ -150,12 +166,14 @@ export function Sidebar() {
       </nav>
 
       <div className="px-4 py-4 border-t border-border">
-        <p className="text-text-secondary text-xs">Sprint 24 · 2 days left</p>
+        <p className="text-text-secondary text-xs">
+          {sprintLabel} · {daysLeft === 0 ? 'Last day' : `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`}
+        </p>
         <div className="mt-2 h-1.5 bg-border rounded-full overflow-hidden">
           <motion.div
             className="h-full bg-warning rounded-full"
             initial={{ width: 0 }}
-            animate={{ width: '86%' }}
+            animate={{ width: `${progressPct}%` }}
             transition={{ duration: 1, ease: 'easeOut', delay: 0.5 }}
           />
         </div>

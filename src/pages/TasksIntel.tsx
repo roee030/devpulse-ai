@@ -318,6 +318,7 @@ export function TasksIntel() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')
   const [assigneeFilter, setAssigneeFilter] = useState<string>('all')
+  const [epicFilter, setEpicFilter] = useState<string>('all')
   const [showStandup, setShowStandup] = useState(false)
   const [search, setSearch] = useState('')
   const searchRef = useRef<HTMLInputElement>(null)
@@ -350,11 +351,17 @@ export function TasksIntel() {
     )
   }, [enrichedTasks, activeUser, visibleDevelopers])
 
+  const epicIds = useMemo(() => {
+    const ids = [...new Set(scopedTasks.map(t => t.epicId).filter(Boolean))] as string[]
+    return ids.sort()
+  }, [scopedTasks])
+
   const filtered = useMemo(() => {
     let t = scopedTasks
     if (statusFilter !== 'all') t = t.filter(x => x.status === statusFilter)
     if (sourceFilter !== 'all') t = t.filter(x => x.source === sourceFilter)
     if (assigneeFilter !== 'all') t = t.filter(x => x.assigneeDev?.id === assigneeFilter)
+    if (epicFilter !== 'all') t = t.filter(x => x.epicId === epicFilter)
     if (search.trim()) {
       const q = search.toLowerCase()
       t = t.filter(x =>
@@ -364,7 +371,7 @@ export function TasksIntel() {
       )
     }
     return t
-  }, [scopedTasks, statusFilter, sourceFilter, assigneeFilter, search])
+  }, [scopedTasks, statusFilter, sourceFilter, assigneeFilter, epicFilter, search])
 
   // Stats
   const totalLinkedPRs    = filtered.filter(t => t.prs.length > 0).length
@@ -499,6 +506,20 @@ export function TasksIntel() {
             <option value="all">All developers</option>
             {visibleDevelopers.map(d => (
               <option key={d.id} value={d.id}>{d.name}</option>
+            ))}
+          </select>
+        )}
+
+        {/* Epic filter */}
+        {epicIds.length > 0 && (
+          <select
+            value={epicFilter}
+            onChange={e => setEpicFilter(e.target.value)}
+            className="text-xs bg-card border border-border rounded-lg px-3 py-1.5 text-text-secondary"
+          >
+            <option value="all">All epics</option>
+            {epicIds.map(id => (
+              <option key={id} value={id}>{id}</option>
             ))}
           </select>
         )}

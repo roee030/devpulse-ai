@@ -1,25 +1,54 @@
 // src/pages/Settings/CompanyPage.tsx
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Save, Loader2 } from 'lucide-react'
-import { doc, setDoc } from 'firebase/firestore'
+import { doc, setDoc, getDoc } from 'firebase/firestore'
 import { db } from '../../lib/firebase'
+import { useCompanyName } from '../../context/CompanyContext'
 
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID ?? 'demo-company'
+const LS_PLAN_KEY = 'devpulse-company-plan'
 
 export function CompanyPage() {
-  const [name, setName]         = useState('')
-  const [plan, setPlan]         = useState<'free' | 'pro' | 'enterprise'>('free')
+  const { companyName, setCompanyName } = useCompanyName()
+  const [name, setName]         = useState(companyName)
+  const [plan, setPlan]         = useState<'free' | 'pro' | 'enterprise'>(
+    () => (localStorage.getItem(LS_PLAN_KEY) as 'free' | 'pro' | 'enterprise') ?? 'free'
+  )
   const [isSaving, setIsSaving] = useState(false)
   const [saved, setSaved]       = useState(false)
   const [error, setError]       = useState<string | null>(null)
+
+  // Sync from context (updated by onboarding or other sessions)
+  useEffect(() => {
+    setName(companyName)
+  }, [companyName])
+
+  // If Firebase is available, try to load saved settings
+  useEffect(() => {
+    if (!db) return
+    getDoc(doc(db, 'companies', COMPANY_ID)).then(snap => {
+      if (!snap.exists()) return
+      const data = snap.data()
+      if (data.name && !companyName) {
+        setName(data.name)
+        setCompanyName(data.name)
+      }
+      if (data.plan) setPlan(data.plan)
+    }).catch(() => {})
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSave() {
     setIsSaving(true)
     setSaved(false)
     setError(null)
     try {
-      if (!db) throw new Error('Database not configured — add Firebase credentials.')
-      await setDoc(doc(db!, 'companies', COMPANY_ID), { name, plan }, { merge: true })
+      // Always persist to context + localStorage
+      setCompanyName(name)
+      localStorage.setItem(LS_PLAN_KEY, plan)
+      // Persist to Firebase if available
+      if (db) {
+        await setDoc(doc(db!, 'companies', COMPANY_ID), { name, plan }, { merge: true })
+      }
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch (e: any) {
