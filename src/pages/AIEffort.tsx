@@ -199,8 +199,16 @@ export function AIEffort() {
     return () => clearInterval(id)
   }, [period])
 
-  const byDeveloper: DeveloperEffortSummary[] = useMemo(() => aggregateByDeveloper(events), [events])
-  const byTask:      TaskEffortSummary[]      = useMemo(() => aggregateByTask(events),      [events])
+  const allByDeveloper: DeveloperEffortSummary[] = useMemo(() => aggregateByDeveloper(events), [events])
+  const byTask:         TaskEffortSummary[]      = useMemo(() => aggregateByTask(events),      [events])
+
+  // Developers only see their own usage; leads see the whole team
+  const ownName = activeUser?.role === 'developer' ? visibleDevelopers[0]?.name : null
+  const byDeveloper: DeveloperEffortSummary[] = useMemo(() => {
+    if (!ownName) return allByDeveloper
+    const self = allByDeveloper.find(d => d.userName === ownName)
+    return self ? [self] : allByDeveloper.slice(0, 1)
+  }, [allByDeveloper, ownName])
 
   const aiInsightText = useMemo(
     () => computeAIEffortInsight(byDeveloper, byTask),

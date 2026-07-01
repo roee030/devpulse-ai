@@ -52,7 +52,10 @@ export function CompanyPage() {
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch (e: any) {
-      setError(e.message ?? 'Failed to save')
+      // If Firebase fails, still show saved (localStorage already updated)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+      if (db) setError((e as Error).message ?? 'Cloud sync failed — saved locally')
     } finally {
       setIsSaving(false)
     }
@@ -63,6 +66,11 @@ export function CompanyPage() {
       <div className="mb-8">
         <h1 className="text-xl font-semibold text-slate-100">Company settings</h1>
         <p className="text-sm text-slate-500 mt-1">Manage your organization profile.</p>
+        {!db && (
+          <p className="text-xs text-amber-400/80 mt-2 bg-amber-400/5 border border-amber-400/20 rounded-lg px-3 py-2">
+            Settings are saved locally. Add Firebase credentials in <code className="font-mono">.env.local</code> to sync across your team.
+          </p>
+        )}
       </div>
 
       <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 space-y-5">
