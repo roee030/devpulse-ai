@@ -16,7 +16,30 @@ import http from 'node:http'
 import https from 'node:https'
 import { spawnSync } from 'node:child_process'
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
+
+// ── Auto-load .env.local so the agent picks up Firebase credentials ─────────────
+
+function loadEnvLocal() {
+  const candidates = [
+    resolve(process.cwd(), '.env.local'),
+    resolve(process.cwd(), '..', '.env.local'),   // when run from agent/ subdir
+  ]
+  for (const p of candidates) {
+    if (!existsSync(p)) continue
+    for (const line of readFileSync(p, 'utf8').split('\n')) {
+      const trimmed = line.trim()
+      if (!trimmed || trimmed.startsWith('#')) continue
+      const eqIdx = trimmed.indexOf('=')
+      if (eqIdx < 0) continue
+      const key = trimmed.slice(0, eqIdx).trim()
+      const val = trimmed.slice(eqIdx + 1).trim()
+      if (key && !(key in process.env)) process.env[key] = val
+    }
+    break
+  }
+}
+loadEnvLocal()
 
 // ── Config ─────────────────────────────────────────────────────────────────────
 
@@ -24,9 +47,10 @@ const PORT         = 9339
 const LOG_FILE     = join(process.cwd(), '.devpulse-ai-effort.json')
 const TASK_REGEX   = /([A-Z][A-Z0-9_]+-\d+)/   // Jira-style: PROJ-123, DEV-42
 // Firebase REST API — no SDK needed in the agent
-const FB_PROJECT   = process.env.FIREBASE_PROJECT_ID ?? 'devpulse-342c9'
-const FB_API_KEY   = process.env.FIREBASE_API_KEY    ?? ''
-const WORKSPACE_ID = 'devpulse'
+// Reads FIREBASE_API_KEY or falls back to VITE_FIREBASE_API_KEY from .env.local
+const FB_PROJECT   = process.env.FIREBASE_PROJECT_ID   ?? process.env.VITE_FIREBASE_PROJECT_ID   ?? 'devpulse-342c9'
+const FB_API_KEY   = process.env.FIREBASE_API_KEY      ?? process.env.VITE_FIREBASE_API_KEY      ?? ''
+const WORKSPACE_ID = process.env.DEVPULSE_WORKSPACE_ID ?? 'devpulse'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 

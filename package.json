@@ -9,7 +9,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "agent": "tsx agent/devpulse-agent.ts",
+    "deploy:rules": "firebase deploy --only firestore:rules,firestore:indexes",
+    "secrets": "bash scripts/push-github-secrets.sh"
   },
   "dependencies": {
     "@unified-api/typescript-sdk": "^2.83.50",

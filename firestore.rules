@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── AI Effort Events ──────────────────────────────────────────────────────
+    // Written by each developer's local agent (no auth — agents run on CLI).
+    // Read by the dashboard (authenticated users only in prod; open in demo).
+    match /ai_effort/{eventId} {
+      // Any client may read — the workspaceId scopes data per company
+      allow read: if true;
+
+      // Agents can create events; validate required fields to prevent abuse
+      allow create: if request.resource.data.workspaceId is string
+                    && request.resource.data.workspaceId.size() > 0
+                    && request.resource.data.totalTokens is int
+                    && request.resource.data.totalTokens >= 0
+                    && request.resource.data.timestamp is timestamp;
+
+      // Events are immutable once written
+      allow update, delete: if false;
+    }
+
+    // ── Workspace / Company data ──────────────────────────────────────────────
+    // Multi-tenant: each company's data lives under /workspaces/{workspaceId}/.
+    // Only authenticated users belonging to that workspace may access it.
+    match /workspaces/{workspaceId}/{document=**} {
+      allow read, write: if request.auth != null
+                         && request.auth.token.workspaceId == workspaceId;
+    }
+
+    // ── Company settings (integrations, config) ───────────────────────────────
+    match /companies/{companyId}/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
