@@ -5,7 +5,7 @@
 // Falls back to synthetic demo data (using real task keys when available).
 import { useEffect, useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Cpu, GitBranch, Zap, TrendingUp, AlertCircle, RefreshCw, Users, ChevronDown, ChevronUp } from 'lucide-react'
+import { Cpu, GitBranch, Zap, TrendingUp, AlertCircle, RefreshCw, Users, ChevronDown, ChevronUp, Download } from 'lucide-react'
 import { useUser } from '../context/UserContext'
 import { useUnifiedData } from '../context/UnifiedDataContext'
 import {
@@ -212,6 +212,26 @@ export function AIEffort() {
   const maxDevTok   = byDeveloper[0]?.totalTokens ?? 1
   const maxTaskTok  = byTask[0]?.totalTokens ?? 1
 
+  function downloadCSV() {
+    const rows = view === 'developers'
+      ? [
+          ['Developer', 'Total Tokens', 'Events', 'Tasks', 'Est. Cost'],
+          ...byDeveloper.map(d => [d.userName, d.totalTokens, d.events, d.tasks.join('; '), costLabel(d.totalTokens)]),
+        ]
+      : [
+          ['Task ID', 'Total Tokens', 'Developers', 'Est. Cost'],
+          ...byTask.map(t => [t.taskId, t.totalTokens, t.developers.join('; '), costLabel(t.totalTokens)]),
+        ]
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const a = Object.assign(document.createElement('a'), {
+      href: URL.createObjectURL(blob),
+      download: `ai-effort-${view}-${period}-${new Date().toISOString().slice(0, 10)}.csv`,
+    })
+    a.click()
+    URL.revokeObjectURL(a.href)
+  }
+
   return (
     <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-6">
 
@@ -259,6 +279,13 @@ export function AIEffort() {
                 <AlertCircle size={10} />Demo data
               </span>
             )}
+            <button
+              onClick={downloadCSV}
+              title="Export CSV"
+              className="p-1.5 rounded-lg hover:bg-white/5 text-text-secondary hover:text-text-primary"
+            >
+              <Download size={12} />
+            </button>
             <button
               onClick={() => loadData()}
               className="p-1.5 rounded-lg hover:bg-white/5 text-text-secondary hover:text-text-primary"

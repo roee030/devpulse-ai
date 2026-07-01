@@ -1,11 +1,12 @@
 // src/pages/Settings/IntegrationsPage.tsx
 import { useState, useEffect } from 'react'
-import { Github, MessageSquare, Trello, BarChart2, Sparkles } from 'lucide-react'
+import { Github, MessageSquare, Trello, BarChart2, Sparkles, RefreshCw } from 'lucide-react'
 import { IntegrationCard } from '../../components/integrations/IntegrationCard'
 import { ConnectModal } from '../../components/integrations/ConnectModal'
 import { CopilotPreviewModal } from '../../components/integrations/CopilotPreviewModal'
 import { UnifiedPlatformCard } from '../../components/integrations/UnifiedPlatformCard'
 import { getConnections, getUnifiedClient } from '../../lib/unified'
+import { useUnifiedData, IS_UNIFIED_LIVE } from '../../context/UnifiedDataContext'
 import type { IntegrationConfig } from '../../components/integrations/types'
 import type { Connection } from '@unified-api/typescript-sdk/sdk/models/shared'
 import type { UnifiedTo } from '@unified-api/typescript-sdk'
@@ -84,6 +85,7 @@ export function IntegrationsPage() {
   const [copilotOpen, setCopilotOpen] = useState(false)
   const [connections, setConnections] = useState<Connection[]>([])
   const [unifiedClient, setUnifiedClient] = useState<UnifiedTo | null>(null)
+  const { lastFetched, isLoading: isSyncing, connections: connStatus } = useUnifiedData()
 
   const isUnifiedMode = !!UNIFIED_API_KEY
 
@@ -121,8 +123,24 @@ export function IntegrationsPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-xl font-semibold text-slate-100">Integrations</h1>
-        <p className="text-sm text-slate-500 mt-1">Connect your tools to start pulling real data into DevPulse.</p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-xl font-semibold text-slate-100">Integrations</h1>
+            <p className="text-sm text-slate-500 mt-1">Connect your tools to start pulling real data into DevPulse.</p>
+          </div>
+          {IS_UNIFIED_LIVE && (
+            <div className="flex items-center gap-1.5 text-xs text-slate-400 shrink-0 pt-1">
+              {isSyncing ? (
+                <RefreshCw size={11} className="animate-spin" />
+              ) : (
+                <span className={`w-1.5 h-1.5 rounded-full ${Object.values(connStatus).some(Boolean) ? 'bg-emerald-400' : 'bg-slate-500'}`} />
+              )}
+              {isSyncing ? 'Syncing…' : lastFetched
+                ? `Last sync ${lastFetched.toLocaleTimeString()}`
+                : 'Not synced yet'}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="space-y-3">
