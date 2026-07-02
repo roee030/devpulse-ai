@@ -730,16 +730,16 @@ export const quarterSummaries: QuarterSummary[] = [
 ]
 
 export const monthlyVelocity = [
-  { month: 'Jan', actual: 58,   target: 60 },
-  { month: 'Feb', actual: 62,   target: 60 },
-  { month: 'Mar', actual: 66,   target: 65 },
-  { month: 'Apr', actual: 55,   target: 65 },
-  { month: 'May', actual: 48,   target: 65 },
-  { month: 'Jun', actual: 39,   target: 65 },
-  { month: 'Jul', actual: null, target: 65 },
-  { month: 'Aug', actual: null, target: 68 },
-  { month: 'Sep', actual: null, target: 68 },
-  { month: 'Oct', actual: null, target: 70 },
-  { month: 'Nov', actual: null, target: 70 },
-  { month: 'Dec', actual: null, target: 70 },
+  { month: 'Jan', actual: 58,   target: 60, prevYear: 52 },
+  { month: 'Feb', actual: 62,   target: 60, prevYear: 50 },
+  { month: 'Mar', actual: 66,   target: 65, prevYear: 55 },
+  { month: 'Apr', actual: 55,   target: 65, prevYear: 59 },
+  { month: 'May', actual: 48,   target: 65, prevYear: 57 },
+  { month: 'Jun', actual: 39,   target: 65, prevYear: 61 },
+  { month: 'Jul', actual: null, target: 65, prevYear: 58 },
+  { month: 'Aug', actual: null, target: 68, prevYear: 63 },
+  { month: 'Sep', actual: null, target: 68, prevYear: 65 },
+  { month: 'Oct', actual: null, target: 70, prevYear: 62 },
+  { month: 'Nov', actual: null, target: 70, prevYear: 66 },
+  { month: 'Dec', actual: null, target: 70, prevYear: 64 },
 ]

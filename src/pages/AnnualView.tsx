@@ -178,15 +178,19 @@ export function AnnualView() {
           <div className="ml-auto flex items-center gap-4 text-xs text-text-secondary">
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-sm bg-accent/80" />
-              <span>Actual</span>
+              <span>2026 Actual</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-5 border-t-2 border-dashed border-warning" />
               <span>Target</span>
             </div>
+            <div className="flex items-center gap-2">
+              <div className="w-5 border-t-2 border-text-secondary/50" style={{ borderStyle: 'solid' }} />
+              <span>2025</span>
+            </div>
           </div>
         </div>
-        <div className="h-48">
+        <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={monthlyVelocity} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" vertical={false} />
@@ -206,8 +210,12 @@ export function AnnualView() {
                 labelStyle={{ color: '#f1f5f9' }}
                 itemStyle={{ color: '#64748b' }}
                 cursor={{ fill: 'rgba(255,255,255,0.03)' }}
+                formatter={(value, name) => {
+                  const labels: Record<string, string> = { actual: '2026 Actual', target: 'Target', prevYear: '2025 Actual' }
+                  return [`${value ?? '-'} pts`, labels[name as string] ?? name]
+                }}
               />
-              <Bar dataKey="actual" fill="#6366f1" radius={[3, 3, 0, 0]} opacity={0.85} name="Actual" />
+              <Bar dataKey="actual" fill="#6366f1" radius={[3, 3, 0, 0]} opacity={0.85} name="actual" />
               <Line
                 dataKey="target"
                 stroke="#f59e0b"
@@ -215,7 +223,15 @@ export function AnnualView() {
                 strokeDasharray="5 4"
                 dot={false}
                 connectNulls
-                name="Target"
+                name="target"
+              />
+              <Line
+                dataKey="prevYear"
+                stroke="#475569"
+                strokeWidth={1.5}
+                dot={false}
+                connectNulls
+                name="prevYear"
               />
             </ComposedChart>
           </ResponsiveContainer>
