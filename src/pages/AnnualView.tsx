@@ -182,7 +182,7 @@ export function AnnualView() {
           <div className="ml-auto flex items-center gap-4 text-xs text-text-secondary">
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-sm bg-accent/80" />
-              <span>2026 Actual</span>
+              <span>{new Date().getFullYear()} Actual</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-5 border-t-2 border-dashed border-warning" />
@@ -190,7 +190,7 @@ export function AnnualView() {
             </div>
             <div className="flex items-center gap-2">
               <div className="w-5 border-t-2 border-text-secondary/50" style={{ borderStyle: 'solid' }} />
-              <span>2025</span>
+              <span>{new Date().getFullYear() - 1}</span>
             </div>
           </div>
         </div>
@@ -215,7 +215,8 @@ export function AnnualView() {
                 itemStyle={{ color: '#64748b' }}
                 cursor={{ fill: 'rgba(255,255,255,0.03)' }}
                 formatter={(value, name) => {
-                  const labels: Record<string, string> = { actual: '2026 Actual', target: 'Target', prevYear: '2025 Actual' }
+                  const yr = new Date().getFullYear()
+                  const labels: Record<string, string> = { actual: `${yr} Actual`, target: 'Target', prevYear: `${yr - 1} Actual` }
                   return [`${value ?? '-'} pts`, labels[name as string] ?? name]
                 }}
               />

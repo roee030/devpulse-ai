@@ -109,7 +109,7 @@ export function Roadmap() {
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-text-primary flex items-center gap-2">
               <Map size={20} className="text-accent" />
-              Product Roadmap 2026
+              Product Roadmap {new Date().getFullYear()}
             </h1>
             <p className="text-text-secondary text-sm mt-1">
               Full-year view · Click an at-risk epic to see downstream impact

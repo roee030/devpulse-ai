@@ -95,12 +95,12 @@ export const sprintBurndown: BurndownDay[] = [
 ]
 
 export const sprint = {
-  name: 'Sprint 24 – Auth Refactor & Payment Module',
-  startDate: '2026-03-13',
-  endDate: '2026-03-27',
+  name: 'Sprint 26 – Payment Gateway & Mobile Auth',
+  startDate: '2026-06-26',
+  endDate: '2026-07-10',
   totalPoints: 84,
-  completedPoints: 51,
-  projectedPoints: 58,
+  completedPoints: 43,
+  projectedPoints: 61,
   burndownData: sprintBurndown,
   topBlockers: [
     { id: '1', description: 'Unexpected bugs in Payment module', tasksDelayed: 3 },
