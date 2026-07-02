@@ -33,12 +33,30 @@ async function seedTaskPlatform(name: string, connectionId: string) {
   }
   console.log(`[seed] Seeding ${name} (${connectionId})…`)
 
-  // Create the sprint project
-  const project = await sdk.task.createTaskProject({
-    connectionId,
-    taskProject: { name: 'Sprint 24 — Auth Refactor' },
-  })
-  console.log(`[seed] ${name}: project created → ${project.id}`)
+  // Try to create a sprint project; some platforms (e.g. Jira) require extra
+  // fields (user_ids) that we may not have — fall back to an existing project.
+  let project: { id?: string } | null = null
+  try {
+    project = await sdk.task.createTaskProject({
+      connectionId,
+      taskProject: { name: 'Sprint 24 — Auth Refactor' },
+    })
+    console.log(`[seed] ${name}: project created → ${project.id}`)
+  } catch (e: unknown) {
+    console.warn(`[seed] ${name}: createTaskProject failed (${(e as Error).message?.slice(0, 80)}), trying existing projects…`)
+    try {
+      const existing = await sdk.task.listTaskProjects({ connectionId, limit: 1 })
+      project = existing[0] ?? null
+      if (project) console.log(`[seed] ${name}: using existing project → ${project.id}`)
+    } catch {
+      project = null
+    }
+  }
+  if (!project?.id) {
+    console.warn(`[seed] ${name}: no project available — skipping task seed`)
+    return
+  }
+  console.log(`[seed] ${name}: project ready → ${project.id}`)
 
   // Tasks matching the known test data
   const tasks: Array<{ name: string; assignee: string; points: string; status: string }> = [

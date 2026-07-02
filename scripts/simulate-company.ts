@@ -135,11 +135,18 @@ async function createSprint(name: string, totalPoints: number) {
       }
     } catch { /* list failed — proceed to create */ }
 
-    const project = await sdk.task.createTaskProject({
-      connectionId: JIRA_CONN,
-      taskProject: { name },
-    })
-    state.projectId = project.id ?? ''
+    try {
+      const project = await sdk.task.createTaskProject({
+        connectionId: JIRA_CONN,
+        taskProject: { name },
+      })
+      state.projectId = project.id ?? ''
+    } catch (e: unknown) {
+      // Some platforms (Jira) require extra fields; fall back to first existing project
+      log(`createTaskProject failed (${(e as Error).message?.slice(0, 80)}) — using existing project if available`)
+      const fallback = await sdk.task.listTaskProjects({ connectionId: JIRA_CONN, limit: 1 }).catch(() => [])
+      state.projectId = fallback[0]?.id ?? ''
+    }
   }
 
   log(`Sprint project created: "${name}" (${totalPoints} pts)`)
