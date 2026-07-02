@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Bell, ChevronDown, Check } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUser } from '../../context/UserContext'
+import { useCompanyName } from '../../context/CompanyContext'
 import { User } from '../../data/mockData'
 
 const roleLabel: Record<string, string> = {
@@ -21,12 +22,13 @@ const roleGroups = [
 
 export function TopBar() {
   const { activeUser, setActiveUser, users } = useUser()
+  const { companyName } = useCompanyName()
   const [open, setOpen] = useState(false)
 
   return (
     <header className="hidden md:flex h-14 bg-card border-b border-border items-center justify-between px-6 fixed top-0 left-60 right-0 z-30">
       <div className="flex items-center gap-2 text-sm">
-        <span className="text-text-secondary">NovaTech</span>
+        <span className="text-text-secondary">{companyName || 'DevPulse'}</span>
         <span className="text-border">/</span>
         <span className="text-text-primary font-medium">{activeUser.title}</span>
       </div>

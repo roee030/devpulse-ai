@@ -173,7 +173,7 @@ export function Login() {
           transition={{ delay: 0.75 }}
           className="text-text-secondary text-xs text-center mt-6 leading-relaxed"
         >
-          Synthetic demo data · No account required · NovaTech Inc (fictional company)
+          Synthetic demo data · No account required · fictional company data
         </motion.p>
       </motion.div>
     </div>

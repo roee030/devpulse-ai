@@ -149,7 +149,7 @@ export function AnnualView() {
       >
         <h1 className="text-xl md:text-2xl font-bold text-text-primary flex items-center gap-2">
           <Calendar size={20} className="text-accent" />
-          Annual View — 2026
+          Annual View — {new Date().getFullYear()}
         </h1>
         <p className="text-text-secondary text-sm mt-1">
           Quarter-by-quarter progress · AI year-end prediction
