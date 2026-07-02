@@ -1,9 +1,10 @@
 // src/components/layout/TopBar.tsx
-import { useState } from 'react'
-import { Bell, ChevronDown, Check } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { Bell, ChevronDown, Check, X, AlertTriangle, GitPullRequest, Zap } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUser } from '../../context/UserContext'
 import { useCompanyName } from '../../context/CompanyContext'
+import { useUnifiedData } from '../../context/UnifiedDataContext'
 import { User } from '../../data/mockData'
 
 const roleLabel: Record<string, string> = {
@@ -20,10 +21,57 @@ const roleGroups = [
   { label: 'Developers', role: 'developer' },
 ]
 
+interface Alert { id: string; icon: React.ElementType; color: string; title: string; sub: string }
+
 export function TopBar() {
-  const { activeUser, setActiveUser, users } = useUser()
+  const { activeUser, setActiveUser, users, visibleDevelopers } = useUser()
   const { companyName } = useCompanyName()
+  const { allPRs, sprint } = useUnifiedData()
   const [open, setOpen] = useState(false)
+  const [bellOpen, setBellOpen] = useState(false)
+
+  const alerts = useMemo<Alert[]>(() => {
+    const list: Alert[] = []
+
+    // Critical burnout risk developers
+    const critical = visibleDevelopers.filter(d => d.riskLevel === 'critical').slice(0, 2)
+    for (const dev of critical) {
+      list.push({
+        id: `burnout-${dev.id}`,
+        icon: AlertTriangle,
+        color: 'text-danger',
+        title: `${dev.name.split(' ')[0]} — critical burnout risk`,
+        sub: dev.riskSignal,
+      })
+    }
+
+    // Stale PRs (open + waiting >12h)
+    const stalePRs = allPRs.filter(p => (p.status === 'open' || p.status === 'changes-requested') && p.waitingHours > 12).slice(0, 2)
+    for (const pr of stalePRs) {
+      const label = pr.linkedTaskKey ? `PR for ${pr.linkedTaskKey}` : 'Open PR'
+      list.push({
+        id: `pr-${pr.id}`,
+        icon: GitPullRequest,
+        color: 'text-warning',
+        title: `${label} awaiting review`,
+        sub: `Open ${Math.round(pr.waitingHours)}h — needs attention`,
+      })
+    }
+
+    // Sprint risk
+    const completionPct = Math.round((sprint.projectedPoints / sprint.totalPoints) * 100)
+    if (completionPct < 85) {
+      list.push({
+        id: 'sprint-risk',
+        icon: Zap,
+        color: 'text-accent',
+        title: `Sprint projected at ${completionPct}%`,
+        sub: `${sprint.topBlockers.length} active blocker${sprint.topBlockers.length !== 1 ? 's' : ''} — ${sprint.name.split('–')[0].trim()}`,
+      })
+    }
+
+    return list.slice(0, 5)
+  }, [visibleDevelopers, allPRs, sprint])
 
   return (
     <header className="hidden md:flex h-14 bg-card border-b border-border items-center justify-between px-6 fixed top-0 left-60 right-0 z-30">
@@ -34,14 +82,59 @@ export function TopBar() {
       </div>
 
       <div className="flex items-center gap-3">
-        <button className="relative text-text-secondary hover:text-text-primary transition-colors">
-          <Bell size={18} />
-          <span className="absolute -top-1 -right-1 w-2 h-2 bg-danger rounded-full pulse-red" />
-        </button>
+        {/* Notification bell */}
+        <div className="relative">
+          <button
+            onClick={() => { setBellOpen(v => !v); setOpen(false) }}
+            className="relative text-text-secondary hover:text-text-primary transition-colors p-1"
+          >
+            <Bell size={18} />
+            {alerts.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-danger rounded-full pulse-red" />
+            )}
+          </button>
+
+          <AnimatePresence>
+            {bellOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.15 }}
+                className="absolute right-0 mt-2 w-80 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden"
+              >
+                <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                  <span className="text-text-primary text-sm font-semibold">Alerts</span>
+                  <button onClick={() => setBellOpen(false)} className="text-text-secondary hover:text-text-primary transition-colors">
+                    <X size={14} />
+                  </button>
+                </div>
+                {alerts.length === 0 ? (
+                  <p className="text-text-secondary text-xs text-center py-6">No active alerts</p>
+                ) : (
+                  <div className="divide-y divide-border">
+                    {alerts.map(alert => {
+                      const Icon = alert.icon
+                      return (
+                        <div key={alert.id} className="flex items-start gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors">
+                          <Icon size={14} className={`mt-0.5 flex-shrink-0 ${alert.color}`} />
+                          <div className="min-w-0">
+                            <p className="text-text-primary text-xs font-medium leading-snug">{alert.title}</p>
+                            <p className="text-text-secondary text-[11px] mt-0.5 leading-relaxed truncate">{alert.sub}</p>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         <div className="relative">
           <button
-            onClick={() => setOpen(v => !v)}
+            onClick={() => { setOpen(v => !v); setBellOpen(false) }}
             className="flex items-center gap-2.5 bg-bg border border-border rounded-lg px-3 py-1.5 text-sm hover:border-accent/50 transition-colors"
           >
             <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center">
