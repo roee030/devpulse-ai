@@ -64,8 +64,8 @@ export function CompanyPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-xl font-semibold text-slate-100">Company settings</h1>
-        <p className="text-sm text-slate-500 mt-1">Manage your organization profile.</p>
+        <h1 className="text-xl font-semibold text-text-primary">Company settings</h1>
+        <p className="text-sm text-text-secondary mt-1">Manage your organization profile.</p>
         {!db && (
           <p className="text-xs text-amber-400/80 mt-2 bg-amber-400/5 border border-amber-400/20 rounded-lg px-3 py-2">
             Settings are saved locally. Add Firebase credentials in <code className="font-mono">.env.local</code> to sync across your team.
@@ -73,24 +73,24 @@ export function CompanyPage() {
         )}
       </div>
 
-      <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 space-y-5">
+      <div className="bg-card border border-border rounded-xl p-6 space-y-5">
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1.5">Company name</label>
+          <label className="block text-xs font-medium text-text-secondary mb-1.5">Company name</label>
           <input
             type="text"
             value={name}
             onChange={e => setName(e.target.value)}
             placeholder="Acme Corp"
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition-colors"
+            className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-accent/60 transition-colors"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1.5">Plan</label>
+          <label className="block text-xs font-medium text-text-secondary mb-1.5">Plan</label>
           <select
             value={plan}
             onChange={e => setPlan(e.target.value as typeof plan)}
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+            className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent/60 transition-colors"
           >
             <option value="free">Free</option>
             <option value="pro">Pro</option>
@@ -98,13 +98,13 @@ export function CompanyPage() {
           </select>
         </div>
 
-        {error && <p className="text-xs text-red-400">{error}</p>}
+        {error && <p className="text-xs text-danger">{error}</p>}
 
         <div className="flex justify-end">
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-accent hover:bg-accent/90 disabled:opacity-50 text-white rounded-lg transition-colors"
           >
             {isSaving
               ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving…</>
