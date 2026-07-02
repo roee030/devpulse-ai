@@ -306,7 +306,7 @@ export function computeSprintInsight(
 export function computeRoadmapInsight(
   atRiskEpics: { title: string; status: string }[],
 ): string {
-  if (atRiskEpics.length === 0) return 'All epics on track for 2026 — no cascading risks detected.'
+  if (atRiskEpics.length === 0) return `All epics on track for ${new Date().getFullYear()} — no cascading risks detected.`
 
   const names = atRiskEpics.slice(0, 2).map(e => e.title)
   const delayed = atRiskEpics.filter(e => e.status === 'delayed')

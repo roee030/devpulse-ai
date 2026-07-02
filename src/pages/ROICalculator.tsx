@@ -50,7 +50,7 @@ export function ROICalculator() {
         {[
           { label: 'Number of developers', value: devCount, setter: setDevCount, min: 1, max: 200, unit: 'devs' },
           { label: 'Status meetings per week', value: meetingsPerWeek, setter: setMeetingsPerWeek, min: 1, max: 20, unit: '/week' },
-          { label: 'Average hourly rate', value: hourlyRate, setter: setHourlyRate, min: 50, max: 500, unit: '₪/hr' },
+          { label: 'Average hourly rate', value: hourlyRate, setter: setHourlyRate, min: 50, max: 500, unit: '$/hr' },
         ].map(({ label, value, setter, min, max, unit }) => (
           <motion.div
             key={label}
@@ -78,8 +78,8 @@ export function ROICalculator() {
 
       {/* Output cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-        <AnimatedStat label="Monthly meeting cost" value={meetingCost} prefix="₪" icon={DollarSign} color="text-danger" delay={0} />
-        <AnimatedStat label="Monthly savings with DevPulse" value={savings} prefix="₪" icon={TrendingUp} color="text-success" delay={0.05} />
+        <AnimatedStat label="Monthly meeting cost" value={meetingCost} prefix="$" icon={DollarSign} color="text-danger" delay={0} />
+        <AnimatedStat label="Monthly savings with DevPulse" value={savings} prefix="$" icon={TrendingUp} color="text-success" delay={0.05} />
         <AnimatedStat label="Pays for itself in" value={paybackWeeks} suffix=" weeks" icon={Calendar} color="text-accent" delay={0.1} />
         <AnimatedStat label="Annual ROI" value={annualROI} suffix="%" icon={Zap} color="text-warning" delay={0.15} />
       </div>
