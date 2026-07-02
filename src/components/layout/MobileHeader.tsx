@@ -2,11 +2,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { Bell, ChevronDown, Check } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import { useUser } from '../../context/UserContext'
 import { User } from '../../data/mockData'
 
 export function MobileHeader() {
   const { activeUser, setActiveUser, users } = useUser()
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -31,7 +33,10 @@ export function MobileHeader() {
       </div>
 
       <div className="flex items-center gap-3">
-        <button className="relative text-text-secondary">
+        <button
+          onClick={() => navigate('/today')}
+          className="relative text-text-secondary hover:text-text-primary transition-colors"
+        >
           <Bell size={18} />
           <span className="absolute -top-1 -right-1 w-2 h-2 bg-danger rounded-full pulse-red" />
         </button>
