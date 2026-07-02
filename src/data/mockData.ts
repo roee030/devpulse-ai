@@ -79,19 +79,19 @@ export interface BurndownDay {
 // ─── Burndown data ────────────────────────────────────────────────────────────
 export const sprintBurndown: BurndownDay[] = [
   { day: 1,  ideal: 84, actual: 84,   predicted: null },
-  { day: 2,  ideal: 78, actual: 80,   predicted: null },
-  { day: 3,  ideal: 72, actual: 75,   predicted: null },
-  { day: 4,  ideal: 66, actual: 71,   predicted: null },
-  { day: 5,  ideal: 60, actual: 67,   predicted: null },
-  { day: 6,  ideal: 54, actual: 62,   predicted: null },
-  { day: 7,  ideal: 48, actual: 58,   predicted: null },
-  { day: 8,  ideal: 42, actual: 55,   predicted: null },
-  { day: 9,  ideal: 36, actual: 51,   predicted: null },
-  { day: 10, ideal: 30, actual: null,  predicted: 48 },
-  { day: 11, ideal: 24, actual: null,  predicted: 44 },
-  { day: 12, ideal: 18, actual: null,  predicted: 40 },
-  { day: 13, ideal: 12, actual: null,  predicted: 35 },
-  { day: 14, ideal: 0,  actual: null,  predicted: 26 },
+  { day: 2,  ideal: 78, actual: 81,   predicted: null },
+  { day: 3,  ideal: 72, actual: 76,   predicted: null },
+  { day: 4,  ideal: 66, actual: 72,   predicted: null },
+  { day: 5,  ideal: 60, actual: 68,   predicted: null },
+  { day: 6,  ideal: 54, actual: 63,   predicted: null },
+  { day: 7,  ideal: 48, actual: null,  predicted: 58 },
+  { day: 8,  ideal: 42, actual: null,  predicted: 54 },
+  { day: 9,  ideal: 36, actual: null,  predicted: 49 },
+  { day: 10, ideal: 30, actual: null,  predicted: 44 },
+  { day: 11, ideal: 24, actual: null,  predicted: 39 },
+  { day: 12, ideal: 18, actual: null,  predicted: 34 },
+  { day: 13, ideal: 12, actual: null,  predicted: 28 },
+  { day: 14, ideal: 0,  actual: null,  predicted: 23 },
 ]
 
 export const sprint = {
@@ -99,7 +99,7 @@ export const sprint = {
   startDate: '2026-06-26',
   endDate: '2026-07-10',
   totalPoints: 84,
-  completedPoints: 43,
+  completedPoints: 21,
   projectedPoints: 61,
   burndownData: sprintBurndown,
   topBlockers: [
