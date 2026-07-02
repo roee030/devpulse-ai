@@ -3,9 +3,9 @@ import { useEffect, useState, useMemo } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   Zap, LayoutDashboard, TrendingUp, User, AlertTriangle,
-  Calculator, Map, Calendar, Plug, Building2, Cpu, LayoutGrid,
+  Calculator, Map, Calendar, Plug, Building2, Cpu, LayoutGrid, X, Keyboard,
 } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useUnifiedData, IS_UNIFIED_LIVE } from '../../context/UnifiedDataContext'
 
 const navItems = [
@@ -29,6 +29,7 @@ const settingsItems = [
 export function Sidebar() {
   const navigate = useNavigate()
   const [awaitingSecond, setAwaitingSecond] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
   const unified = useUnifiedData()
 
   const sprintLabel = useMemo(() => {
@@ -54,6 +55,16 @@ export function Sidebar() {
       const tag = (e.target as HTMLElement).tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
 
+      if (e.key === 'Escape') {
+        setHelpOpen(false)
+        return
+      }
+
+      if (e.key === '?') {
+        setHelpOpen(v => !v)
+        return
+      }
+
       if (!awaitingSecond) {
         if (e.key === 'g' || e.key === 'G') {
           setAwaitingSecond(true)
@@ -67,7 +78,10 @@ export function Sidebar() {
 
       const key = e.key.toUpperCase()
       const match = navItems.find(n => n.shortcut === key)
-      if (match) navigate(match.path)
+      if (match) {
+        navigate(match.path)
+        setHelpOpen(false)
+      }
     }
 
     window.addEventListener('keydown', onKeyDown)
@@ -177,7 +191,72 @@ export function Sidebar() {
             transition={{ duration: 1, ease: 'easeOut', delay: 0.5 }}
           />
         </div>
+        <button
+          onClick={() => setHelpOpen(true)}
+          className="mt-3 flex items-center gap-1.5 text-text-secondary hover:text-text-primary transition-colors text-[11px]"
+        >
+          <Keyboard size={11} />
+          <span>Keyboard shortcuts</span>
+          <span className="ml-auto font-mono text-[9px] px-1 py-0.5 rounded border border-border bg-bg">?</span>
+        </button>
       </div>
+
+      {/* Keyboard shortcuts help modal */}
+      <AnimatePresence>
+        {helpOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setHelpOpen(false)}
+              className="fixed inset-0 bg-black z-50"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 bg-card border border-border rounded-2xl shadow-2xl z-50 overflow-hidden"
+            >
+              <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+                <div className="flex items-center gap-2">
+                  <Keyboard size={14} className="text-accent" />
+                  <span className="text-text-primary font-semibold text-sm">Keyboard Shortcuts</span>
+                </div>
+                <button onClick={() => setHelpOpen(false)} className="text-text-secondary hover:text-text-primary transition-colors">
+                  <X size={14} />
+                </button>
+              </div>
+              <div className="px-5 py-4 space-y-3">
+                <p className="text-text-secondary text-xs mb-3">Press <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded border border-border bg-bg text-text-primary">G</kbd> then a letter to jump to any page</p>
+                <div className="space-y-1">
+                  {navItems.filter(n => n.shortcut).map(({ label, shortcut }) => (
+                    <div key={shortcut} className="flex items-center justify-between py-1">
+                      <span className="text-text-secondary text-xs">{label}</span>
+                      <div className="flex items-center gap-1">
+                        <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded border border-border bg-bg text-text-primary">G</kbd>
+                        <span className="text-text-secondary text-[10px]">then</span>
+                        <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded border border-border bg-bg text-text-primary">{shortcut}</kbd>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t border-border pt-3 mt-3">
+                  <div className="flex items-center justify-between py-1">
+                    <span className="text-text-secondary text-xs">Show / hide this panel</span>
+                    <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded border border-border bg-bg text-text-primary">?</kbd>
+                  </div>
+                  <div className="flex items-center justify-between py-1">
+                    <span className="text-text-secondary text-xs">Dismiss</span>
+                    <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded border border-border bg-bg text-text-primary">Esc</kbd>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </aside>
   )
 }
