@@ -33,9 +33,13 @@ function pct(n: number, max: number) {
   return max === 0 ? 0 : Math.round((n / max) * 100)
 }
 
-type Period = '1d' | '7d' | '30d'
-const PERIOD_DAYS: Record<Period, number> = { '1d': 1, '7d': 7, '30d': 30 }
-const PERIOD_LABEL: Record<Period, string> = { '1d': 'Today', '7d': 'This week', '30d': 'This month' }
+type Period = '1d' | '7d' | '30d' | 'custom'
+const PERIOD_DAYS: Record<Exclude<Period, 'custom'>, number> = { '1d': 1, '7d': 7, '30d': 30 }
+const PERIOD_LABEL: Record<Period, string> = { '1d': 'Today', '7d': 'This week', '30d': 'This month', custom: 'Custom' }
+
+function isoDate(d: Date) {
+  return d.toISOString().slice(0, 10)
+}
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
@@ -139,13 +143,15 @@ export function AIEffort() {
   const { visibleDevelopers, activeUser } = useUser()
   const { enrichedTasks } = useUnifiedData()
 
-  const [events,   setEvents]   = useState<AIEffortEvent[]>([])
-  const [isLive,   setIsLive]   = useState(false)
-  const [agentOn,  setAgentOn]  = useState(false)
-  const [period,   setPeriod]   = useState<Period>('7d')
-  const [view,     setView]     = useState<'developers' | 'tasks'>('developers')
-  const [loading,  setLoading]  = useState(true)
-  const [lastSync, setLastSync] = useState<Date | null>(null)
+  const [events,      setEvents]      = useState<AIEffortEvent[]>([])
+  const [isLive,      setIsLive]      = useState(false)
+  const [agentOn,     setAgentOn]     = useState(false)
+  const [period,      setPeriod]      = useState<Period>('7d')
+  const [customStart, setCustomStart] = useState(() => isoDate(new Date(Date.now() - 30 * 86_400_000)))
+  const [customEnd,   setCustomEnd]   = useState(() => isoDate(new Date()))
+  const [view,        setView]        = useState<'developers' | 'tasks'>('developers')
+  const [loading,     setLoading]     = useState(true)
+  const [lastSync,    setLastSync]    = useState<Date | null>(null)
 
   const teamNames = visibleDevelopers.map(d => d.name)
   // Use real task keys from Jira/Linear when available
@@ -155,11 +161,23 @@ export function AIEffort() {
   )
 
   async function loadData() {
+    const sinceDate = period === 'custom'
+      ? new Date(customStart)
+      : new Date(Date.now() - PERIOD_DAYS[period] * 86_400_000)
+    const endDate = period === 'custom'
+      ? new Date(customEnd + 'T23:59:59')
+      : new Date()
+
     // 1. Try Firebase (real shared data)
     try {
-      const fbEvents = await fetchTeamEvents('devpulse', PERIOD_DAYS[period])
-      if (fbEvents.length > 0) {
-        setEvents(fbEvents)
+      const daysBack = Math.ceil((endDate.getTime() - sinceDate.getTime()) / 86_400_000)
+      const fbEvents = await fetchTeamEvents('devpulse', daysBack)
+      const inRange = fbEvents.filter(e => {
+        const t = new Date(e.timestamp).getTime()
+        return t >= sinceDate.getTime() && t <= endDate.getTime()
+      })
+      if (inRange.length > 0) {
+        setEvents(inRange)
         setIsLive(true)
         setLastSync(new Date())
         return
@@ -173,10 +191,10 @@ export function AIEffort() {
         const d = await r.json()
         if ((d.events?.length ?? 0) > 0) {
           setAgentOn(true)
-          const since = Date.now() - PERIOD_DAYS[period] * 86_400_000
-          setEvents((d.events as AIEffortEvent[]).filter(
-            e => new Date(e.timestamp).getTime() > since
-          ))
+          setEvents((d.events as AIEffortEvent[]).filter(e => {
+            const t = new Date(e.timestamp).getTime()
+            return t >= sinceDate.getTime() && t <= endDate.getTime()
+          }))
           setLastSync(new Date())
           return
         }
@@ -192,7 +210,7 @@ export function AIEffort() {
   useEffect(() => {
     setLoading(true)
     loadData().finally(() => setLoading(false))
-  }, [period, visibleDevelopers.length, realTaskKeys.length])
+  }, [period, customStart, customEnd, visibleDevelopers.length, realTaskKeys.length])
 
   useEffect(() => {
     const id = setInterval(loadData, 15_000)
@@ -234,7 +252,7 @@ export function AIEffort() {
     const blob = new Blob([csv], { type: 'text/csv' })
     const a = Object.assign(document.createElement('a'), {
       href: URL.createObjectURL(blob),
-      download: `ai-effort-${view}-${period}-${new Date().toISOString().slice(0, 10)}.csv`,
+      download: `ai-effort-${view}-${period === 'custom' ? `${customStart}_${customEnd}` : period}-${isoDate(new Date())}.csv`,
     })
     a.click()
     URL.revokeObjectURL(a.href)
@@ -256,9 +274,9 @@ export function AIEffort() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Period selector */}
-          {(['1d', '7d', '30d'] as Period[]).map(p => (
+          {(['1d', '7d', '30d', 'custom'] as Period[]).map(p => (
             <button
               key={p}
               onClick={() => setPeriod(p)}
@@ -271,6 +289,26 @@ export function AIEffort() {
               {PERIOD_LABEL[p]}
             </button>
           ))}
+          {period === 'custom' && (
+            <>
+              <input
+                type="date"
+                value={customStart}
+                max={customEnd}
+                onChange={e => setCustomStart(e.target.value)}
+                className="text-xs px-2 py-1.5 rounded-lg bg-card border border-border text-text-primary focus:outline-none focus:border-accent"
+              />
+              <span className="text-text-secondary text-xs">→</span>
+              <input
+                type="date"
+                value={customEnd}
+                min={customStart}
+                max={isoDate(new Date())}
+                onChange={e => setCustomEnd(e.target.value)}
+                className="text-xs px-2 py-1.5 rounded-lg bg-card border border-border text-text-primary focus:outline-none focus:border-accent"
+              />
+            </>
+          )}
 
           {/* Status + refresh */}
           <div className="flex items-center gap-1.5 ml-1">
