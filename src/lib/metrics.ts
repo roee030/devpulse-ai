@@ -3,7 +3,7 @@
 // No side effects — safe to call in useMemo or state setters.
 // Uses structural (duck-typed) interfaces to avoid circular imports with UnifiedDataContext.
 
-import type { Team, Division, BurndownDay, QuarterSummary } from '../data/mockData'
+import type { Team, Division, BurndownDay, QuarterSummary, Epic, EpicStatus, RippleCard } from '../data/mockData'
 
 // ── Minimal structural interfaces (avoid circular deps) ───────────────────────
 
@@ -235,6 +235,79 @@ export function computeAnnualMetrics(
   })
 
   return { quarterSummaries, monthlyVelocity }
+}
+
+// ── Ripple chain computation ──────────────────────────────────────────────────
+
+function weekToQuarter(week: number): string {
+  if (week <= 13) return 'Q1'
+  if (week <= 26) return 'Q2'
+  if (week <= 39) return 'Q3'
+  return 'Q4'
+}
+
+function weekToTimeframe(week: number): string {
+  const year = new Date().getFullYear()
+  const d = new Date(year, 0, 1 + (week - 1) * 7)
+  return d.toLocaleString('en-US', { month: 'short', year: 'numeric' })
+}
+
+export function computeRippleChains(
+  allEpics: Epic[],
+  liveStatusMap?: Map<string, EpicStatus>,
+): Map<string, RippleCard[]> {
+  const epicById = new Map(allEpics.map(e => [e.id, e]))
+
+  // Build reverse adjacency: epicId → IDs of epics that depend on it
+  const dependents = new Map<string, string[]>()
+  for (const epic of allEpics) {
+    for (const dep of epic.dependsOn ?? []) {
+      if (!dependents.has(dep)) dependents.set(dep, [])
+      dependents.get(dep)!.push(epic.id)
+    }
+  }
+
+  const result = new Map<string, RippleCard[]>()
+
+  for (const epic of allEpics) {
+    const status = liveStatusMap?.get(epic.id) ?? epic.status
+    if (status !== 'at-risk' && status !== 'delayed') continue
+
+    const chain: RippleCard[] = []
+    // BFS starting one level above so direct dependents land at depth 0
+    const queue: { id: string; depth: number; parentId: string }[] = [
+      { id: epic.id, depth: -1, parentId: epic.id },
+    ]
+    const visited = new Set<string>([epic.id])
+
+    while (queue.length > 0) {
+      const { id, depth, parentId } = queue.shift()!
+      for (const depId of dependents.get(id) ?? []) {
+        if (visited.has(depId)) continue
+        visited.add(depId)
+        const dep = epicById.get(depId)
+        if (!dep) continue
+        const newDepth = depth + 1
+        const severity: RippleCard['severity'] = newDepth === 0 ? 'danger' : newDepth === 1 ? 'warn' : 'business'
+        const parent = epicById.get(parentId)!
+        chain.push({
+          id: `r-${epic.id}-${dep.id}`,
+          quarter: weekToQuarter(dep.startWeek),
+          timeframe: weekToTimeframe(dep.startWeek),
+          title: `${dep.title} ${newDepth === 0 ? 'blocked' : 'at risk'}`,
+          consequence: newDepth === 0
+            ? `${dep.title} (${dep.owner}) has a hard dependency on ${epic.title} — cannot ship until unblocked`
+            : `Delay cascades: ${epic.title} → ${parent.title} → ${dep.title} (${dep.owner}) timeline slips`,
+          severity,
+        })
+        queue.push({ id: depId, depth: newDepth, parentId: depId })
+      }
+    }
+
+    if (chain.length > 0) result.set(epic.id, chain)
+  }
+
+  return result
 }
 
 // ── Epics status map ──────────────────────────────────────────────────────────

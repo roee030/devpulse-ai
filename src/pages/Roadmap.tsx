@@ -2,11 +2,10 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Map, AlertTriangle, ArrowDown, X } from 'lucide-react'
-import { epics, Epic, RippleCard as RippleCardType } from '../data/mockData'
-import type { EpicStatus } from '../data/mockData'
+import { epics, Epic, RippleCard as RippleCardType, EpicStatus } from '../data/mockData'
 import { AiInsightCard } from '../components/ui/AiInsightCard'
 import { useUnifiedData } from '../context/UnifiedDataContext'
-import { computeEpicStatusMap } from '../lib/metrics'
+import { computeEpicStatusMap, computeRippleChains } from '../lib/metrics'
 import { computeRoadmapInsight } from '../lib/insights'
 
 const TOTAL_WEEKS = 52
@@ -82,9 +81,17 @@ export function Roadmap() {
   const [selected, setSelected] = useState<Epic | null>(null)
 
   // Overlay live epic statuses from real tasks when connected
-  const liveStatusMap = isLive ? computeEpicStatusMap(enrichedTasks) : null
+  const liveStatusMap = useMemo(
+    () => isLive ? computeEpicStatusMap(enrichedTasks) : undefined,
+    [isLive, enrichedTasks],
+  )
   const getEpicStatus = (epic: Epic): EpicStatus =>
     (liveStatusMap?.get(epic.id) as EpicStatus | undefined) ?? epic.status
+
+  const rippleChainMap = useMemo(
+    () => computeRippleChains(epics, liveStatusMap),
+    [liveStatusMap],
+  )
 
   const atRiskEpics = useMemo(() => epics.filter(e => {
     const s = getEpicStatus(e)
@@ -171,7 +178,8 @@ export function Roadmap() {
                 const widthPct = ((epic.endWeek - epic.startWeek + 1) / TOTAL_WEEKS) * 100
                 const epicStatus = getEpicStatus(epic)
                 const styles = STATUS_STYLES[epicStatus as keyof typeof STATUS_STYLES]
-                const hasRipple = !!(epic.rippleChain?.length)
+                const rippleChain = rippleChainMap.get(epic.id)
+                const hasRipple = !!(rippleChain?.length)
                 return (
                   <motion.div
                     key={epic.id}
@@ -281,7 +289,7 @@ export function Roadmap() {
                       If this slips further…
                     </span>
                   </div>
-                  {selected.rippleChain && <RippleChainPanel chain={selected.rippleChain} />}
+                  {rippleChainMap.get(selected.id) && <RippleChainPanel chain={rippleChainMap.get(selected.id)!} />}
                 </div>
               </div>
             </motion.div>

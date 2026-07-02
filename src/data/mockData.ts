@@ -601,7 +601,7 @@ export interface Epic {
   status: EpicStatus
   category: string
   description: string
-  rippleChain?: RippleCard[]
+  dependsOn?: string[]
 }
 
 export const epics: Epic[] = [
@@ -619,25 +619,19 @@ export const epics: Epic[] = [
     id: 'epic-3', title: 'Payment Gateway Integration', owner: 'Michal Stern', teamId: 'team-backend',
     startWeek: 8, endWeek: 26, status: 'at-risk', category: 'Platform',
     description: 'Stripe integration with 3DS2 support',
-    rippleChain: [
-      { id: 'r1', quarter: 'Q2', timeframe: 'Now',      title: 'Payment Gateway delayed 3 weeks',  consequence: 'Auth bug blocking core payment flow — unresolved since Sprint 22', severity: 'danger' },
-      { id: 'r2', quarter: 'Q3', timeframe: 'Aug 2026', title: 'Enterprise Tier launch blocked',    consequence: 'Payment is a hard dependency — Enterprise pricing tiers cannot ship without it', severity: 'warn' },
-      { id: 'r3', quarter: 'Q4', timeframe: 'Nov 2026', title: 'Enterprise GA at risk',             consequence: 'Sales team committed Q4 pipeline to Enterprise customers. Delay = missed quota.', severity: 'business' },
-    ],
+    dependsOn: ['epic-1'],
   },
   {
     id: 'epic-4', title: 'Mobile Auth & Biometrics', owner: 'Tom Levi', teamId: 'team-mobile',
     startWeek: 10, endWeek: 24, status: 'at-risk', category: 'Product',
     description: 'Face ID / fingerprint login for iOS and Android',
-    rippleChain: [
-      { id: 'r4', quarter: 'Q2', timeframe: 'Now',      title: 'Android auth token blocked',   consequence: 'Ofer Ben-David blocked 3 days — no commits. Android biometrics cannot proceed.', severity: 'danger' },
-      { id: 'r5', quarter: 'Q3', timeframe: 'Aug 2026', title: 'Mobile v2.0 launch delayed',   consequence: 'Biometrics was anchor feature of v2.0. Release pushed to Sep at earliest.', severity: 'warn' },
-    ],
+    dependsOn: ['epic-1'],
   },
   {
     id: 'epic-5', title: 'Developer Portal v1', owner: 'Yael Katz', teamId: 'team-frontend',
     startWeek: 14, endWeek: 26, status: 'on-track', category: 'Product',
     description: 'API documentation and sandbox environment',
+    dependsOn: ['epic-2'],
   },
   {
     id: 'epic-6', title: 'ML Churn Prediction', owner: 'Paz Gonen', teamId: 'team-ml',
@@ -648,31 +642,37 @@ export const epics: Epic[] = [
     id: 'epic-7', title: 'Enterprise Tier Features', owner: 'Roi Friedman', teamId: 'team-backend',
     startWeek: 27, endWeek: 35, status: 'on-track', category: 'Platform',
     description: 'SSO, audit logs, advanced permissions, SLA tiers',
+    dependsOn: ['epic-3'],
   },
   {
     id: 'epic-8', title: 'API v2 — Public Platform', owner: 'Avi Shapiro', teamId: 'team-backend',
     startWeek: 27, endWeek: 39, status: 'on-track', category: 'Platform',
     description: 'Versioned public API with GraphQL support',
+    dependsOn: ['epic-5'],
   },
   {
     id: 'epic-9', title: 'Mobile v2.0 Launch', owner: 'Tom Levi', teamId: 'team-mobile',
     startWeek: 30, endWeek: 38, status: 'on-track', category: 'Product',
     description: 'Full rewrite with biometrics and native payment',
+    dependsOn: ['epic-4', 'epic-3'],
   },
   {
     id: 'epic-10', title: 'Data Platform v2', owner: 'Shira Goldberg', teamId: 'team-data-eng',
     startWeek: 35, endWeek: 50, status: 'on-track', category: 'Data',
     description: 'Real-time streaming + self-serve analytics',
+    dependsOn: ['epic-6'],
   },
   {
     id: 'epic-11', title: 'Enterprise GA Launch', owner: 'Lior Ben-David', teamId: 'team-backend',
     startWeek: 40, endWeek: 48, status: 'on-track', category: 'Business',
     description: 'GA of Enterprise tier with sales enablement',
+    dependsOn: ['epic-7', 'epic-3'],
   },
   {
     id: 'epic-12', title: 'Platform Observability', owner: 'Dana Mizrahi', teamId: 'team-infra',
     startWeek: 40, endWeek: 52, status: 'on-track', category: 'Infrastructure',
     description: 'OpenTelemetry, distributed tracing, SLO dashboards',
+    dependsOn: ['epic-2'],
   },
 ]
 
