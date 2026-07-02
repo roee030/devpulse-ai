@@ -132,11 +132,15 @@ export function AnnualView() {
   const insightText = useMemo(() => {
     const q1 = quarterSummaries[0]
     const q2 = quarterSummaries[1]
+    if (!q1 || !q2) return ''
     const pct1 = Math.round((q1.deliveredPoints / q1.totalPoints) * 100)
     const pct2 = Math.round((q2.deliveredPoints / q2.totalPoints) * 100)
     const avg = Math.round((pct1 + pct2) / 2)
-    return `Q1 delivered at ${pct1}% capacity. Q2 is at ${pct2}% with 2 at-risk epics. At current trajectory the team delivers ~${avg}% of annual commitments — unblocking Payment Gateway now protects Q3 enterprise goals.`
-  }, [])
+    const atRisk = quarterSummaries.reduce((n, q) =>
+      n + q.initiatives.filter(i => i.status === 'at-risk').length, 0)
+    const blocker = atRisk > 0 ? `Unblocking at-risk initiatives now protects Q3 enterprise goals.` : `Team is tracking to hit annual targets.`
+    return `Q1 delivered at ${pct1}% capacity. Q2 is at ${pct2}% with ${atRisk} at-risk epic${atRisk !== 1 ? 's' : ''}. At current trajectory the team delivers ~${avg}% of annual commitments — ${blocker}`
+  }, [quarterSummaries])
 
   return (
     <div>

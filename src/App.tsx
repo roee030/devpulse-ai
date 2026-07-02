@@ -1,5 +1,5 @@
 // src/App.tsx
-import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -61,6 +61,7 @@ function AnimatedRoutes() {
           <Route path="/settings/integrations" element={<IntegrationsPage />} />
           <Route path="/settings/company"      element={<CompanyPage />} />
           <Route path="/simulate"              element={<Simulate />} />
+          <Route path="*"                      element={<Navigate to="/" replace />} />
         </Routes>
       </motion.div>
     </AnimatePresence>
