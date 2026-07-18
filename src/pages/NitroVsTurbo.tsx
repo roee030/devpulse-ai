@@ -10,6 +10,7 @@ import {
   Wrench, Wand2, TerminalSquare, CheckCircle2, XCircle,
 } from 'lucide-react'
 import { useCountUp } from '../hooks/useCountUp'
+import { BridgeStressTestSimulator } from '../components/nitro/BridgeStressTestSimulator'
 
 /* ------------------------------------------------------------------ */
 /*  Tiny, dependency-free syntax highlighter (caveman-simple).        */
@@ -295,6 +296,11 @@ export function NitroVsTurbo() {
           <div className="text-xs text-text-secondary mb-3">Relative throughput — reads/sec, log-free view</div>
           <SpeedRow label="TurboModule" width={1} tone="bg-danger" value="1×" />
           <SpeedRow label="Nitro Modules" width={100} tone="bg-success" value="94×" />
+        </div>
+
+        {/* Live interactive simulator */}
+        <div className="mt-10">
+          <BridgeStressTestSimulator />
         </div>
 
         {/* Side-by-side code */}
