@@ -22,6 +22,7 @@ import { CompanyPage } from './pages/Settings/CompanyPage'
 import { Simulate } from './pages/Simulate'
 import { AIEffort } from './pages/AIEffort'
 import { TasksIntel } from './pages/TasksIntel'
+import { NitroVsTurbo } from './pages/NitroVsTurbo'
 
 const pageVariants = {
   initial: { opacity: 0, y: 16 },
@@ -71,10 +72,14 @@ function AnimatedRoutes() {
 const LS_ONBOARDED = 'devpulse-onboarded'
 
 function AppContent() {
+  const { pathname } = useLocation()
   const { isLoggedIn, isAuthLoading } = useAuth()
   const [isOnboarded, setIsOnboarded] = useState<boolean>(() =>
     !!localStorage.getItem(LS_ONBOARDED)
   )
+
+  // Public demo route — architecture blueprint, no auth required.
+  if (pathname === '/nitro') return <NitroVsTurbo />
 
   if (isAuthLoading) {
     return (
