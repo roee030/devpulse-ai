@@ -1,0 +1,33 @@
+name: Travel Watch - Hotels
+
+on:
+  schedule:
+    # 08:00 Asia/Jerusalem ≈ 05:00 UTC (Israel DST is UTC+3 most of the year; adjust ±1h
+    # around DST transitions if exact timing matters).
+    - cron: '0 5 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  run-hotels-watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: travel-watch-bots
+        run: npm install --omit=dev
+
+      - name: Run hotels watch
+        working-directory: travel-watch-bots
+        env:
+          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          USE_LLM_SUMMARY: ${{ vars.USE_LLM_SUMMARY || 'false' }}
+          RUN_MODE: once
+        run: npm run start:hotels

@@ -1,0 +1,18 @@
+{
+  "name": "travel-watch-bots",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Two independent Telegram travel-watch bots: flights (SerpApi google_flights) and hotels (SerpApi google_hotels).",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start:flights": "node flights/index.js",
+    "start:hotels": "node hotels/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "node-cron": "^3.0.3"
+  }
+}
