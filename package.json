@@ -11,6 +11,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "agent": "tsx agent/devpulse-agent.ts",
+    "agent:face": "node scripts/agent-face-tui.js",
     "deploy:rules": "firebase deploy --only firestore:rules,firestore:indexes",
     "secrets": "bash scripts/push-github-secrets.sh"
   },
