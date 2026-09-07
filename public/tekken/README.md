@@ -1,0 +1,47 @@
+# Iron Fist Legends
+
+A Tekken-style 2D fighting game that runs entirely in the browser. No server, no build step,
+no external assets: every character, arena, sound effect, voice and rock track is generated
+procedurally with Canvas 2D and the Web Audio API.
+
+Open `index.html` directly, or when the DevPulse site is deployed it is served at `/devpulse-ai/tekken/`.
+
+## What is in it
+
+- **20 playable fighters**, each with a unique fighting style (Karate, Muay Thai, Boxing, Capoeira,
+  Taekwondo, Savate, Lucha Libre, Cyber Combat, Ninjutsu, Wing Chun, Sumo, Sambo, Krav Maga, Kendo,
+  Drunken Fist, Street Brawler, Alien Psionics, Dambe, Berserker, Aikido) plus the final boss
+  **Gormoth, the Iron Ogre**.
+- Each style has its own stats, 6 moves and a SUPER, a hit-spark colour, and a synthesized voice
+  (grunts, hurt sounds, KO cries and spoken quotes via the browser's speech synthesis).
+- Move types: normals, projectiles, dashes, launchers, multi-hit chains, spins, command grabs,
+  counters, teleports and cinematic supers.
+- **8 arenas**, each with its own procedural rock track (different tempo, key, riff and drums).
+- **Arcade mode**: a ladder of 7 opponents with rising difficulty, then the boss on the Shadow Realm
+  stage. Continues are limited; clears and best times are saved in `localStorage`.
+- **Versus CPU** and **Versus 2P** (two players on one keyboard, or two gamepads).
+- Fighters gallery with move lists and live move previews, options and a controls screen.
+- Menu placeholders for **Online Match** and **Create Fighter** (photo upload + style pick),
+  which are planned for a later phase that needs a server.
+
+## Controls
+
+| Action | Player 1 | Player 2 |
+| --- | --- | --- |
+| Move / jump / crouch | W A S D | Arrow keys |
+| Light / heavy punch | J / K | , / . (or Numpad 1 / 2) |
+| Light / heavy kick | U / I | N / M (or Numpad 4 / 5) |
+| Special 1 / Special 2 | L / S+L | / and Down+/ (or Numpad 3) |
+| Super (full meter) | ; | Right Shift (or Numpad 0) |
+| Block | hold back (down+back for lows) | hold back |
+| Pause / back | Esc | Esc |
+
+Gamepads use the standard layout: X/Y punches, A/B kicks, LB special, RB super.
+
+## Code layout
+
+- `js/data.js` - move library, the 20 styles, 21 characters, arenas and music tracks.
+- `js/audio.js` - Web Audio engine: distorted power-chord guitar, bass, lead, drums, SFX and voices.
+- `js/render.js` - skeletal pose system, fighter and head drawing, procedural arenas, text helpers.
+- `js/fighter.js` - fighter state machine, hit boxes, projectiles, grabs/counters/teleports and CPU AI.
+- `js/game.js` - screens, input (keyboard + gamepad), fight orchestration, camera, HUD and effects.

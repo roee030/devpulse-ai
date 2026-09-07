@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iron Fist Legends</title>
+<style>
+  html,body{margin:0;padding:0;background:#000;height:100%;overflow:hidden;font-family:Impact,"Arial Black",sans-serif;}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000;}
+  canvas{display:block;image-rendering:auto;}
+  #hint{position:fixed;left:0;right:0;bottom:8px;text-align:center;color:#666;font:12px Arial,sans-serif;pointer-events:none;}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="c" width="1280" height="720"></canvas></div>
+<div id="hint">P1: WASD move · J/K punch · U/I kick · L special · ; super &nbsp;|&nbsp; P2: Arrows · , . punch · N M kick · / special · Right-Shift super &nbsp;|&nbsp; Enter confirm · Esc back/pause</div>
+<script src="js/data.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/render.js"></script>
+<script src="js/fighter.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
