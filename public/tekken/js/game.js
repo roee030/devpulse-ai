@@ -2,7 +2,102 @@
 'use strict';
 
 const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
-function fitCanvas() { const s = Math.min(window.innerWidth / W, (window.innerHeight - 30) / H); canvas.style.width = Math.floor(W * s) + 'px'; canvas.style.height = Math.floor(H * s) + 'px'; }
+function fitCanvas() { const pad = Touch.enabled ? 0 : 30; const s = Math.min(window.innerWidth / W, (window.innerHeight - pad) / H); canvas.style.width = Math.floor(W * s) + 'px'; canvas.style.height = Math.floor(H * s) + 'px'; }
+
+// ---------- Touch controls (phones / tablets) ----------
+const Touch = {
+  enabled: false, touches: new Map(), stick: null, btnState: {}, prevBtn: {}, tap: null, stickHome: { x: 180, y: 560 }, stickR: 95, knobR: 60,
+  buttons: [
+    { id: 'lp', x: 1000, y: 520, r: 44, label: 'P', col: '#ff8a3c' }, { id: 'hp', x: 1092, y: 466, r: 44, label: 'P+', col: '#ff5c33' },
+    { id: 'lk', x: 1000, y: 626, r: 44, label: 'K', col: '#4da6ff' }, { id: 'hk', x: 1092, y: 572, r: 44, label: 'K+', col: '#3d7dff' },
+    { id: 'sp', x: 1190, y: 500, r: 44, label: 'SP', col: '#c840ff' }, { id: 'sup', x: 1190, y: 610, r: 44, label: '\u2605', col: '#ffd040' },
+    { id: 'pause', x: 1236, y: 42, r: 26, label: 'II', col: '#ddd' }, { id: 'full', x: 1176, y: 42, r: 26, label: '\u2922', col: '#ddd' },
+  ],
+  detect() {
+    const coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+    if ((('ontouchstart' in window) || navigator.maxTouchPoints > 0) && coarse) this.enable();
+  },
+  enable() { if (this.enabled) return; this.enabled = true; document.body.classList.add('touch'); fitCanvas(); },
+  pos(t) { const r = canvas.getBoundingClientRect(); return { x: (t.clientX - r.left) * W / r.width, y: (t.clientY - r.top) * H / r.height }; },
+  inStickZone(p) {
+    const fighting = Game.screen === 'fight' && !Game.paused;
+    if (fighting) return p.x < W * 0.5 && p.y > 150;
+    return Math.hypot(p.x - this.stickHome.x, p.y - this.stickHome.y) <= this.stickR + 30;
+  },
+  hitButton(p) { for (const b of this.buttons) if (Math.hypot(p.x - b.x, p.y - b.y) <= b.r + 10) return b.id; return null; },
+  start(e) {
+    this.enable(); AudioSys.init(); AudioSys.resume();
+    for (const t of e.changedTouches) {
+      const p = this.pos(t); const b = this.hitButton(p);
+      if (b) { this.touches.set(t.identifier, { kind: 'btn', id: b }); if (b === 'full') this.fullscreen(); }
+      else if (!this.stick && this.inStickZone(p)) { this.stick = { id: t.identifier, ox: p.x, oy: p.y, x: p.x, y: p.y }; this.touches.set(t.identifier, { kind: 'stick' }); }
+      else { this.touches.set(t.identifier, { kind: 'tap' }); this.tap = p; }
+    }
+  },
+  move(e) {
+    for (const t of e.changedTouches) {
+      const rec = this.touches.get(t.identifier); if (!rec) continue; const p = this.pos(t);
+      if (rec.kind === 'stick' && this.stick) { this.stick.x = p.x; this.stick.y = p.y; }
+      else if (rec.kind === 'btn') { const b = this.hitButton(p); if (b !== rec.id && b !== 'full' && b !== 'pause') rec.id = b; }
+    }
+  },
+  end(e) {
+    for (const t of e.changedTouches) { const rec = this.touches.get(t.identifier); if (rec && rec.kind === 'stick') this.stick = null; this.touches.delete(t.identifier); }
+  },
+  fullscreen() {
+    const el = document.documentElement;
+    try { if (!document.fullscreenElement) { (el.requestFullscreen || el.webkitRequestFullscreen).call(el); if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {}); } else (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (err) {}
+  },
+  dir() {
+    const d = { left: false, right: false, up: false, down: false }; const s = this.stick; if (!s) return d;
+    let dx = s.x - s.ox, dy = s.y - s.oy; const L = Math.hypot(dx, dy); if (L < 16) return d;
+    const a = Math.atan2(dy, dx); // 8-way with generous diagonals
+    if (Math.abs(Math.cos(a)) > 0.38) { if (dx > 0) d.right = true; else d.left = true; }
+    if (Math.abs(Math.sin(a)) > 0.38) { if (dy > 0) d.down = true; else d.up = true; }
+    return d;
+  },
+  input() {
+    const inp = emptyInput(); if (!this.enabled) return inp;
+    Object.assign(inp, this.dir());
+    const st = {}; for (const rec of this.touches.values()) if (rec.kind === 'btn' && rec.id) st[rec.id] = true;
+    for (const k of ['lp', 'hp', 'lk', 'hk', 'sp', 'sup']) inp[k] = !!st[k];
+    this.btnState = st; return inp;
+  },
+  // turn stick/button edges into synthetic key edges so menus work with touch
+  emitEdges() {
+    if (!this.enabled) return;
+    const d = this.dir(); const cur = Object.assign({}, this.btnState, d);
+    const fighting = Game.screen === 'fight' && !Game.paused;
+    const map = fighting ? { pause: 'Escape' } : { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', lp: 'Enter', lk: 'Enter', hp: 'Escape', hk: 'Escape', pause: 'Escape', sp: 'KeyR' };
+    for (const k in map) if (cur[k] && !this.prevBtn[k]) keyEdges.push(map[k]);
+    this.prevBtn = cur;
+  },
+  takeTap() { const t = this.tap; this.tap = null; return t; },
+  draw(ctx, fighting) {
+    if (!this.enabled) return;
+    ctx.save(); ctx.lineWidth = 3;
+    // stick
+    const s = this.stick, hx = s ? s.ox : this.stickHome.x, hy = s ? s.oy : this.stickHome.y;
+    ctx.globalAlpha = s ? 0.5 : 0.22; ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(hx, hy, this.stickR, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.stroke();
+    let kx = hx, ky = hy; if (s) { const dx = s.x - s.ox, dy = s.y - s.oy, L = Math.hypot(dx, dy), m = Math.min(L, this.knobR); if (L > 0) { kx = hx + dx / L * m; ky = hy + dy / L * m; } }
+    ctx.globalAlpha = s ? 0.85 : 0.35; ctx.fillStyle = '#ffb020'; ctx.beginPath(); ctx.arc(kx, ky, 36, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.stroke();
+    if (!s) { ctx.globalAlpha = 0.5; ctx.fillStyle = '#fff'; ctx.font = 'bold 22px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('\u25B2', hx, hy - 66); ctx.fillText('\u25BC', hx, hy + 66); ctx.fillText('\u25C0', hx - 66, hy); ctx.fillText('\u25B6', hx + 66, hy); }
+    // buttons
+    for (const b of this.buttons) {
+      if (!fighting && b.id !== 'pause' && b.id !== 'full' && b.id !== 'lp' && b.id !== 'hp') continue;
+      const on = !!this.btnState[b.id];
+      ctx.globalAlpha = on ? 0.9 : 0.4; ctx.fillStyle = on ? b.col : '#000'; ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = b.col; ctx.stroke();
+      ctx.globalAlpha = on ? 1 : 0.85; ctx.fillStyle = on ? '#000' : '#fff'; ctx.font = `bold ${b.r > 30 ? 24 : 18}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(fighting || b.r <= 30 ? b.label : (b.id === 'lp' ? 'OK' : 'BACK'), b.x, b.y + 1);
+    }
+    ctx.restore();
+  },
+};
+canvas.addEventListener('touchstart', e => { e.preventDefault(); Touch.start(e); }, { passive: false });
+canvas.addEventListener('touchmove', e => { e.preventDefault(); Touch.move(e); }, { passive: false });
+canvas.addEventListener('touchend', e => { e.preventDefault(); Touch.end(e); }, { passive: false });
+canvas.addEventListener('touchcancel', e => { e.preventDefault(); Touch.end(e); }, { passive: false });
+Touch.detect();
 window.addEventListener('resize', fitCanvas); fitCanvas();
 
 // ---------- Input ----------
@@ -27,6 +122,7 @@ function readInput(who) {
   const map = KEYMAP[who], inp = emptyInput();
   for (const k in map) inp[k] = map[k].some(c => keys[c]);
   const pad = readPad(who === 'p1' ? 0 : 1); if (pad) for (const k in inp) inp[k] = inp[k] || pad[k];
+  if (who === 'p1' && Touch.enabled) { const t = Touch.input(); for (const k in inp) inp[k] = inp[k] || t[k]; }
   return inp;
 }
 let menuEdgeQueue = [];
@@ -77,6 +173,7 @@ const Game = {
     if (this.fadeDir === 1) { this.fade = Math.min(1, this.fade + 0.08); if (this.fade >= 1) { this.screen = this.nextScreen; this.fadeDir = -1; this.enter(this.screen); } }
     else if (this.fadeDir === -1) { this.fade = Math.max(0, this.fade - 0.06); if (this.fade <= 0) this.fadeDir = 0; }
     if (this.fadeDir === 1) return;
+    if (Touch.enabled) { if (this.screen !== 'fight') Touch.input(); Touch.emitEdges(); this.handleTap(Touch.takeTap()); }
     const nav = menuKeys();
     const pe = padEdges(0), pe2 = padEdges(1);
     if (pe.up) nav.up = true; if (pe.down) nav.down = true; if (pe.left) nav.left = true; if (pe.right) nav.right = true; if (pe.lp || pe.lk || pe.sup) nav.ok = true; if (pe.hp || pe.hk) nav.back = true;
@@ -95,6 +192,21 @@ const Game = {
       case 'controls': if (nav.ok || nav.back) { AudioSys.sfx('back'); this.go('menu'); } break;
       case 'victory': case 'gameover': if (nav.ok || nav.back) { AudioSys.sfx('confirm'); this.go('menu'); } break;
     }
+  },
+  handleTap(p) {
+    if (!p) return;
+    const cols = 5, cw = 118, chh = 88, gx = W / 2 - cols * cw / 2, gy = 80;
+    if (this.screen === 'title') keyEdges.push('Enter');
+    else if (this.screen === 'menu') { const i = Math.round((p.y - 250) / 54); if (i >= 0 && i < this.menuItems.length && p.x < 700) { if (this.sel === i) keyEdges.push('Enter'); else { this.sel = i; AudioSys.sfx('move'); } } }
+    else if (this.screen === 'select') {
+      const cx = Math.floor((p.x - gx) / cw), cy = Math.floor((p.y - gy) / chh);
+      if (cx >= 0 && cx < cols && cy >= 0 && cy < 4) { const cur = this.mode === 'vs2p' && this.p1 ? this.cursor2 : (this.selPhase === 2 ? this.cursor2 : this.cursor); if (cur[0] === cx && cur[1] === cy) keyEdges.push('Enter'); else { cur[0] = cx; cur[1] = cy; AudioSys.sfx('move'); } }
+    }
+    else if (this.screen === 'stageselect') { const tw = 280, th = 158, gx2 = W / 2 - 4 * tw / 2 - 10, gy2 = 110; const cx = Math.floor((p.x - gx2) / (tw + 10)), cy = Math.floor((p.y - gy2) / (th + 50)); if (cx >= 0 && cx < 4 && cy >= 0 && cy < 2) { const i = cy * 4 + cx; if (this.selStage === i) keyEdges.push('Enter'); else { this.selStage = i; AudioSys.sfx('move'); } } }
+    else if (this.screen === 'ladder' || this.screen === 'result' || this.screen === 'victory' || this.screen === 'gameover' || this.screen === 'controls') keyEdges.push('Enter');
+    else if (this.screen === 'options') { const i = Math.round((p.y - 170) / 56); if (i >= 0 && i < 7) { this.sel = i; keyEdges.push(p.x < W / 2 ? 'KeyA' : 'KeyD'); } }
+    else if (this.screen === 'gallery') keyEdges.push(p.x < W / 2 ? 'KeyA' : 'KeyD');
+    else if (this.screen === 'fight' && this.paused) { const i = Math.round((p.y - 330) / 54); if (i >= 0 && i < 3) { this.pauseSel = i; keyEdges.push('Enter'); } }
   },
   enter(screen) {
     this.sel = 0;
@@ -391,6 +503,8 @@ const Game = {
       case 'gameover': this.drawGameOver(); break;
     }
     if (this.fade > 0) { ctx.fillStyle = `rgba(0,0,0,${this.fade})`; ctx.fillRect(0, 0, W, H); }
+    Touch.draw(ctx, this.screen === 'fight' && !this.paused);
+    if (Touch.enabled && window.innerHeight > window.innerWidth) { ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.fillRect(0, 0, W, 60); txt(ctx, 'Rotate your phone to landscape for the best experience', W / 2, 30, 22, '#ffd060', 'center', { font: 'Arial', weight: 'bold' }); }
     ctx.restore();
   },
   bgMenu(st) {
@@ -410,7 +524,7 @@ const Game = {
     const bob = Math.sin(this.t / 14) * 2;
     drawFighter(ctx, a, mergePose(P.idle, { hy: bob }), 300, 640, 1, 1.3); drawFighter(ctx, b, mergePose(P.idle, { hy: -bob }), 980, 640, -1, 1.3);
     this.logo(230, 120);
-    if (Math.floor(this.t / 30) % 2 === 0) txt(ctx, 'PRESS ENTER', W / 2, 520, 34, '#fff', 'center', { stroke: '#000' });
+    if (Math.floor(this.t / 30) % 2 === 0) txt(ctx, Touch.enabled ? 'TAP TO START' : 'PRESS ENTER', W / 2, 520, 34, '#fff', 'center', { stroke: '#000' });
     txt(ctx, '20 FIGHTING STYLES  ·  8 ARENAS  ·  ARCADE & VERSUS', W / 2, 580, 20, '#ddd', 'center', { font: 'Arial', weight: 'bold' });
     txt(ctx, 'Procedural rock soundtrack - turn your sound on', W / 2, 610, 16, '#aaa', 'center', { font: 'Arial' });
   },

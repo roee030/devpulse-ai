@@ -38,6 +38,10 @@ Open `index.html` directly, or when the DevPulse site is deployed it is served a
 
 Gamepads use the standard layout: X/Y punches, A/B kicks, LB special, RB super.
 
+**Phones and tablets** are detected automatically: a floating joystick appears on the left, six attack
+buttons (P, P+, K, K+, SP, super star) on the right, plus pause and fullscreen buttons. Menus accept
+direct taps (tap once to highlight, again to confirm) or joystick + OK/BACK. Landscape is recommended.
+
 ## Code layout
 
 - `js/data.js` - move library, the 20 styles, 21 characters, arenas and music tracks.
