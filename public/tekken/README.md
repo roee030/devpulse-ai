@@ -8,17 +8,22 @@ Open `index.html` directly, or when the DevPulse site is deployed it is served a
 
 ## What is in it
 
-- **20 playable fighters**, each with a unique fighting style (Karate, Muay Thai, Boxing, Capoeira,
-  Taekwondo, Savate, Lucha Libre, Cyber Combat, Ninjutsu, Wing Chun, Sumo, Sambo, Krav Maga, Kendo,
-  Drunken Fist, Street Brawler, Alien Psionics, Dambe, Berserker, Aikido) plus the final boss
-  **Gormoth, the Iron Ogre**.
+- **16 playable fighters** from the neon-arena concept sheet, each with a unique style, energy weapon and
+  body type: Pyros (magma golem), Vex Halden (laser filaments), Kade Frost (cryo), Dorian Ashe (crimson
+  plasma blade), Silas Echo (sonic), Thorn (plant tendrils), Kryll (four-armed insectoid), Jax Razor
+  (energy claws), Rook Sentinel (twin volt blades), Nyx Valen (twin neon blades), Brakkus Warden (plasma
+  hammer, arcade boss), Dez Pulse (kinetic fists), Ivo Bolt (lightspeed), Shade (void blades), Mira Synn
+  (psionics) and Mirage (hard-light clones).
 - Each style has its own stats, 6 moves and a SUPER, a hit-spark colour, and a synthesized voice
   (grunts, hurt sounds, KO cries and spoken quotes via the browser's speech synthesis).
-- Move types: normals, projectiles, dashes, launchers, multi-hit chains, spins, command grabs,
+- Move types: normals, projectiles (fireballs, ice shards, blade waves, nets, spike volleys, clones),
+  stationary eruptions and ground quakes, dashes, launchers, multi-hit chains, spins, command grabs,
   counters, teleports and cinematic supers.
+- Fighters are drawn procedurally: cel-shaded muscular bodies, faces, tactical suits with glowing seams,
+  energy blades, hammers, claws and threads, plus species bodies (lava cracks, tendrils, extra arms).
 - **8 arenas**, each with its own procedural rock track (different tempo, key, riff and drums).
-- **Arcade mode**: a ladder of 7 opponents with rising difficulty, then the boss on the Shadow Realm
-  stage. Continues are limited; clears and best times are saved in `localStorage`.
+- **Arcade mode**: a ladder of 7 opponents with rising difficulty, then the Siege Warden on the Shadow
+  Realm stage. Continues are limited; clears and best times are saved in `localStorage`.
 - **Versus CPU** and **Versus 2P** (two players on one keyboard, or two gamepads).
 - Fighters gallery with move lists and live move previews, options and a controls screen.
 - Menu placeholders for **Online Match** and **Create Fighter** (photo upload + style pick),

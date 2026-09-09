@@ -244,16 +244,30 @@ class Fighter {
 // ---------- Projectile ----------
 class Projectile {
   constructor(owner, m, big) {
-    const pr = owner.style.proj || { shape: 'ki', color: owner.style.fx, speed: 9, size: 26 };
+    const pr = (m.alt && owner.style.proj2) ? owner.style.proj2 : (owner.style.proj || { shape: 'ki', color: owner.style.fx, speed: 9, size: 26 });
     this.owner = owner; this.m = m; this.x = owner.x + owner.facing * 60; this.y = owner.feetY - 105 * owner.ch.body.h;
-    this.vx = owner.facing * pr.speed * (big ? 1.3 : 1); this.size = pr.size * (big ? 1.8 : 1); this.shape = pr.shape; this.color = pr.color; this.life = 140; this.dead = false; this.t = 0; this.big = big;
+    this.vx = owner.facing * (pr.speed || 0) * (big ? 1.3 : 1); this.size = pr.size * (big ? 1.8 : 1); this.shape = pr.shape; this.color = pr.color; this.life = 140; this.dead = false; this.t = 0; this.big = big;
+    this.stationary = !!pr.stationary; this.low = !!pr.low; this.tall = pr.shape === 'pillar';
+    if (this.stationary) { this.x = owner.x + owner.facing * pr.dist; this.vx = 0; this.life = pr.life; this.y = GROUND; this.maxLife = pr.life; }
+    this.facing = owner.facing;
   }
-  box() { return { x0: this.x - this.size, x1: this.x + this.size, y0: this.y - this.size, y1: this.y + this.size }; }
+  box() {
+    if (this.tall) return { x0: this.x - this.size * 0.7, x1: this.x + this.size * 0.7, y0: GROUND - 240, y1: GROUND };
+    if (this.low) return { x0: this.x - this.size, x1: this.x + this.size, y0: GROUND - 70, y1: GROUND };
+    return { x0: this.x - this.size, x1: this.x + this.size, y0: this.y - this.size, y1: this.y + this.size };
+  }
   update() { this.x += this.vx; this.t++; this.life--; if (this.life <= 0 || this.x < -100 || this.x > STAGE_W + 100) this.dead = true; }
   draw(ctx) {
     ctx.save(); ctx.translate(this.x, this.y); const s = this.size, c = this.color;
     ctx.shadowColor = c; ctx.shadowBlur = 25;
-    if (this.shape === 'shuriken') { ctx.rotate(this.t * 0.5); ctx.fillStyle = '#ddd'; for (let i = 0; i < 4; i++) { ctx.rotate(Math.PI / 2); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(s, -4); ctx.lineTo(s * 1.1, 4); ctx.fill(); } }
+    if (this.shape === 'pillar') { const k = Math.min(1, this.t / 6) * (this.life < 6 ? this.life / 6 : 1); ctx.globalAlpha = 0.9; for (let i = 0; i < 3; i++) { const g = ctx.createLinearGradient(0, 0, 0, -240 * k); g.addColorStop(0, c); g.addColorStop(0.6, '#ffd040'); g.addColorStop(1, c + '00'); ctx.fillStyle = g; const wv = s * (0.7 - i * 0.18); ctx.beginPath(); ctx.moveTo(-wv, 0); ctx.quadraticCurveTo(-wv * 0.4 + Math.sin(this.t / 2 + i) * 8, -120 * k, 0, -240 * k); ctx.quadraticCurveTo(wv * 0.4 + Math.cos(this.t / 2 + i) * 8, -120 * k, wv, 0); ctx.fill(); } ctx.fillStyle = '#ffd040'; ctx.beginPath(); ctx.ellipse(0, 0, s, 8, 0, 0, Math.PI * 2); ctx.fill(); }
+    else if (this.shape === 'quake') { ctx.globalAlpha = 0.85; ctx.strokeStyle = c; ctx.lineWidth = 6; for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(0, 0, s * 0.4 + i * 16 + (this.t % 4) * 3, Math.PI, Math.PI * 2); ctx.stroke(); } ctx.fillStyle = '#fff'; for (let i = 0; i < 6; i++) { ctx.fillRect(-s + i * s / 3 + (this.t * 3) % 10, -10 - (i % 3) * 12, 5, 10 + (i % 3) * 6); } }
+    else if (this.shape === 'net') { ctx.rotate(this.t * 0.08); ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, s, 0, Math.PI * 2); ctx.stroke(); for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * s, Math.sin(a) * s); ctx.stroke(); } ctx.beginPath(); ctx.arc(0, 0, s * 0.5, 0, Math.PI * 2); ctx.stroke(); }
+    else if (this.shape === 'ice') { ctx.rotate(this.vx > 0 ? 0 : Math.PI); ctx.fillStyle = '#e8f0ff'; ctx.beginPath(); ctx.moveTo(s * 1.6, 0); ctx.lineTo(0, -s * 0.5); ctx.lineTo(-s, 0); ctx.lineTo(0, s * 0.5); ctx.closePath(); ctx.fill(); ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.stroke(); ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(s * 1.2, 0); ctx.lineTo(0, -s * 0.2); ctx.lineTo(-s * 0.6, 0); ctx.lineTo(0, s * 0.2); ctx.fill(); }
+    else if (this.shape === 'slash') { const d = Math.sign(this.vx) || 1; ctx.strokeStyle = c; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(-d * s * 0.6, 0, s, -1.2 * d + (d < 0 ? Math.PI : 0), 1.2 * d + (d < 0 ? Math.PI : 0), d < 0); ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.stroke(); }
+    else if (this.shape === 'spike') { const d = Math.sign(this.vx) || 1; for (let i = -1; i <= 1; i++) { ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(d * s * 1.4, i * 12); ctx.lineTo(-d * s * 0.4, i * 12 - 4); ctx.lineTo(-d * s * 0.4, i * 12 + 4); ctx.closePath(); ctx.fill(); } }
+    else if (this.shape === 'clone') { ctx.globalAlpha = 0.75; ctx.fillStyle = c; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; const d = Math.sign(this.vx) || 1; ctx.beginPath(); ctx.arc(0, -s * 1.6, 12, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-14, -s * 1.3, 28, s * 1.1, 10) : ctx.rect(-14, -s * 1.3, 28, s * 1.1); ctx.fill(); ctx.stroke(); ctx.lineWidth = 8; ctx.strokeStyle = c; ctx.beginPath(); ctx.moveTo(0, -s * 0.9); ctx.lineTo(d * 34, -s * 1.0); ctx.moveTo(-6, -s * 0.2); ctx.lineTo(d * 26, s * 0.3); ctx.moveTo(6, -s * 0.2); ctx.lineTo(-d * 22, s * 0.35); ctx.stroke(); }
+    else if (this.shape === 'shuriken') { ctx.rotate(this.t * 0.5); ctx.fillStyle = '#ddd'; for (let i = 0; i < 4; i++) { ctx.rotate(Math.PI / 2); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(s, -4); ctx.lineTo(s * 1.1, 4); ctx.fill(); } }
     else if (this.shape === 'laser') { ctx.fillStyle = c; ctx.fillRect(-s * 2.5, -s * 0.35, s * 5, s * 0.7); ctx.fillStyle = '#fff'; ctx.fillRect(-s * 2.2, -s * 0.12, s * 4.4, s * 0.24); }
     else if (this.shape === 'wave') { ctx.strokeStyle = c; ctx.lineWidth = 6; for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(-i * 10 * Math.sign(this.vx), 0, s - i * 8, -1.1, 1.1); ctx.stroke(); } }
     else if (this.shape === 'fire') { for (let i = 0; i < 4; i++) { ctx.fillStyle = i % 2 ? '#ffd040' : c; ctx.globalAlpha = 0.8; ctx.beginPath(); ctx.arc(-i * 12 * Math.sign(this.vx) + Math.sin(this.t / 2 + i) * 4, Math.cos(this.t / 3 + i) * 6, s - i * 7, 0, Math.PI * 2); ctx.fill(); } }

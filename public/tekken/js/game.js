@@ -147,6 +147,7 @@ function padEdges(idx) {
 
 // ---------- Game ----------
 const SAVE_KEY = 'ifl_save';
+const SEL = { cols: 4, rows: 4, cw: 140, ch: 96, gx: W / 2 - 280, gy: 78 };
 const Game = {
   screen: 'title', t: 0, fade: 1, fadeDir: -1, nextScreen: null, sel: 0, msg: [], shake: 0, particles: [], projectiles: [], afterimages: [],
   opts: { rounds: 2, time: 99, diff: 5 }, save: { arcadeWins: 0, cleared: [], best: null },
@@ -195,12 +196,12 @@ const Game = {
   },
   handleTap(p) {
     if (!p) return;
-    const cols = 5, cw = 118, chh = 88, gx = W / 2 - cols * cw / 2, gy = 80;
+    const cols = SEL.cols, cw = SEL.cw, chh = SEL.ch, gx = SEL.gx, gy = SEL.gy;
     if (this.screen === 'title') keyEdges.push('Enter');
     else if (this.screen === 'menu') { const i = Math.round((p.y - 250) / 54); if (i >= 0 && i < this.menuItems.length && p.x < 700) { if (this.sel === i) keyEdges.push('Enter'); else { this.sel = i; AudioSys.sfx('move'); } } }
     else if (this.screen === 'select') {
       const cx = Math.floor((p.x - gx) / cw), cy = Math.floor((p.y - gy) / chh);
-      if (cx >= 0 && cx < cols && cy >= 0 && cy < 4) { const cur = this.mode === 'vs2p' && this.p1 ? this.cursor2 : (this.selPhase === 2 ? this.cursor2 : this.cursor); if (cur[0] === cx && cur[1] === cy) keyEdges.push('Enter'); else { cur[0] = cx; cur[1] = cy; AudioSys.sfx('move'); } }
+      if (cx >= 0 && cx < cols && cy >= 0 && cy < SEL.rows) { const cur = this.mode === 'vs2p' && this.p1 ? this.cursor2 : (this.selPhase === 2 ? this.cursor2 : this.cursor); if (cur[0] === cx && cur[1] === cy) keyEdges.push('Enter'); else { cur[0] = cx; cur[1] = cy; AudioSys.sfx('move'); } }
     }
     else if (this.screen === 'stageselect') { const tw = 280, th = 158, gx2 = W / 2 - 4 * tw / 2 - 10, gy2 = 110; const cx = Math.floor((p.x - gx2) / (tw + 10)), cy = Math.floor((p.y - gy2) / (th + 50)); if (cx >= 0 && cx < 4 && cy >= 0 && cy < 2) { const i = cy * 4 + cx; if (this.selStage === i) keyEdges.push('Enter'); else { this.selStage = i; AudioSys.sfx('move'); } } }
     else if (this.screen === 'ladder' || this.screen === 'result' || this.screen === 'victory' || this.screen === 'gameover' || this.screen === 'controls') keyEdges.push('Enter');
@@ -215,15 +216,15 @@ const Game = {
     if (screen === 'victory') { AudioSys.playMusic('victory'); AudioSys.announce('You are the champion!'); }
     if (screen === 'gameover') { AudioSys.playMusic('gameover'); AudioSys.announce('Game over'); }
     if (screen === 'gallery') { this.galleryF = new Fighter(PLAYABLE[this.galleryIdx], 0, 1, true); }
-    if (screen === 'select') { this.cursor = [0, 0]; this.cursor2 = [4, 3]; this.p1 = null; this.p2 = null; this.selPhase = 1; }
+    if (screen === 'select') { this.cursor = [0, 0]; this.cursor2 = [SEL.cols - 1, SEL.rows - 1]; this.p1 = null; this.p2 = null; this.selPhase = 1; }
   },
 
   // ---------- Menu ----------
   menuItems: [
-    { label: 'ARCADE', sub: 'Fight through 7 warriors and face the Iron Ogre', act: 'arcade' },
+    { label: 'ARCADE', sub: 'Fight through 7 warriors and face the Siege Warden', act: 'arcade' },
     { label: 'VERSUS CPU', sub: 'One-on-one against the computer', act: 'vscpu' },
     { label: 'VERSUS 2P', sub: 'Local two-player battle on one keyboard', act: 'vs2p' },
-    { label: 'FIGHTERS', sub: 'Browse the 20 fighting styles and their moves', act: 'gallery' },
+    { label: 'FIGHTERS', sub: 'Browse the 16 fighters and their moves', act: 'gallery' },
     { label: 'CONTROLS', sub: 'Keyboard and gamepad layout', act: 'controls' },
     { label: 'OPTIONS', sub: 'Audio, rounds, difficulty', act: 'options' },
     { label: 'ONLINE MATCH', sub: 'Coming soon - ranked and private rooms', act: null },
@@ -242,7 +243,7 @@ const Game = {
 
   // ---------- Character select ----------
   stepSelect(nav) {
-    const cols = 5, rows = 4;
+    const cols = SEL.cols, rows = SEL.rows;
     const moveCur = (c, up, down, left, right) => { if (up) c[1] = (c[1] + rows - 1) % rows; if (down) c[1] = (c[1] + 1) % rows; if (left) c[0] = (c[0] + cols - 1) % cols; if (right) c[0] = (c[0] + 1) % cols; if (up || down || left || right) AudioSys.sfx('move'); };
     if (nav.back && this.selPhase === 1) { AudioSys.sfx('back'); this.go('menu'); return; }
     if (this.mode === 'vs2p') {
@@ -273,7 +274,7 @@ const Game = {
     if (nav.back) { AudioSys.sfx('back'); this.go('select'); }
   },
   buildArcade() {
-    const pool = PLAYABLE.filter(c => c.id !== this.p1.id).sort(() => Math.random() - 0.5).slice(0, 7);
+    const pool = PLAYABLE.filter(c => c.id !== this.p1.id && c.id !== BOSS.id).sort(() => Math.random() - 0.5).slice(0, 7);
     const stages = STAGES.filter(s => !s.boss).sort(() => Math.random() - 0.5);
     const ladder = pool.map((c, i) => ({ ch: c, stage: stages[i % stages.length], diff: [1, 2, 3, 4, 5, 6, 8][i] }));
     ladder.push({ ch: BOSS, stage: STAGES.find(s => s.boss), diff: 9, boss: true });
@@ -339,6 +340,7 @@ const Game = {
     else {
       f1.update(f2, this); f2.update(f1, this);
       this.separate(f1, f2);
+      for (const f of [f1, f2]) if (f.style.trail && this.t % 3 === 0 && (f.state === 'walk' || f.state === 'attack' || f.airborne)) this.afterimage(f);
       for (const p of this.projectiles) { p.update(); this.projHit(p); }
       for (const p of this.projectiles) for (const q of this.projectiles) if (p !== q && p.owner !== q.owner && !p.dead && !q.dead && this.overlap(p.box(), q.box())) { p.dead = q.dead = true; this.hitFx(p.x, p.y, '#fff', true); AudioSys.sfx('projhit'); }
       this.projectiles = this.projectiles.filter(p => !p.dead);
@@ -440,7 +442,7 @@ const Game = {
   projHit(p) {
     if (p.dead) return; const def = p.owner === this.f1 ? this.f2 : this.f1;
     if (this.overlap(p.box(), def.hurtbox()) && def.invul <= 0 && def.state !== 'down' && def.state !== 'getup') {
-      const m = Object.assign({}, p.m, { type: 'projectile', lvl: 'mid' });
+      const m = Object.assign({}, p.m, { type: 'projectile', lvl: p.low ? 'low' : 'mid' });
       const blocked = this.canBlock(def, m);
       this.resolveHit(p.owner, def, m); p.dead = true; if (!blocked) AudioSys.sfx('projhit');
       this.hitFx(p.x, p.y, p.color, true);
@@ -525,7 +527,7 @@ const Game = {
     drawFighter(ctx, a, mergePose(P.idle, { hy: bob }), 300, 640, 1, 1.3); drawFighter(ctx, b, mergePose(P.idle, { hy: -bob }), 980, 640, -1, 1.3);
     this.logo(230, 120);
     if (Math.floor(this.t / 30) % 2 === 0) txt(ctx, Touch.enabled ? 'TAP TO START' : 'PRESS ENTER', W / 2, 520, 34, '#fff', 'center', { stroke: '#000' });
-    txt(ctx, '20 FIGHTING STYLES  ·  8 ARENAS  ·  ARCADE & VERSUS', W / 2, 580, 20, '#ddd', 'center', { font: 'Arial', weight: 'bold' });
+    txt(ctx, '16 FIGHTERS  ·  16 STYLES  ·  8 ARENAS  ·  ARCADE & VERSUS', W / 2, 580, 20, '#ddd', 'center', { font: 'Arial', weight: 'bold' });
     txt(ctx, 'Procedural rock soundtrack - turn your sound on', W / 2, 610, 16, '#aaa', 'center', { font: 'Arial' });
   },
   drawMenu() {
@@ -545,7 +547,7 @@ const Game = {
   drawSelect() {
     this.bgMenu();
     txt(ctx, this.mode === 'arcade' ? 'ARCADE - CHOOSE YOUR FIGHTER' : this.mode === 'vs2p' ? 'VERSUS - CHOOSE YOUR FIGHTERS' : (this.selPhase === 1 ? 'CHOOSE YOUR FIGHTER' : 'CHOOSE CPU OPPONENT'), W / 2, 40, 34, '#ffb020', 'center', { stroke: '#000' });
-    const cols = 5, cw = 118, chh = 88, gx = W / 2 - cols * cw / 2, gy = 80;
+    const cols = SEL.cols, cw = SEL.cw, chh = SEL.ch, gx = SEL.gx, gy = SEL.gy;
     PLAYABLE.forEach((ch, i) => {
       const cx = gx + (i % cols) * cw, cy = gy + Math.floor(i / cols) * chh;
       drawPortrait(ctx, ch, cx + 4, cy + 4, cw - 8, chh - 8, '#101018');
@@ -613,13 +615,13 @@ const Game = {
     drawStageFloor(ctx, st);
     // shadows
     for (const f of [f1, f2]) { ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.beginPath(); ctx.ellipse(f.x, GROUND + 4, 40 * f.ch.body.w * Math.max(0.4, 1 - f.y / 400), 9, 0, 0, Math.PI * 2); ctx.fill(); }
-    for (const a of this.afterimages) drawFighter(ctx, a.ch, a.pose, a.x, a.y, a.facing, null, { alpha: a.life / 28, flash: true });
+    for (const a of this.afterimages) drawFighter(ctx, a.ch, a.pose, a.x, a.y, a.facing, null, { alpha: a.life / 28, flash: a.color || true });
     // fighters (draw the one in hitstun on top)
     const order = f1.state === 'hit' || f1.state === 'grabbed' ? [f2, f1] : [f1, f2];
     for (const f of order) {
       const pose = f.getPose(); const fc = f.facing * (pose.spin ? f.spinFlip : 1);
       const alpha = f.state === 'attack' && f.move && f.move.type === 'teleport' && f.mf < f.move.startup ? 0.3 : 1;
-      drawFighter(ctx, f.ch, pose, f.x, f.feetY, fc, null, { flash: f.flashT > 0 && f.flashT % 2 === 0, alpha, aura: f.meter >= 100 ? f.style.fx : (f.counterFlash > 0 ? '#ffffff' : null) });
+      drawFighter(ctx, f.ch, pose, f.x, f.feetY, fc, null, { flash: f.flashT > 0 && f.flashT % 2 === 0, alpha, attack: f.state === 'attack' && f.move && f.mf > f.move.startup * 0.5, aura: f.meter >= 100 ? f.style.fx : (f.counterFlash > 0 ? '#ffffff' : null) });
     }
     for (const p of this.projectiles) p.draw(ctx);
     for (const p of this.particles) {
@@ -675,7 +677,7 @@ const Game = {
     const ch = PLAYABLE[this.galleryIdx], st = STYLES[ch.style], f = this.galleryF; this.bgMenu();
     txt(ctx, 'FIGHTERS', W / 2, 40, 40, '#ffb020', 'center', { stroke: '#000' });
     txt(ctx, '<  ' + (this.galleryIdx + 1) + ' / ' + PLAYABLE.length + '  >', W / 2, 80, 18, '#ccc', 'center', { font: 'Arial' });
-    const pose = f.getPose(); drawFighter(ctx, ch, pose, 380, 620, pose.spin ? f.spinFlip : 1, 1.6, { aura: f.state === 'attack' && f.move && f.move.type === 'super' ? st.fx : null });
+    const pose = f.getPose(); drawFighter(ctx, ch, pose, 380, 620, pose.spin ? f.spinFlip : 1, 1.6, { attack: f.state === 'attack', aura: f.state === 'attack' && f.move && f.move.type === 'super' ? st.fx : null });
     txt(ctx, ch.name, 700, 130, 38, '#fff', 'left', { stroke: '#000' });
     txt(ctx, st.name + '  ·  ' + ch.country, 700, 168, 20, '#ffd060', 'left', { font: 'Arial', weight: 'bold' });
     ctx.font = '15px Arial'; ctx.fillStyle = '#ddd'; ctx.textAlign = 'left'; wrapText(ctx, ch.bio + ' ' + st.desc, 700, 200, 520, 20);
@@ -703,14 +705,14 @@ const Game = {
     this.bgMenu(STAGES[0]); const ch = this.p1;
     drawFighter(ctx, ch, mergePose(P.win, { aF: [172 + Math.sin(this.t / 6) * 6, -8] }), W / 2, 620, 1, 1.7);
     txt(ctx, 'CHAMPION', W / 2, 120, 100, '#ffd040', 'center', { stroke: '#000', strokeW: 10, shadow: '#ff8000', blur: 40 });
-    txt(ctx, ch.name + ' has defeated the Iron Ogre!', W / 2, 210, 30, '#fff', 'center', { stroke: '#000' });
+    txt(ctx, ch.name + ' has conquered the arena!', W / 2, 210, 30, '#fff', 'center', { stroke: '#000' });
     txt(ctx, '"' + ch.quotes.win + '"', W / 2, 260, 22, '#ffd060', 'center', { font: 'Georgia', weight: 'italic' });
-    txt(ctx, `Arcade cleared ${this.save.arcadeWins} time(s)  ·  Fighters cleared: ${this.save.cleared.length}/20`, W / 2, 680, 18, '#ddd', 'center', { font: 'Arial' });
+    txt(ctx, `Arcade cleared ${this.save.arcadeWins} time(s)  ·  Fighters cleared: ${this.save.cleared.length}/${PLAYABLE.length}`, W / 2, 680, 18, '#ddd', 'center', { font: 'Arial' });
   },
   drawGameOver() {
     this.bgMenu(STAGES[7]); drawFighter(ctx, this.p1, P.down, W / 2, 620, 1, 1.5);
     txt(ctx, 'GAME OVER', W / 2, 200, 100, '#ff3030', 'center', { stroke: '#000', strokeW: 10, shadow: '#800', blur: 40 });
-    txt(ctx, 'The Iron Ogre reigns... for now.', W / 2, 290, 28, '#fff', 'center', { stroke: '#000' });
+    txt(ctx, 'The Warden holds the ladder... for now.', W / 2, 290, 28, '#fff', 'center', { stroke: '#000' });
     txt(ctx, 'Press ENTER', W / 2, 680, 20, '#ddd', 'center', { font: 'Arial' });
   },
 };
