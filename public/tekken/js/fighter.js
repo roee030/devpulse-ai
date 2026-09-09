@@ -51,7 +51,7 @@ class Fighter {
     }
     if (!m) return false;
     if (m.type === 'super') { game.superFlash(this); AudioSys.sfx('super'); }
-    this.move = m; this.mf = 0; this.state = 'attack'; this.hitsDone = 0; this.nextHitF = 0; this.hitTargets = 0; this.hitLanded = false; this.consume(key);
+    this.move = m; this.moveKey = key; this.mf = 0; this.state = 'attack'; this.hitsDone = 0; this.nextHitF = 0; this.hitTargets = 0; this.hitLanded = false; this.consume(key);
     this.crouchAttack = !!m.crouch; this.crouching = !!m.crouch;
     if (m.vy && this.grounded()) { this.vy = m.vy; this.airborne = true; }
     if (m.type === 'teleport') { this.invul = m.startup + 2; AudioSys.sfx('tele'); }

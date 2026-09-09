@@ -19,8 +19,9 @@ Open `index.html` directly, or when the DevPulse site is deployed it is served a
 - Move types: normals, projectiles (fireballs, ice shards, blade waves, nets, spike volleys, clones),
   stationary eruptions and ground quakes, dashes, launchers, multi-hit chains, spins, command grabs,
   counters, teleports and cinematic supers.
-- Fighters are drawn procedurally: cel-shaded muscular bodies, faces, tactical suits with glowing seams,
-  energy blades, hammers, claws and threads, plus species bodies (lava cracks, tendrils, extra arms).
+- Fighters are rendered from the concept-sheet artwork: each character's main figure plus its four move
+  panels were cut out with background removal (`sprites/*.webp`) and are animated with lunges, tilts,
+  spins, hit tints, knockdowns and energy trails. The procedural vector bodies remain as a fallback.
 - **8 arenas**, each with its own procedural rock track (different tempo, key, riff and drums).
 - **Arcade mode**: a ladder of 7 opponents with rising difficulty, then the Siege Warden on the Shadow
   Realm stage. Continues are limited; clears and best times are saved in `localStorage`.
@@ -51,6 +52,8 @@ direct taps (tap once to highlight, again to confirm) or joystick + OK/BACK. Lan
 
 - `js/data.js` - move library, the 20 styles, 21 characters, arenas and music tracks.
 - `js/audio.js` - Web Audio engine: distorted power-chord guitar, bass, lead, drums, SFX and voices.
-- `js/render.js` - skeletal pose system, fighter and head drawing, procedural arenas, text helpers.
+- `js/render.js` - procedural arenas, text helpers, and the fallback vector fighter renderer.
+- `js/sprites.js` - sprite loader and the artwork-based fighter renderer (pose-to-move mapping per character).
+- `sprites/` - 16 x 5 transparent WebP cut-outs from the concept sheet.
 - `js/fighter.js` - fighter state machine, hit boxes, projectiles, grabs/counters/teleports and CPU AI.
 - `js/game.js` - screens, input (keyboard + gamepad), fight orchestration, camera, HUD and effects.

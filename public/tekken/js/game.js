@@ -155,6 +155,7 @@ const Game = {
   arcade: null, cursor: [0, 0], selStage: 0, paused: false, pauseSel: 0, galleryIdx: 0, galleryF: null,
   init() {
     try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s) Object.assign(this.save, s); const o = JSON.parse(localStorage.getItem('ifl_opts') || 'null'); if (o) Object.assign(this.opts, o); } catch (e) {}
+    Sprites.load();
     requestAnimationFrame(ts => this.loop(ts));
   },
   persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(this.save)); localStorage.setItem('ifl_opts', JSON.stringify(this.opts)); } catch (e) {} },
@@ -455,7 +456,7 @@ const Game = {
     this.particles.push({ x, y, vx: 0, vy: 0, life: 8, color, ring: true, size: heavy ? 60 : 36 });
   },
   dust(x, y, n) { for (let i = 0; i < n; i++) this.particles.push({ x: x + rnd(-20, 20), y, vx: rnd(-3, 3), vy: rnd(-3, -0.5), life: rnd(10, 25), color: '#c8b89a', size: rnd(3, 7), g: 0.05 }); },
-  afterimage(f) { this.afterimages.push({ ch: f.ch, pose: f.getPose(), x: f.x, y: f.feetY, facing: f.facing * (f.move && f.move.anim === 'spin' ? f.spinFlip : 1), life: 14, color: f.style.fx }); },
+  afterimage(f) { const atk = f.state === 'attack' && f.move && f.mf > f.move.startup * 0.55; this.afterimages.push({ ch: f.ch, pose: f.getPose(), x: f.x, y: f.feetY, facing: f.facing * (f.move && f.move.anim === 'spin' ? f.spinFlip : 1), life: 14, color: f.style.fx, spriteKey: atk ? poseKeyForMove(f.ch, f.moveKey || 'lp') : 'main', xf: { dx: atk ? 16 : 0 } }); },
   superFlash(f) { this.flash = 1; this.superT = 40; this.superWho = f; this.shake = 8; this.hitstop = 14; AudioSys.grunt(f.ch.voice, 'special'); AudioSys.say(f.style.moves.sup.name, f.ch.voice.sp, f.ch.voice.rate * 1.1); },
 
   // ---------- Gallery / options ----------
@@ -509,6 +510,12 @@ const Game = {
     if (Touch.enabled && window.innerHeight > window.innerWidth) { ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.fillRect(0, 0, W, 60); txt(ctx, 'Rotate your phone to landscape for the best experience', W / 2, 30, 22, '#ffd060', 'center', { font: 'Arial', weight: 'bold' }); }
     ctx.restore();
   },
+  showcase(ch, x, feetY, facing, size, pose) {
+    if (pose === 'win') { if (drawSpriteImg(ctx, ch, 'main', x, feetY, facing, size / 1.3, { dy: -Math.abs(Math.sin(this.t / 8)) * 10, glow: ch.colors.accent, glowBlur: 22 })) return; }
+    else if (pose === 'down') { if (drawSpriteImg(ctx, ch, 'main', x, feetY, facing, size / 1.3, { lie: 1 })) return; }
+    else if (drawSpriteIdle(ctx, ch, x, feetY, facing, size / 1.3, this.t)) return;
+    drawFighter(ctx, ch, pose === 'win' ? mergePose(P.win, { aF: [172 + Math.sin(this.t / 6) * 6, -8] }) : pose === 'down' ? P.down : mergePose(P.idle, { hy: Math.sin(this.t / 14) * 2 }), x, feetY, facing, size);
+  },
   bgMenu(st) {
     const s = st || STAGES[Math.floor(this.t / 900) % STAGES.length];
     drawStageBG(ctx, s, STAGE_W / 2 + Math.sin(this.t / 400) * 200, this.t, 1);
@@ -524,9 +531,10 @@ const Game = {
     // showcase two fighters
     const a = PLAYABLE[Math.floor(this.t / 300) % PLAYABLE.length], b = PLAYABLE[(Math.floor(this.t / 300) + 7) % PLAYABLE.length];
     const bob = Math.sin(this.t / 14) * 2;
-    drawFighter(ctx, a, mergePose(P.idle, { hy: bob }), 300, 640, 1, 1.3); drawFighter(ctx, b, mergePose(P.idle, { hy: -bob }), 980, 640, -1, 1.3);
+    this.showcase(a, 300, 660, 1, 1.35); this.showcase(b, 980, 660, -1, 1.35);
     this.logo(230, 120);
-    if (Math.floor(this.t / 30) % 2 === 0) txt(ctx, Touch.enabled ? 'TAP TO START' : 'PRESS ENTER', W / 2, 520, 34, '#fff', 'center', { stroke: '#000' });
+    if (!Sprites.ready()) txt(ctx, `LOADING FIGHTERS ${Math.round(Sprites.loaded / Math.max(1, Sprites.total) * 100)}%`, W / 2, 520, 30, '#ffd060', 'center', { stroke: '#000' });
+    else if (Math.floor(this.t / 30) % 2 === 0) txt(ctx, Touch.enabled ? 'TAP TO START' : 'PRESS ENTER', W / 2, 520, 34, '#fff', 'center', { stroke: '#000' });
     txt(ctx, '16 FIGHTERS  ·  16 STYLES  ·  8 ARENAS  ·  ARCADE & VERSUS', W / 2, 580, 20, '#ddd', 'center', { font: 'Arial', weight: 'bold' });
     txt(ctx, 'Procedural rock soundtrack - turn your sound on', W / 2, 610, 16, '#aaa', 'center', { font: 'Arial' });
   },
@@ -540,7 +548,7 @@ const Game = {
       if (on) txt(ctx, it.sub, x0 + 300, y + 2, 16, '#ddd', 'left', { font: 'Arial' });
     });
     const ch = PLAYABLE[Math.floor(this.t / 240) % PLAYABLE.length];
-    drawFighter(ctx, ch, mergePose(P.idle, { hy: Math.sin(this.t / 14) * 2 }), 1000, 620, -1, 1.4);
+    this.showcase(ch, 1000, 640, -1, 1.4);
     txt(ctx, ch.name, 1000, 660, 22, '#ffd060', 'center', { stroke: '#000' }); txt(ctx, STYLES[ch.style].name, 1000, 688, 16, '#ddd', 'center', { font: 'Arial' });
     txt(ctx, `Arcade cleared: ${this.save.arcadeWins}x${this.save.best ? '  ·  best time ' + this.save.best + 's' : ''}`, 120, 700, 15, '#aaa', 'left', { font: 'Arial' });
   },
@@ -550,7 +558,7 @@ const Game = {
     const cols = SEL.cols, cw = SEL.cw, chh = SEL.ch, gx = SEL.gx, gy = SEL.gy;
     PLAYABLE.forEach((ch, i) => {
       const cx = gx + (i % cols) * cw, cy = gy + Math.floor(i / cols) * chh;
-      drawPortrait(ctx, ch, cx + 4, cy + 4, cw - 8, chh - 8, '#101018');
+      if (!drawSpritePortrait(ctx, ch, cx + 4, cy + 4, cw - 8, chh - 8, '#101018')) drawPortrait(ctx, ch, cx + 4, cy + 4, cw - 8, chh - 8, '#101018');
       const c1 = this.cursor[1] * cols + this.cursor[0] === i, c2 = (this.mode !== 'arcade') && this.cursor2 && (this.cursor2[1] * cols + this.cursor2[0] === i) && (this.mode === 'vs2p' || this.selPhase === 2);
       if (c1) roundRect(ctx, cx + 2, cy + 2, cw - 4, chh - 4, 6, null, '#ff4040', 4);
       if (c2) roundRect(ctx, cx + 6, cy + 6, cw - 12, chh - 12, 6, null, '#4080ff', 4);
@@ -559,7 +567,7 @@ const Game = {
     });
     const show = (cur, x, facing, color, label) => {
       const ch = PLAYABLE[cur[1] * cols + cur[0]], st = STYLES[ch.style];
-      drawFighter(ctx, ch, mergePose(P.idle, { hy: Math.sin(this.t / 14) * 2 }), x, 640, facing, 1.1);
+      this.showcase(ch, x, 655, facing, 1.25);
       const tx = facing > 0 ? 30 : W - 30, al = facing > 0 ? 'left' : 'right';
       txt(ctx, label, tx, 460, 18, color, al, { stroke: '#000' });
       txt(ctx, ch.name, tx, 492, 26, '#fff', al, { stroke: '#000' });
@@ -591,14 +599,13 @@ const Game = {
       const x = 90 + i * 140, y = 110, cur = i === a.idx, done = i < a.idx, hidden = e.boss && !cur && !done;
       roundRect(ctx, x, y, 120, 96, 6, done ? '#1a3a1a' : cur ? '#3a2a00' : '#111', cur ? '#ffb020' : '#444', cur ? 4 : 2);
       if (hidden) { txt(ctx, '???', x + 60, y + 48, 40, '#ff2050', 'center', { stroke: '#000' }); }
-      else drawPortrait(ctx, e.ch, x + 4, y + 4, 112, 88, '#101018');
+      else if (!drawSpritePortrait(ctx, e.ch, x + 4, y + 4, 112, 88, '#101018')) drawPortrait(ctx, e.ch, x + 4, y + 4, 112, 88, '#101018');
       if (done) txt(ctx, 'WIN', x + 60, y + 48, 30, '#40ff60', 'center', { stroke: '#000' });
       txt(ctx, hidden ? 'FINAL BOSS' : e.ch.name.split(' ')[0].toUpperCase(), x + 60, y + 116, 14, cur ? '#ffd060' : '#ccc', 'center', { font: 'Arial', weight: 'bold' });
       txt(ctx, 'LV ' + e.diff, x + 60, y + 134, 12, '#999', 'center', { font: 'Arial' });
     });
     const e = a.ladder[a.idx];
-    drawFighter(ctx, this.p1, mergePose(P.idle, { hy: Math.sin(this.t / 14) * 2 }), 330, 640, 1, 1.3);
-    drawFighter(ctx, e.ch, mergePose(P.idle, { hy: -Math.sin(this.t / 14) * 2 }), 950, 640, -1, 1.3 * (e.boss ? 1.05 : 1));
+    this.showcase(this.p1, 330, 655, 1, 1.3); this.showcase(e.ch, 950, 655, -1, 1.3 * (e.boss ? 1.05 : 1));
     txt(ctx, 'VS', W / 2, 430, 90, '#ff3030', 'center', { stroke: '#000', strokeW: 8 });
     txt(ctx, `STAGE ${a.idx + 1} / ${a.ladder.length}`, W / 2, 300, 26, '#fff', 'center', { stroke: '#000' });
     txt(ctx, e.ch.name, 950, 670, 24, '#fff', 'center', { stroke: '#000' }); txt(ctx, STYLES[e.ch.style].name + ' · ' + e.stage.name, 950, 696, 15, '#ffd060', 'center', { font: 'Arial', weight: 'bold' });
@@ -615,13 +622,13 @@ const Game = {
     drawStageFloor(ctx, st);
     // shadows
     for (const f of [f1, f2]) { ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.beginPath(); ctx.ellipse(f.x, GROUND + 4, 40 * f.ch.body.w * Math.max(0.4, 1 - f.y / 400), 9, 0, 0, Math.PI * 2); ctx.fill(); }
-    for (const a of this.afterimages) drawFighter(ctx, a.ch, a.pose, a.x, a.y, a.facing, null, { alpha: a.life / 28, flash: a.color || true });
+    for (const a of this.afterimages) { if (a.spriteKey) drawSpriteImg(ctx, a.ch, a.spriteKey, a.x, a.y, a.facing, 1, Object.assign({}, a.xf, { tint: a.color || '#ffffff', alpha: a.life / 28 })); else drawFighter(ctx, a.ch, a.pose, a.x, a.y, a.facing, null, { alpha: a.life / 28, flash: a.color || true }); }
     // fighters (draw the one in hitstun on top)
     const order = f1.state === 'hit' || f1.state === 'grabbed' ? [f2, f1] : [f1, f2];
     for (const f of order) {
-      const pose = f.getPose(); const fc = f.facing * (pose.spin ? f.spinFlip : 1);
       const alpha = f.state === 'attack' && f.move && f.move.type === 'teleport' && f.mf < f.move.startup ? 0.3 : 1;
-      drawFighter(ctx, f.ch, pose, f.x, f.feetY, fc, null, { flash: f.flashT > 0 && f.flashT % 2 === 0, alpha, attack: f.state === 'attack' && f.move && f.mf > f.move.startup * 0.5, aura: f.meter >= 100 ? f.style.fx : (f.counterFlash > 0 ? '#ffffff' : null) });
+      const sopts = { flash: f.flashT > 0 && f.flashT % 2 === 0 && f.state !== 'hit', alpha, aura: f.meter >= 100 ? f.style.fx : (f.counterFlash > 0 ? '#ffffff' : null) };
+      if (!drawFighterSprite(ctx, f, sopts)) { const pose = f.getPose(); const fc = f.facing * (pose.spin ? f.spinFlip : 1); drawFighter(ctx, f.ch, pose, f.x, f.feetY, fc, null, Object.assign(sopts, { attack: f.state === 'attack' && f.move && f.mf > f.move.startup * 0.5 })); }
     }
     for (const p of this.projectiles) p.draw(ctx);
     for (const p of this.particles) {
@@ -667,7 +674,7 @@ const Game = {
   drawResult() {
     ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, 0, W, H);
     const w = this.matchWinner, ch = w.ch;
-    drawFighter(ctx, ch, mergePose(P.win, { aF: [172 + Math.sin(this.t / 6) * 6, -8] }), W / 2, 600, w.facing, 1.5);
+    this.showcase(ch, W / 2, 610, w.facing, 1.5, 'win');
     txt(ctx, (w.isP1 ? 'PLAYER 1' : (this.mode === 'vs2p' ? 'PLAYER 2' : 'CPU')) + ' WINS', W / 2, 120, 70, '#ffd040', 'center', { stroke: '#000', strokeW: 8, shadow: '#ff8000', blur: 30 });
     txt(ctx, ch.name, W / 2, 190, 34, '#fff', 'center', { stroke: '#000' });
     txt(ctx, '"' + ch.quotes.win + '"', W / 2, 235, 22, '#ffd060', 'center', { font: 'Georgia', weight: 'italic' });
@@ -677,7 +684,9 @@ const Game = {
     const ch = PLAYABLE[this.galleryIdx], st = STYLES[ch.style], f = this.galleryF; this.bgMenu();
     txt(ctx, 'FIGHTERS', W / 2, 40, 40, '#ffb020', 'center', { stroke: '#000' });
     txt(ctx, '<  ' + (this.galleryIdx + 1) + ' / ' + PLAYABLE.length + '  >', W / 2, 80, 18, '#ccc', 'center', { font: 'Arial' });
-    const pose = f.getPose(); drawFighter(ctx, ch, pose, 380, 620, pose.spin ? f.spinFlip : 1, 1.6, { attack: f.state === 'attack', aura: f.state === 'attack' && f.move && f.move.type === 'super' ? st.fx : null });
+    f.x = 380; f.y = 0; f.facing = 1; const gopts = { aura: f.state === 'attack' && f.move && f.move.type === 'super' ? st.fx : null };
+    if (Sprites.get(ch.id, 'main')) { ctx.save(); ctx.translate(380, 630); ctx.scale(1.25, 1.25); ctx.translate(-380, -GROUND); drawFighterSprite(ctx, f, gopts); ctx.restore(); }
+    else { const pose = f.getPose(); drawFighter(ctx, ch, pose, 380, 620, pose.spin ? f.spinFlip : 1, 1.6, Object.assign(gopts, { attack: f.state === 'attack' })); }
     txt(ctx, ch.name, 700, 130, 38, '#fff', 'left', { stroke: '#000' });
     txt(ctx, st.name + '  ·  ' + ch.country, 700, 168, 20, '#ffd060', 'left', { font: 'Arial', weight: 'bold' });
     ctx.font = '15px Arial'; ctx.fillStyle = '#ddd'; ctx.textAlign = 'left'; wrapText(ctx, ch.bio + ' ' + st.desc, 700, 200, 520, 20);
@@ -703,14 +712,14 @@ const Game = {
   },
   drawVictory() {
     this.bgMenu(STAGES[0]); const ch = this.p1;
-    drawFighter(ctx, ch, mergePose(P.win, { aF: [172 + Math.sin(this.t / 6) * 6, -8] }), W / 2, 620, 1, 1.7);
+    this.showcase(ch, W / 2, 630, 1, 1.7, 'win');
     txt(ctx, 'CHAMPION', W / 2, 120, 100, '#ffd040', 'center', { stroke: '#000', strokeW: 10, shadow: '#ff8000', blur: 40 });
     txt(ctx, ch.name + ' has conquered the arena!', W / 2, 210, 30, '#fff', 'center', { stroke: '#000' });
     txt(ctx, '"' + ch.quotes.win + '"', W / 2, 260, 22, '#ffd060', 'center', { font: 'Georgia', weight: 'italic' });
     txt(ctx, `Arcade cleared ${this.save.arcadeWins} time(s)  ·  Fighters cleared: ${this.save.cleared.length}/${PLAYABLE.length}`, W / 2, 680, 18, '#ddd', 'center', { font: 'Arial' });
   },
   drawGameOver() {
-    this.bgMenu(STAGES[7]); drawFighter(ctx, this.p1, P.down, W / 2, 620, 1, 1.5);
+    this.bgMenu(STAGES[7]); this.showcase(this.p1, W / 2, 620, 1, 1.5, 'down');
     txt(ctx, 'GAME OVER', W / 2, 200, 100, '#ff3030', 'center', { stroke: '#000', strokeW: 10, shadow: '#800', blur: 40 });
     txt(ctx, 'The Warden holds the ladder... for now.', W / 2, 290, 28, '#fff', 'center', { stroke: '#000' });
     txt(ctx, 'Press ENTER', W / 2, 680, 20, '#ddd', 'center', { font: 'Arial' });
