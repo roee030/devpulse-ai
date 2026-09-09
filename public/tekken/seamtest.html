@@ -33,13 +33,48 @@ function restPose(ch){
 window.__run = function(){
   const PS=poses(), names=Object.keys(PS), res={};
   const JN=['elF','elB','knF','knB','shF','shB','hipF','hipB','neck'];
-  for(const ch of CHARACTERS){
-    const per={}; let worst=1, worstAt='';
+  // every id present in rig.json, so a freshly added fighter is measured too
+  const ids = Object.keys(Rig.data);
+  for(const id of ids){
+    const ch = CHAR_BY_ID[id] || { id, style: Object.keys(STYLES)[0], colors:{accent:'#ffffff'}, body:{h:1,w:1,kind:'human'} };
+    const per={}, bone={}, whole={}; let worst=1, worstAt='';
+    const BONES=[['shF','elF'],['elF','wrF'],['shB','elB'],['elB','wrB'],['hipF','knF'],['knF','anF'],['hipB','knB'],['knB','anB'],['hip','neck']];
     const measure=(pose)=>{
       ctx.clearRect(0,0,900,600);
       const info=drawRig(ctx,ch,pose,450,520,1,1.5,{});
       if(!info) return null;
       const img=ctx.getImageData(0,0,900,600).data, cov={};
+      // does the artwork actually sit on the skeleton? sample along every bone
+      let bTot=0,bOn=0;
+      for(const [a,b] of BONES){
+        const A=info.joints[a], B=info.joints[b];
+        for(let s2=0.12;s2<=0.88;s2+=0.04){
+          const X=Math.round(A.x+(B.x-A.x)*s2), Y=Math.round(A.y+(B.y-A.y)*s2);
+          if(X<0||Y<0||X>=900||Y>=600) continue;
+          bTot++; if(img[(Y*900+X)*4+3]>24) bOn++;
+        }
+      }
+      cov.__bone = bTot? bOn/bTot : 1;
+      // wholeness: is the drawn fighter one connected piece, or did parts float away?
+      {
+        const W=900,H=600, st=new Int32Array(W*H); let total=0;
+        const on=new Uint8Array(W*H);
+        for(let i=0;i<W*H;i++){ if(img[i*4+3]>24){on[i]=1;total++;} }
+        const seen=new Uint8Array(W*H); let best=0;
+        for(let i=0;i<W*H;i++){
+          if(!on[i]||seen[i]) continue;
+          let sp=0, cnt=0; st[sp++]=i; seen[i]=1;
+          while(sp){ const p=st[--sp]; cnt++;
+            const px=p%W, py=(p/W)|0;
+            for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){
+              const nx=px+dx, ny=py+dy; if(nx<0||ny<0||nx>=W||ny>=H) continue;
+              const q=ny*W+nx; if(on[q]&&!seen[q]){seen[q]=1;st[sp++]=q;}
+            }
+          }
+          if(cnt>best) best=cnt;
+        }
+        cov.__whole = total? best/total : 1;
+      }
       for(const j of JN){
         const p=info.joints[j], r=Math.max(6, 13*info.scale);
         let tot=0,on=0;
@@ -54,9 +89,10 @@ window.__run = function(){
       return cov;
     };
     const base = measure(restPose(ch));
-    if(!base){ res[ch.id]={err:'no rig'}; continue; }
+    if(!base){ res[id]={err:'no rig'}; continue; }
     for(const n of names){
       const cov = measure(PS[n]);
+      bone[n] = +cov.__bone.toFixed(3); whole[n] = +cov.__whole.toFixed(3);
       let minCov=1, minJ='';
       for(const j of JN){
         const ratio = base[j] > 0.02 ? Math.min(1, cov[j]/base[j]) : 1;
@@ -65,7 +101,13 @@ window.__run = function(){
       per[n]=+minCov.toFixed(3);
       if(minCov<worst){worst=minCov;worstAt=n+':'+minJ;}
     }
-    res[ch.id]={worst:+worst.toFixed(3), at:worstAt, per};
+    const bvals=Object.values(bone);
+    res[id]={worst:+worst.toFixed(3), at:worstAt, per,
+      bone:+(bvals.reduce((a,b)=>a+b,0)/bvals.length).toFixed(3),
+      whole:+Math.min(...Object.values(whole)).toFixed(3),
+      wholeAt:Object.keys(whole).reduce((a,b)=>whole[a]<whole[b]?a:b),
+      boneMin:+Math.min(...bvals).toFixed(3),
+      boneAt:Object.keys(bone).reduce((a,b)=>bone[a]<bone[b]?a:b)};
   }
   return res;
 };

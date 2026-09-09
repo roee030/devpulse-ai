@@ -54,7 +54,9 @@ function drawRig(ctx, ch, pose, x, feetY, facing, sizeMult, opts) {
   const BACK_SHADE = 0.24;   // far-side limbs sit behind the body
   const drawPart = (name, joint, targetAng, extraScale) => {
     const p = parts[name]; const im = Rig.part(ch.id, name, tint, !tint && name.endsWith('B') ? BACK_SHADE : 0); if (!p || !im) return;
-    ctx.save(); ctx.translate(joint.x, joint.y); ctx.rotate((targetAng - p.ang) * DEG); ctx.scale(k * (extraScale || 1), k * (extraScale || 1));
+    // canvas rotate(t) maps a local direction a to screen direction (a - t), so to point the bone
+    // at targetAng we must rotate by (restAngle - targetAng), not the other way round
+    ctx.save(); ctx.translate(joint.x, joint.y); ctx.rotate((p.ang - targetAng) * DEG); ctx.scale(k * (extraScale || 1), k * (extraScale || 1));
     ctx.drawImage(im, -p.px, -p.py); ctx.restore();
   };
   const limb = (side, tag) => {
