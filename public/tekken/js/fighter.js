@@ -234,14 +234,14 @@ class Fighter {
     if (s === 'walk') {
       const w = this.walkT * 4, sw = Math.sin(w) * 30, sw2 = Math.cos(w) * 12, fwd = this.vx * this.facing > 0;
       return mergePose(P.idle, {
-        lF: [16 + sw, -8 - Math.max(0, sw2)], lB: [-14 - sw, 4 - Math.max(0, -sw2)],
-        aF: [60 - sw * 0.42, 100 + Math.max(0, sw) * 0.3], aB: [45 + sw * 0.42, 110 - Math.max(0, -sw) * 0.3],
+        lF: [23 + sw, -13 - Math.max(0, sw2)], lB: [-21 - sw, 8 - Math.max(0, -sw2)],
+        aF: [54 - sw * 0.40, 76 + Math.max(0, sw) * 0.28], aB: [40 + sw * 0.40, 88 - Math.max(0, -sw) * 0.28],
         hy: Math.abs(Math.sin(w)) * 4, tor: (fwd ? 9 : 3) + Math.sin(w * 2) * 2, head: Math.sin(w * 2) * -2,
       });
     }
     // idle breathing / fighting stance sway
     const b = Math.sin(this.t / 14), b2 = Math.sin(this.t / 14 + 0.8);
-    return mergePose(P.idle, { hy: b * 2.4, aF: [60 + b * 5, 100 + b2 * 4], aB: [45 + b * 4, 110 - b2 * 3], tor: 6 + b * 1.6, head: -b * 2, lF: [14 + b, -6], lB: [-12 - b, 3] });
+    return mergePose(P.idle, { hy: b * 2.4, aF: [54 + b * 5, 76 + b2 * 4], aB: [40 + b * 4, 88 - b2 * 3], tor: 6 + b * 1.6, head: -b * 2, lF: [23 + b, -13], lB: [-21 - b, 8] });
   }
 }
 

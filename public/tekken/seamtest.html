@@ -1,0 +1,73 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>seam test</title><style>body{margin:0;background:#101018}canvas{display:block}</style></head><body>
+<canvas id="c" width="900" height="600"></canvas>
+<script src="js/data.js"></script><script src="js/render.js"></script><script src="js/sprites.js"></script><script src="js/rig.js"></script>
+<script>
+const cv=document.getElementById('c'), ctx=cv.getContext('2d',{willReadFrequently:true});
+Sprites.load(); Rig.load();
+// poses that stress every joint
+function poses(){
+  const list={};
+  list.idle=P.idle; list.crouch=P.crouch; list.jump=P.jump; list.block=P.block; list.hit=P.hit; list.down=P.down; list.win=P.win;
+  list.punch=mergePose(P.idle,P.straight.hit); list.punchWind=mergePose(P.idle,P.straight.wind);
+  list.kick=mergePose(P.idle,P.rkick.hit); list.kickWind=mergePose(P.idle,P.rkick.wind);
+  list.upper=mergePose(P.idle,P.upper.hit); list.sweep=mergePose(P.crouch,P.sweep.hit);
+  list.hkick=mergePose(P.idle,P.hkick.hit); list.axe=mergePose(P.idle,P.axe.hit); list.knee=mergePose(P.idle,P.knee.hit);
+  list.walk1=mergePose(P.idle,{lF:[46,-34],lB:[-30,12],aF:[42,110],aB:[63,96]});
+  list.walk2=mergePose(P.idle,{lF:[-30,12],lB:[46,-34],aF:[78,90],aB:[27,120]});
+  // extreme joint bends
+  list.armFold=mergePose(P.idle,{aF:[20,150],aB:[110,140]});
+  list.armBack=mergePose(P.idle,{aF:[-60,40],aB:[-80,60]});
+  list.legFold=mergePose(P.idle,{lF:[80,-150],lB:[70,-140],hy:40});
+  list.legHigh=mergePose(P.idle,{lF:[150,-20],lB:[-20,10]});
+  list.twist=mergePose(P.idle,{tor:35,head:-25});
+  list.twist2=mergePose(P.idle,{tor:-30,head:25});
+  return list;
+}
+// each character's own rest angles - the pose in which the parts reassemble into the original artwork
+function restPose(ch){
+  const p = Rig.data[ch.id].parts;
+  const rel = (a,b)=>[p[a].ang, p[b].ang - p[a].ang];
+  return { hy:0, tor: p.torso.ang - 180, head: p.head.ang - p.torso.ang + 180,
+           aF: rel('uArmF','fArmF'), aB: rel('uArmB','fArmB'), lF: rel('thighF','shinF'), lB: rel('thighB','shinB') };
+}
+window.__run = function(){
+  const PS=poses(), names=Object.keys(PS), res={};
+  const JN=['elF','elB','knF','knB','shF','shB','hipF','hipB','neck'];
+  for(const ch of CHARACTERS){
+    const per={}; let worst=1, worstAt='';
+    const measure=(pose)=>{
+      ctx.clearRect(0,0,900,600);
+      const info=drawRig(ctx,ch,pose,450,520,1,1.5,{});
+      if(!info) return null;
+      const img=ctx.getImageData(0,0,900,600).data, cov={};
+      for(const j of JN){
+        const p=info.joints[j], r=Math.max(6, 13*info.scale);
+        let tot=0,on=0;
+        for(let dy=-r;dy<=r;dy+=1) for(let dx=-r;dx<=r;dx+=1){
+          if(dx*dx+dy*dy>r*r) continue;
+          const X=Math.round(p.x+dx), Y=Math.round(p.y+dy);
+          if(X<0||Y<0||X>=900||Y>=600) continue;
+          tot++; if(img[(Y*900+X)*4+3]>24) on++;
+        }
+        cov[j]= tot? on/tot : 1;
+      }
+      return cov;
+    };
+    const base = measure(restPose(ch));
+    if(!base){ res[ch.id]={err:'no rig'}; continue; }
+    for(const n of names){
+      const cov = measure(PS[n]);
+      let minCov=1, minJ='';
+      for(const j of JN){
+        const ratio = base[j] > 0.02 ? Math.min(1, cov[j]/base[j]) : 1;
+        if(ratio<minCov){minCov=ratio;minJ=j;}
+      }
+      per[n]=+minCov.toFixed(3);
+      if(minCov<worst){worst=minCov;worstAt=n+':'+minJ;}
+    }
+    res[ch.id]={worst:+worst.toFixed(3), at:worstAt, per};
+  }
+  return res;
+};
+window.__ready = () => Rig.ready() && Sprites.ready();
+</script></body></html>

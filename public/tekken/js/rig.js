@@ -19,12 +19,15 @@ const Rig = {
   },
   ready() { return this.data && this.loaded >= this.total; },
   has(cid) { return !!(this.data && this.data[cid] && this.img[cid + '_torso'] && this.img[cid + '_torso'].complete && this.img[cid + '_torso'].naturalWidth > 0); },
-  part(cid, p, tint) {
+  part(cid, p, tint, shade) {
     const key = cid + '_' + p, im = this.img[key]; if (!im || !im.complete || !im.naturalWidth) return null;
-    if (!tint) return im;
-    const ck = key + tint; if (this.tints[ck]) return this.tints[ck];
+    if (!tint && !shade) return im;
+    const ck = key + (tint || '') + (shade || 0); if (this.tints[ck]) return this.tints[ck];
     const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const x = c.getContext('2d');
-    x.drawImage(im, 0, 0); x.globalCompositeOperation = 'source-in'; x.fillStyle = tint; x.fillRect(0, 0, c.width, c.height); this.tints[ck] = c; return c;
+    x.drawImage(im, 0, 0);
+    if (tint) { x.globalCompositeOperation = 'source-in'; x.fillStyle = tint; x.fillRect(0, 0, c.width, c.height); }
+    else { x.globalCompositeOperation = 'source-atop'; x.fillStyle = 'rgba(6,8,16,' + shade + ')'; x.fillRect(0, 0, c.width, c.height); }
+    this.tints[ck] = c; return c;
   },
 };
 const angOf = (vx, vy) => Math.atan2(vx, vy) / DEG;   // 0 = straight down, + = toward +x (forward)
@@ -38,17 +41,19 @@ function drawRig(ctx, ch, pose, x, feetY, facing, sizeMult, opts) {
   const len = (p) => parts[p].len * k;
   const legLen = Math.max(len('thighF') + len('shinF'), len('thighB') + len('shinB'));
   const hyScale = legLen / 110;
+  const stand = legLen + (rig.sole || 0) * k;   // hip height above the sole in the rest stance
   ctx.save();
   ctx.translate(x, feetY); ctx.scale(facing, 1);
   if (opts.alpha != null) ctx.globalAlpha *= opts.alpha;
   if (opts.glow) { ctx.shadowColor = opts.glow; ctx.shadowBlur = opts.glowBlur || 14; }
-  const hipC = { x: 0, y: -legLen * 0.96 + (pose.hy || 0) * hyScale };
+  const hipC = { x: 0, y: -stand + (pose.hy || 0) * hyScale };
   const tor = (pose.tor || 0) * DEG, ct = Math.cos(tor), st = Math.sin(tor);
   const T = (o) => ({ x: hipC.x + (o[0] * ct - o[1] * st) * k, y: hipC.y + (o[0] * st + o[1] * ct) * k });
   const neck = T(rig.neck), shF = T(rig.joints.shL), shB = T(rig.joints.shR), hipF = T(rig.joints.hipL), hipB = T(rig.joints.hipR);
   const pt = (b, a, l) => ({ x: b.x + Math.sin(a * DEG) * l, y: b.y + Math.cos(a * DEG) * l });
+  const BACK_SHADE = 0.24;   // far-side limbs sit behind the body
   const drawPart = (name, joint, targetAng, extraScale) => {
-    const p = parts[name]; const im = Rig.part(ch.id, name, tint); if (!p || !im) return;
+    const p = parts[name]; const im = Rig.part(ch.id, name, tint, !tint && name.endsWith('B') ? BACK_SHADE : 0); if (!p || !im) return;
     ctx.save(); ctx.translate(joint.x, joint.y); ctx.rotate((targetAng - p.ang) * DEG); ctx.scale(k * (extraScale || 1), k * (extraScale || 1));
     ctx.drawImage(im, -p.px, -p.py); ctx.restore();
   };
@@ -106,7 +111,11 @@ function drawRig(ctx, ch, pose, x, feetY, facing, sizeMult, opts) {
     const acc = ch.colors.accent, R = 36 * ws; const g = ctx.createRadialGradient(F.hand.x, F.hand.y, 4, F.hand.x, F.hand.y, R); g.addColorStop(0, acc + 'dd'); g.addColorStop(1, acc + '00'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(F.hand.x, F.hand.y, R, 0, Math.PI * 2); ctx.fill();
   }
   ctx.restore();
-  return { hand: { x: x + F.hand.x * facing, y: feetY + F.hand.y }, top: feetY + neck.y - 60 * k };
+  const S = (p) => ({ x: x + p.x * facing, y: feetY + p.y });
+  return { hand: S(F.hand), top: feetY + neck.y - 60 * k, scale: k,
+    joints: { shF: S(F.sh), elF: S(F.el), wrF: S(F.hand), hipF: S(F.hp), knF: S(F.kn), anF: S(F.ft),
+              shB: S(B.sh), elB: S(B.el), wrB: S(B.hand), hipB: S(B.hp), knB: S(B.kn), anB: S(B.ft),
+              neck: S(neck), hip: S(hipC) } };
 }
 
 // Fighter presentation from live game state

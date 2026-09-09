@@ -1,0 +1,27 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;background:#20202a}canvas{display:block}</style></head><body>
+<canvas id="c" width="1800" height="900"></canvas>
+<script src="js/data.js"></script><script src="js/render.js"></script><script src="js/sprites.js"></script><script src="js/rig.js"></script>
+<script>
+const ctx=document.getElementById('c').getContext('2d');
+Sprites.load(); Rig.load();
+const IDS=['jax','mira','pyros','silas'];
+const PS=()=>({idle:P.idle, punch:mergePose(P.idle,P.straight.hit), kick:mergePose(P.idle,P.rkick.hit),
+  armFold:mergePose(P.idle,{aF:[20,150],aB:[110,140]}), walk:mergePose(P.idle,{lF:[46,-34],lB:[-30,12],aF:[42,110],aB:[63,96]}),
+  legHigh:mergePose(P.idle,{lF:[150,-20],lB:[-20,10]})});
+function draw(){ if(!Rig.ready()){requestAnimationFrame(draw);return;}
+  ctx.fillStyle='#20202a'; ctx.fillRect(0,0,1800,900);
+  const ps=PS(), names=Object.keys(ps);
+  IDS.forEach((id,r)=>{ const ch=CHAR_BY_ID[id];
+    ctx.fillStyle='#ffd060'; ctx.font='bold 15px Arial'; ctx.fillText(id, 6, 30+r*225);
+    names.forEach((n,c)=>{ const x=120+c*280, y=215+r*225;
+      ctx.strokeStyle='rgba(255,255,255,0.10)'; ctx.beginPath(); ctx.moveTo(x-70,y); ctx.lineTo(x+70,y); ctx.stroke();
+      const info=drawRig(ctx,ch,ps[n],x,y,1,0.85,{});
+      if(r===0){ctx.fillStyle='#9bd'; ctx.font='12px Arial'; ctx.fillText(n, x-24, 16);}
+      if(info){ctx.strokeStyle='#ff3b6b'; ctx.lineWidth=1;
+        for(const j of ['elF','elB','knF','knB','shF','hipF','neck']){const p=info.joints[j];ctx.beginPath();ctx.arc(p.x,p.y,10,0,7);ctx.stroke();}}
+    });
+  });
+  window.__done=true;
+}
+draw();
+</script></body></html>

@@ -11,18 +11,18 @@ const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 // ---------- Poses ----------
 // hy: hip drop, tor: torso lean (+forward), head: head tilt, aB/aF: back/front arm [upper, lower(rel)], lB/lF legs
 const P = {
-  idle:    { hy:0,  tor:6,   head:0,   aB:[45,110], aF:[60,100], lB:[-12,3],  lF:[14,-6] },
+  idle:    { hy:0,  tor:6,   head:0,   aB:[40,88],  aF:[54,76],  lB:[-21,8],  lF:[23,-13] },
   crouch:  { hy:55, tor:25,  head:-10, aB:[40,110], aF:[55,100], lB:[70,-125],lF:[78,-130] },
   jump:    { hy:0,  tor:2,   head:0,   aB:[120,30], aF:[130,20], lB:[40,-70], lF:[55,-80] },
   fall:    { hy:0,  tor:8,   head:0,   aB:[100,20], aF:[110,20], lB:[20,-30], lF:[35,-40] },
-  block:   { hy:0,  tor:8,   head:0,   aB:[70,105], aF:[82,95],  lB:[-10,3],  lF:[12,-5] },
+  block:   { hy:0,  tor:8,   head:0,   aB:[62,92],  aF:[74,84],  lB:[-18,7],  lF:[20,-11] },
   blockLow:{ hy:55, tor:22,  head:-5,  aB:[30,80],  aF:[40,60],  lB:[70,-125],lF:[78,-130] },
   hit:     { hy:0,  tor:-18, head:-22, aB:[30,40],  aF:[50,30],  lB:[-15,10], lF:[10,-10] },
   hitLow:  { hy:50, tor:0,   head:-20, aB:[30,40],  aF:[50,30],  lB:[70,-125],lF:[78,-130] },
   launch:  { hy:0,  tor:-50, head:-20, aB:[120,20], aF:[140,10], lB:[30,-40], lF:[50,-50] },
   down:    { hy:96, tor:-88, head:-10, aB:[80,0],   aF:[100,20], lB:[92,-5],  lF:[88,0], noGround:true },
   getup:   { hy:60, tor:35,  head:-10, aB:[60,40],  aF:[70,30],  lB:[60,-120],lF:[90,-140] },
-  win:     { hy:0,  tor:-5,  head:-10, aB:[30,30],  aF:[172,-8], lB:[-12,3],  lF:[14,-6] },
+  win:     { hy:0,  tor:-5,  head:-10, aB:[30,30],  aF:[168,-6], lB:[-18,7],  lF:[20,-11] },
   stunned: { hy:10, tor:12,  head:15,  aB:[20,20],  aF:[25,15],  lB:[-5,-10], lF:[10,-25] },
   // attack keyframes: wind, hit
   jab:     { wind:{ aF:[40,120], tor:2 }, hit:{ aF:[92,0], tor:10 } },
@@ -48,7 +48,7 @@ const P = {
   grab:    { wind:{ aF:[70,60], aB:[70,60] }, hit:{ aF:[90,0], aB:[90,0], tor:12 }, open:true },
   counter: { wind:{ tor:-4, aF:[70,50], aB:[60,60] }, hit:{ tor:-6, aF:[78,40], aB:[66,60], lF:[22,-8] }, open:true },
   rush:    { wind:{ tor:15, aF:[-20,-10], aB:[-20,-10] }, hit:{ tor:20, aF:[92,0], aB:[45,110], lF:[34,-10] }, alt:{ tor:20, aB:[92,0], aF:[45,110], lF:[34,-10] } },
-  throwLift:{ hy:-6, tor:-14, aF:[150,0], aB:[150,0], lB:[-12,3], lF:[14,-6] },
+  throwLift:{ hy:-6, tor:-14, aF:[150,0], aB:[150,0], lB:[-18,7], lF:[20,-11] },
   throwSlam:{ hy:20, tor:40, aF:[70,0], aB:[70,0], lB:[40,-60], lF:[60,-80] },
   grabbed: { hy:0, tor:-10, head:-15, aB:[60,20], aF:[60,20], lB:[-5,-10], lF:[10,-20] },
 };
