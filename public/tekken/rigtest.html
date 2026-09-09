@@ -1,0 +1,33 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>rig test</title>
+<style>body{margin:0;background:#1b1b24;font:12px Arial;color:#ddd}canvas{display:block}</style></head><body>
+<canvas id="c" width="2400" height="1400"></canvas>
+<script src="js/data.js"></script><script src="js/render.js"></script><script src="js/sprites.js"></script><script src="js/rig.js"></script>
+<script>
+const ctx = document.getElementById('c').getContext('2d');
+const P2 = {
+  idle: P.idle, walkA: mergePose(P.idle,{lF:[42,-30],lB:[-30,10],hy:4}), crouch: P.crouch, jump: P.jump,
+  punch: mergePose(P.idle, P.straight.hit), kick: mergePose(P.idle, P.rkick.hit), upper: mergePose(P.idle, P.upper.hit),
+  sweep: mergePose(P.crouch, P.sweep.hit), block: P.block, hit: P.hit, down: P.down, win: P.win,
+};
+const NAMES = Object.keys(P2);
+Sprites.load(); Rig.load();
+function draw() {
+  if (!Rig.ready()) { requestAnimationFrame(draw); return; }
+  ctx.fillStyle = '#1b1b24'; ctx.fillRect(0,0,2400,1400);
+  const cw = 150, chh = 175;
+  CHARACTERS.forEach((ch, i) => {
+    const Y = 40 + Math.floor(i/2)*chh + (i%2)*0;
+    const row = i % 8, col = Math.floor(i/8);
+    const X0 = col*1200, Y0 = 30 + row*172;
+    ctx.fillStyle='#ffd060'; ctx.font='bold 13px Arial'; ctx.fillText(ch.id, X0+4, Y0+12);
+    NAMES.forEach((n, j) => {
+      const x = X0 + 90 + j*95, y = Y0 + 160;
+      ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.beginPath(); ctx.moveTo(x-42,y); ctx.lineTo(x+42,y); ctx.stroke();
+      drawRig(ctx, ch, P2[n], x, y, 1, 0.62, {});
+      if (i===0) { ctx.fillStyle='#8ac'; ctx.font='11px Arial'; ctx.fillText(n, x-20, Y0+8); }
+    });
+  });
+  window.__done = true;
+}
+draw();
+</script></body></html>

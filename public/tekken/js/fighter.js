@@ -232,12 +232,16 @@ class Fighter {
     if (s === 'crouch') return P.crouch;
     if (s === 'jump' || this.airborne) return this.vy < 0 ? P.jump : P.fall;
     if (s === 'walk') {
-      const sw = Math.sin(this.walkT * 4) * 28, sw2 = Math.cos(this.walkT * 4) * 10;
-      return mergePose(P.idle, { lF: [14 + sw, -6 - Math.max(0, sw2)], lB: [-12 - sw, 3 - Math.max(0, -sw2)], hy: Math.abs(Math.sin(this.walkT * 4)) * 3 });
+      const w = this.walkT * 4, sw = Math.sin(w) * 30, sw2 = Math.cos(w) * 12, fwd = this.vx * this.facing > 0;
+      return mergePose(P.idle, {
+        lF: [16 + sw, -8 - Math.max(0, sw2)], lB: [-14 - sw, 4 - Math.max(0, -sw2)],
+        aF: [60 - sw * 0.42, 100 + Math.max(0, sw) * 0.3], aB: [45 + sw * 0.42, 110 - Math.max(0, -sw) * 0.3],
+        hy: Math.abs(Math.sin(w)) * 4, tor: (fwd ? 9 : 3) + Math.sin(w * 2) * 2, head: Math.sin(w * 2) * -2,
+      });
     }
-    // idle breathing
-    const b = Math.sin(this.t / 14);
-    return mergePose(P.idle, { hy: b * 2, aF: [60 + b * 3, 100], aB: [45 + b * 2, 110], tor: 6 + b });
+    // idle breathing / fighting stance sway
+    const b = Math.sin(this.t / 14), b2 = Math.sin(this.t / 14 + 0.8);
+    return mergePose(P.idle, { hy: b * 2.4, aF: [60 + b * 5, 100 + b2 * 4], aB: [45 + b * 4, 110 - b2 * 3], tor: 6 + b * 1.6, head: -b * 2, lF: [14 + b, -6], lB: [-12 - b, 3] });
   }
 }
 

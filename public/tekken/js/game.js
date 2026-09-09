@@ -155,7 +155,7 @@ const Game = {
   arcade: null, cursor: [0, 0], selStage: 0, paused: false, pauseSel: 0, galleryIdx: 0, galleryF: null,
   init() {
     try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s) Object.assign(this.save, s); const o = JSON.parse(localStorage.getItem('ifl_opts') || 'null'); if (o) Object.assign(this.opts, o); } catch (e) {}
-    Sprites.load();
+    Sprites.load(); Rig.load();
     requestAnimationFrame(ts => this.loop(ts));
   },
   persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(this.save)); localStorage.setItem('ifl_opts', JSON.stringify(this.opts)); } catch (e) {} },
@@ -456,7 +456,7 @@ const Game = {
     this.particles.push({ x, y, vx: 0, vy: 0, life: 8, color, ring: true, size: heavy ? 60 : 36 });
   },
   dust(x, y, n) { for (let i = 0; i < n; i++) this.particles.push({ x: x + rnd(-20, 20), y, vx: rnd(-3, 3), vy: rnd(-3, -0.5), life: rnd(10, 25), color: '#c8b89a', size: rnd(3, 7), g: 0.05 }); },
-  afterimage(f) { const atk = f.state === 'attack' && f.move && f.mf > f.move.startup * 0.55; this.afterimages.push({ ch: f.ch, pose: f.getPose(), x: f.x, y: f.feetY, facing: f.facing * (f.move && f.move.anim === 'spin' ? f.spinFlip : 1), life: 14, color: f.style.fx, spriteKey: atk ? poseKeyForMove(f.ch, f.moveKey || 'lp') : 'main', xf: { dx: atk ? 16 : 0 } }); },
+  afterimage(f) { const atk = f.state === 'attack' && f.move && f.mf > f.move.startup * 0.55; this.afterimages.push({ ch: f.ch, rigPose: Rig.has(f.ch.id) ? f.getPose() : null, pose: f.getPose(), x: f.x, y: f.feetY, facing: f.facing * (f.move && f.move.anim === 'spin' ? f.spinFlip : 1), life: 14, color: f.style.fx, spriteKey: atk ? poseKeyForMove(f.ch, f.moveKey || 'lp') : 'main', xf: { dx: atk ? 16 : 0 } }); },
   superFlash(f) { this.flash = 1; this.superT = 40; this.superWho = f; this.shake = 8; this.hitstop = 14; AudioSys.grunt(f.ch.voice, 'special'); AudioSys.say(f.style.moves.sup.name, f.ch.voice.sp, f.ch.voice.rate * 1.1); },
 
   // ---------- Gallery / options ----------
@@ -511,6 +511,8 @@ const Game = {
     ctx.restore();
   },
   showcase(ch, x, feetY, facing, size, pose) {
+    const rp = pose === 'win' ? mergePose(P.win, { aF: [172 + Math.sin(this.t / 6) * 6, -8] }) : pose === 'down' ? P.down : mergePose(P.idle, { hy: Math.sin(this.t / 14) * 2, tor: 6 + Math.sin(this.t / 14) });
+    if (drawRig(ctx, ch, rp, x, feetY, facing, size / 1.35, { glow: pose === 'win' ? ch.colors.accent : null, glowBlur: 22 })) return;
     if (pose === 'win') { if (drawSpriteImg(ctx, ch, 'main', x, feetY, facing, size / 1.3, { dy: -Math.abs(Math.sin(this.t / 8)) * 10, glow: ch.colors.accent, glowBlur: 22 })) return; }
     else if (pose === 'down') { if (drawSpriteImg(ctx, ch, 'main', x, feetY, facing, size / 1.3, { lie: 1 })) return; }
     else if (drawSpriteIdle(ctx, ch, x, feetY, facing, size / 1.3, this.t)) return;
@@ -533,7 +535,7 @@ const Game = {
     const bob = Math.sin(this.t / 14) * 2;
     this.showcase(a, 300, 660, 1, 1.35); this.showcase(b, 980, 660, -1, 1.35);
     this.logo(230, 120);
-    if (!Sprites.ready()) txt(ctx, `LOADING FIGHTERS ${Math.round(Sprites.loaded / Math.max(1, Sprites.total) * 100)}%`, W / 2, 520, 30, '#ffd060', 'center', { stroke: '#000' });
+    if (!Sprites.ready() || !Rig.ready()) txt(ctx, `LOADING FIGHTERS ${Math.round((Sprites.loaded + Rig.loaded) / Math.max(1, Sprites.total + Rig.total) * 100)}%`, W / 2, 520, 30, '#ffd060', 'center', { stroke: '#000' });
     else if (Math.floor(this.t / 30) % 2 === 0) txt(ctx, Touch.enabled ? 'TAP TO START' : 'PRESS ENTER', W / 2, 520, 34, '#fff', 'center', { stroke: '#000' });
     txt(ctx, '16 FIGHTERS  ·  16 STYLES  ·  8 ARENAS  ·  ARCADE & VERSUS', W / 2, 580, 20, '#ddd', 'center', { font: 'Arial', weight: 'bold' });
     txt(ctx, 'Procedural rock soundtrack - turn your sound on', W / 2, 610, 16, '#aaa', 'center', { font: 'Arial' });
@@ -622,13 +624,13 @@ const Game = {
     drawStageFloor(ctx, st);
     // shadows
     for (const f of [f1, f2]) { ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.beginPath(); ctx.ellipse(f.x, GROUND + 4, 40 * f.ch.body.w * Math.max(0.4, 1 - f.y / 400), 9, 0, 0, Math.PI * 2); ctx.fill(); }
-    for (const a of this.afterimages) { if (a.spriteKey) drawSpriteImg(ctx, a.ch, a.spriteKey, a.x, a.y, a.facing, 1, Object.assign({}, a.xf, { tint: a.color || '#ffffff', alpha: a.life / 28 })); else drawFighter(ctx, a.ch, a.pose, a.x, a.y, a.facing, null, { alpha: a.life / 28, flash: a.color || true }); }
+    for (const a of this.afterimages) { if (a.rigPose) { drawRig(ctx, a.ch, a.rigPose, a.x, a.y, a.facing, 1, { tint: a.color, alpha: a.life / 28 }); } else if (a.spriteKey) drawSpriteImg(ctx, a.ch, a.spriteKey, a.x, a.y, a.facing, 1, Object.assign({}, a.xf, { tint: a.color || '#ffffff', alpha: a.life / 28 })); else drawFighter(ctx, a.ch, a.pose, a.x, a.y, a.facing, null, { alpha: a.life / 28, flash: a.color || true }); }
     // fighters (draw the one in hitstun on top)
     const order = f1.state === 'hit' || f1.state === 'grabbed' ? [f2, f1] : [f1, f2];
     for (const f of order) {
       const alpha = f.state === 'attack' && f.move && f.move.type === 'teleport' && f.mf < f.move.startup ? 0.3 : 1;
       const sopts = { flash: f.flashT > 0 && f.flashT % 2 === 0 && f.state !== 'hit', alpha, aura: f.meter >= 100 ? f.style.fx : (f.counterFlash > 0 ? '#ffffff' : null) };
-      if (!drawFighterSprite(ctx, f, sopts)) { const pose = f.getPose(); const fc = f.facing * (pose.spin ? f.spinFlip : 1); drawFighter(ctx, f.ch, pose, f.x, f.feetY, fc, null, Object.assign(sopts, { attack: f.state === 'attack' && f.move && f.mf > f.move.startup * 0.5 })); }
+      if (!drawFighterRig(ctx, f, sopts) && !drawFighterSprite(ctx, f, sopts)) { const pose = f.getPose(); const fc = f.facing * (pose.spin ? f.spinFlip : 1); drawFighter(ctx, f.ch, pose, f.x, f.feetY, fc, null, Object.assign(sopts, { attack: f.state === 'attack' && f.move && f.mf > f.move.startup * 0.5 })); }
     }
     for (const p of this.projectiles) p.draw(ctx);
     for (const p of this.particles) {
@@ -685,7 +687,7 @@ const Game = {
     txt(ctx, 'FIGHTERS', W / 2, 40, 40, '#ffb020', 'center', { stroke: '#000' });
     txt(ctx, '<  ' + (this.galleryIdx + 1) + ' / ' + PLAYABLE.length + '  >', W / 2, 80, 18, '#ccc', 'center', { font: 'Arial' });
     f.x = 380; f.y = 0; f.facing = 1; const gopts = { aura: f.state === 'attack' && f.move && f.move.type === 'super' ? st.fx : null };
-    if (Sprites.get(ch.id, 'main')) { ctx.save(); ctx.translate(380, 630); ctx.scale(1.25, 1.25); ctx.translate(-380, -GROUND); drawFighterSprite(ctx, f, gopts); ctx.restore(); }
+    if (Rig.has(ch.id) || Sprites.get(ch.id, 'main')) { ctx.save(); ctx.translate(380, 640); ctx.scale(1.3, 1.3); ctx.translate(-380, -GROUND); if (!drawFighterRig(ctx, f, gopts)) drawFighterSprite(ctx, f, gopts); ctx.restore(); }
     else { const pose = f.getPose(); drawFighter(ctx, ch, pose, 380, 620, pose.spin ? f.spinFlip : 1, 1.6, Object.assign(gopts, { attack: f.state === 'attack' })); }
     txt(ctx, ch.name, 700, 130, 38, '#fff', 'left', { stroke: '#000' });
     txt(ctx, st.name + '  ·  ' + ch.country, 700, 168, 20, '#ffd060', 'left', { font: 'Arial', weight: 'bold' });

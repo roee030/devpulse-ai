@@ -8,20 +8,23 @@ Open `index.html` directly, or when the DevPulse site is deployed it is served a
 
 ## What is in it
 
-- **16 playable fighters** from the neon-arena concept sheet, each with a unique style, energy weapon and
-  body type: Pyros (magma golem), Vex Halden (laser filaments), Kade Frost (cryo), Dorian Ashe (crimson
-  plasma blade), Silas Echo (sonic), Thorn (plant tendrils), Kryll (four-armed insectoid), Jax Razor
-  (energy claws), Rook Sentinel (twin volt blades), Nyx Valen (twin neon blades), Brakkus Warden (plasma
-  hammer, arcade boss), Dez Pulse (kinetic fists), Ivo Bolt (lightspeed), Shade (void blades), Mira Synn
-  (psionics) and Mirage (hard-light clones).
+- **16 playable fighters** taken straight from the concept sheet: Pyros (magma golem), Vex Halden
+  (laser filaments), Kade Frost (cryo), Dorian Ashe (crimson plasma blade), Silas Echo (sonic),
+  Thorn (plant tendrils), Kryll (four-armed insectoid), Jax Razor (energy claws), Rook Sentinel
+  (twin volt blades), Nyx Valen (twin neon blades), Brakkus Warden (plasma hammer, arcade boss),
+  Dez Pulse (kinetic fists), Ivo Bolt (lightspeed), Shade (void blades), Mira Synn (psionics) and
+  Mirage (hard-light clones).
+- **The artwork itself is animated.** Each figure is cut into 10 rig parts (head, torso, arms,
+  forearms with hands, thighs, shins with feet) and driven by a skeleton, so fighters walk, throw
+  punches and kicks, crouch, jump, flinch, get launched and fall over as real articulated motion
+  rather than swapped stills. See `tools/README.md` for the art pipeline.
+- Energy weapons (blades, hammer, claws, filaments, charged fists) are drawn live from the hands in
+  each fighter's colour, so they follow the arm through every frame.
 - Each style has its own stats, 6 moves and a SUPER, a hit-spark colour, and a synthesized voice
   (grunts, hurt sounds, KO cries and spoken quotes via the browser's speech synthesis).
 - Move types: normals, projectiles (fireballs, ice shards, blade waves, nets, spike volleys, clones),
   stationary eruptions and ground quakes, dashes, launchers, multi-hit chains, spins, command grabs,
   counters, teleports and cinematic supers.
-- Fighters are rendered from the concept-sheet artwork: each character's main figure plus its four move
-  panels were cut out with background removal (`sprites/*.webp`) and are animated with lunges, tilts,
-  spins, hit tints, knockdowns and energy trails. The procedural vector bodies remain as a fallback.
 - **8 arenas**, each with its own procedural rock track (different tempo, key, riff and drums).
 - **Arcade mode**: a ladder of 7 opponents with rising difficulty, then the Siege Warden on the Shadow
   Realm stage. Continues are limited; clears and best times are saved in `localStorage`.

@@ -20,7 +20,7 @@ const POSE_MAP = {
   mira:   { punch:'p0', kick:'p3', sp1:'p2', sp2:'p1', sup:'p2' },
   mirage: { punch:'p0', kick:'p1', sp1:'p2', sp2:'p3', sup:'p2' },
 };
-const SPRITE_KEYS = ['main', 'p0', 'p1', 'p2', 'p3'];
+const SPRITE_KEYS = ['main'];   // portraits only - in-fight animation comes from the cut-out rig
 const FIGHTER_H = 228;        // on-screen height of the main figure at body.h = 1
 const POSE_RATIO = 1.92;      // pose panels are drawn at roughly half the size of the main figure on the sheet
 
